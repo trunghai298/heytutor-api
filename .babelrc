@@ -1,0 +1,47 @@
+{
+  "presets": [
+    [
+      "@babel/preset-env",
+      {
+        "targets": {
+          "node": "current"
+        }
+      }
+    ],
+    "@babel/typescript"
+  ],
+  "env": {
+    "development": {
+      "plugins": [
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread",
+        "inline-dotenv"
+      ]
+    },
+    "production": {
+      "plugins": [
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread",
+        [
+          "inline-dotenv",
+          {
+            "path": ".env.prod"
+          }
+        ],
+        "transform-inline-environment-variables"
+      ]
+    },
+    "test": {
+      "plugins": [
+        "@babel/proposal-class-properties",
+        "@babel/proposal-object-rest-spread",
+        [
+          "inline-dotenv",
+          {
+            "path": ".env.test"
+          }
+        ]
+      ]
+    }
+  }
+}

@@ -1,23 +1,42 @@
-import { MySQLClient } from "../clients/mysql";
-import { User } from "../models/users";
+import User from "../models/user";
+import { NotFoundError } from "../utils/errors";
 
-export class UserServices {
-  static list = async (params: any = {}, ctx: any = {}) => {
-    const limit = parseInt(params.limit, 10);
-    const offset = parseInt(params.offset, 10) || 0;
+const getUserInfo = async (userId: number) => {
+  const user = await User.findOne({
+    where: {
+      id: userId,
+    },
+    attributes: {
+      exclude: ["password"],
+    },
+  });
 
-    const users = await Users({
-      where: {
-        isAdmin: {
-          [MySQLClient.Op.ne]: 1,
-        },
-      },
-      raw: true,
-      offset,
-      limit,
-      order: [["createdAt", "desc"]],
+  if (!user) {
+    throw new NotFoundError({
+      field: "id",
+      message: "User is not found",
     });
+  }
 
-    return users;
-  };
-}
+  return user;
+};
+
+const fetchByEmail = async (email: string) => {
+  const user = await User.findOne({
+    where: { email },
+  });
+
+  if (!user) {
+    throw new NotFoundError({
+      field: "email",
+      message: "User is not found",
+    });
+  }
+
+  return user;
+};
+
+export default {
+  getUserInfo,
+  fetchByEmail,
+};

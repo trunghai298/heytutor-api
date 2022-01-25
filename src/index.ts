@@ -1,11 +1,18 @@
-const express = require("express");
-const app = express();
-const port = 3000;
+import app from "./app";
+import { LogClient } from "./clients/logger";
+import { NodeEnv, SERVER_PORT, APP_NAME_DEFAULT } from "./constants/server";
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
-});
+const PORT = process.env.SERVER_PORT || SERVER_PORT;
 
-app.listen(port, () => {
-  console.log(`Example app listening at http://localhost:${port}`);
-});
+(async () => {
+  app.set("port", PORT);
+  const appName = process.env.APP_NAME || APP_NAME_DEFAULT;
+
+  app.listen(PORT, () => {
+    LogClient.info(
+      `${appName} is running at http://localhost:${PORT} in ${
+        process.env.NODE_ENV || NodeEnv.Development
+      } mode`
+    );
+  });
+})();
