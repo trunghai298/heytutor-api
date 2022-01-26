@@ -2,6 +2,8 @@
 ## Install environment
 - install nodejs
 - install mysqlserver
+- install PostMan for testing api
+- install SequelPro(macos)  / TablePlus(window - https://tableplus.com/windows)
 ## Installing
 - npm i
 ## Deployment
