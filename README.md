@@ -3,7 +3,7 @@
 - install nodejs
 - install mysqlserver
 - install VSCode (https://code.visualstudio.com/download)
-- install PostMan for testing api
+- install PostMan for testing api (https://www.postman.com/downloads/)
 - install SequelPro(macos)  / TablePlus(window - https://tableplus.com/windows)
 ## Installing
 - npm i
