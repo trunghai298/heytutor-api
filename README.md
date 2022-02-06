@@ -1,7 +1,7 @@
 # Hey-Tutor-api
 ## Install environment
-- install nodejs
-- install mysqlserver
+- install nodejs (https://nodejs.org/en/download/)
+- install mysqlserver (https://dev.mysql.com/downloads/installer/)
 - install VSCode (https://code.visualstudio.com/download)
 - install PostMan for testing api (https://www.postman.com/downloads/)
 - install SequelPro(macos)  / TablePlus(window - https://tableplus.com/windows)
@@ -22,5 +22,5 @@ SERVER_PORT=3001
 ## Set up database
 Run in Postman or in your browser to delete and setup all the tables in your database. Make sure to set the correct configuration for the database connection in `.env` and create the empty database `hey_tutors`, `hey_tutors_test`:
 ```
-GET /mysql
+GET /mysql (http://localhost:3001/mysql)
 ```
