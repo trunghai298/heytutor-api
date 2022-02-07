@@ -9,6 +9,7 @@ interface UserInstance extends Model {
   postCount: number;
   rateCount: number;
   isBanned: boolean;
+  googleId: string;
 }
 
 const User = MySQLClient.define<UserInstance>("User", {
@@ -33,6 +34,9 @@ const User = MySQLClient.define<UserInstance>("User", {
   },
   isBanned: {
     type: DataTypes.BOOLEAN,
+  },
+  googleId: {
+    type: DataTypes.STRING,
   },
 });
 

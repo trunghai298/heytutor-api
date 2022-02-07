@@ -1,15 +1,12 @@
 import { BadRequestError } from "../utils/errors";
-import Term from "../models/term";
+import Department from "../models/department";
 
 /**
- * To create a new term
+ * To create a new department
  */
-const addTerm = async (payload) => {
+const addDept = async (payload) => {
   try {
-    const res = await Term.create({
-      id: payload.id,
-      termName: payload.termName,
-    });
+    const res = await Department.create(payload);
     return res;
   } catch (error) {
     throw new BadRequestError({
@@ -20,5 +17,5 @@ const addTerm = async (payload) => {
 };
 
 export default {
-  addTerm,
+  addDept,
 };

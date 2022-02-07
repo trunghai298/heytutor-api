@@ -6,7 +6,8 @@ interface CommentInstance extends Model {
   postId: number;
   userId: number;
   isLiked: boolean;
-  content: string;
+  likedBy: string;
+  comment: string;
   likeCount: number;
 }
 
@@ -15,20 +16,25 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  senderId: {
+  postId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  receiverId: {
+  userId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  conversationId: {
-    type: DataTypes.INTEGER.UNSIGNED,
+  isLiked: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
-  content: {
+  likedBy: {
     type: DataTypes.STRING,
   },
-  seenAt: {
-    type: DataTypes.DATE,
+  comment: {
+    type: DataTypes.STRING,
+  },
+  likeCount: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
 });
 

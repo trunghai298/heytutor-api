@@ -1,6 +1,14 @@
 import { Strategy, ExtractJwt } from "passport-jwt";
 import passport from "passport";
 import { Response, NextFunction } from "express";
+import MySQLClient from "../clients/mysql";
+import { uuid } from "uuidv4";
+import User from "../models/user";
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+
+var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 export const initPassport = () => {
   const opts: any = {};
@@ -14,13 +22,58 @@ export const initPassport = () => {
     "jwt",
     new Strategy(opts, (req: any, jwtPayload: any, done: any) => {
       // Your logic to fetch the user from the JWT payload
-      req.ctx = {
-        ...req.ctx,
-        ...jwtPayload,
-      };
+      req.ctx = jwtPayload;
       done(null, jwtPayload);
     })
   );
+
+  passport.use(
+    new GoogleStrategy(
+      {
+        clientID: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        callbackURL: `${process.env.API_URL}/auth/google/callback`,
+      },
+      async (accessToken, refreshToken, profile, cb) => {
+        console.log("profile", profile);
+        try {
+          const user = await MySQLClient.transaction(async (transaction) => {
+            const user = await User.findOne({
+              where: { googleId: profile.id },
+              transaction,
+            });
+            if (!user) {
+              return User.create(
+                {
+                  id: uuid(),
+                  isAdmin: 0,
+                  userName: profile.displayName,
+                  googleId: profile.id,
+                  maxTasks: 50,
+                },
+                { transaction }
+              );
+            }
+
+            return user;
+          });
+
+          return cb(null, user);
+        } catch (e) {
+          console.log(e);
+          return cb(e);
+        }
+      }
+    )
+  );
+
+  passport.serializeUser(function (user: any, done) {
+    done(null, user.id);
+  });
+
+  passport.deserializeUser(function (user, done) {
+    done(null, user);
+  });
 
   return passport.initialize();
 };
@@ -28,3 +81,12 @@ export const initPassport = () => {
 export const authenticateJWT =
   () => (req: any, res: Response, next: NextFunction) =>
     passport.authenticate("jwt", { session: false })(req, res, next);
+
+export const authenticateGoogle = () => {
+  return (req: any, res: Response, next: NextFunction) =>
+    passport.authenticate("google", { scope: ["profile", "email"] })(
+      req,
+      res,
+      next
+    );
+};

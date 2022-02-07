@@ -1,21 +1,28 @@
 import Student from "../models/student";
-import { NotFoundError } from "../utils/errors";
+import { NotFoundError, BadRequestError } from "../utils/errors";
 
 const fetchById = async (id: number) => {
-  const student = await Student.findOne({
-    where: {
-      id,
-    },
-  });
+  try {
+    const student = await Student.findOne({
+      where: {
+        id,
+      },
+    });
 
-  if (!student) {
-    throw new NotFoundError({
+    if (!student) {
+      throw new NotFoundError({
+        field: "id",
+        message: "Student is not found",
+      });
+    }
+
+    return student;
+  } catch (error) {
+    throw new BadRequestError({
       field: "id",
-      message: "Student is not found",
+      message: "Can not find this user.",
     });
   }
-
-  return student;
 };
 
 export default {

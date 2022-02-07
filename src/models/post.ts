@@ -35,18 +35,22 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   },
   isLiked: {
     type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   likeCount: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   commentCount: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   comments: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isResolved: {
     type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   createdAt: {
     type: DataTypes.DATE,
