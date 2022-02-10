@@ -6,7 +6,13 @@ import Class from "../models/class";
  */
 const addClass = async (payload) => {
   try {
-    const res = await Class.create(payload);
+    const input = {
+      id: payload.classId,
+      courseId: payload.courseId,
+      deptId: payload.deptId,
+      className: payload.className,
+    };
+    const res = await Class.create(input);
     return res;
   } catch (error) {
     throw new BadRequestError({

@@ -12,6 +12,8 @@ interface MessageInstance extends Model {
 
 const Message = MySQLClient.define<MessageInstance>("Message", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

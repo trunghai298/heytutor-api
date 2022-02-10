@@ -12,6 +12,8 @@ interface EventInstance extends Model {
 
 const Event = MySQLClient.define<EventInstance>("Event", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

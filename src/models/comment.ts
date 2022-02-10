@@ -14,6 +14,8 @@ interface CommentInstance extends Model {
 
 const Comment = MySQLClient.define<CommentInstance>("Comment", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

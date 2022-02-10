@@ -14,6 +14,7 @@ interface UserInstance extends Model {
 
 const User = MySQLClient.define<UserInstance>("User", {
   id: {
+    allowNull: false,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

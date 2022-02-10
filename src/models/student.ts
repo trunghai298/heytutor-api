@@ -3,22 +3,26 @@ import MySQLClient from "../clients/mysql";
 
 interface StudentInstance extends Model {
   id: number;
+  stdId: string;
   stdCode: string;
-  rollNumber: string;
   fullName: number;
   classId: number;
   major: string;
+  imageUrl: string;
 }
 
 const Student = MySQLClient.define<StudentInstance>("Student", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  stdCode: {
+  stdId: {
+    primaryKey: true,
     type: DataTypes.STRING,
   },
-  rollNumber: {
+  stdCode: {
     type: DataTypes.STRING,
   },
   fullName: {
@@ -28,6 +32,9 @@ const Student = MySQLClient.define<StudentInstance>("Student", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   major: {
+    type: DataTypes.STRING,
+  },
+  imageUrl: {
     type: DataTypes.STRING,
   },
 });

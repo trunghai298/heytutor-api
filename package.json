@@ -4,6 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
+    "getStudentsInfo": "babel-node --max_old_space_size=8000  --extensions \".ts\" src/scripts/getStudentsInfo.ts",
     "dev": "nodemon --delay 2 --watch src/ --exec 'babel-node src/index.ts' --extensions \".ts,.tsx\" -e ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,8 +21,10 @@
   "dependencies": {
     "@babel/preset-env": "^7.16.11",
     "@babel/preset-typescript": "^7.16.7",
+    "axios": "^0.25.0",
     "babel-plugin-inline-dotenv": "^1.6.0",
     "body-parser": "^1.19.1",
+    "cheerio": "^1.0.0-rc.10",
     "cors": "^2.8.5",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",

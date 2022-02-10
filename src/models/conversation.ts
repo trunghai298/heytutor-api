@@ -10,6 +10,8 @@ interface ConversationInstance extends Model {
 
 const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

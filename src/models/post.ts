@@ -18,6 +18,8 @@ interface PostInstance extends Model {
 
 const Post = MySQLClient.define<PostInstance>("Post", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

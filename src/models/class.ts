@@ -3,6 +3,7 @@ import MySQLClient from "../clients/mysql";
 
 interface ClassInstance extends Model {
   id: number;
+  classId: number;
   deptId: number;
   courseId: number;
   className: string;
@@ -10,6 +11,12 @@ interface ClassInstance extends Model {
 
 const Class = MySQLClient.define<ClassInstance>("Class", {
   id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  classId: {
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },

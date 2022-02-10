@@ -6,7 +6,13 @@ import Course from "../models/course";
  */
 const addCourse = async (payload) => {
   try {
-    const res = await Course.create(payload);
+    const input = {
+      id: payload.courseId,
+      deptId: payload.deptId,
+      courseName: payload.courseName,
+      courseCode: payload.courseCode,
+    };
+    const res = await Course.create(input);
     return res;
   } catch (error) {
     throw new BadRequestError({

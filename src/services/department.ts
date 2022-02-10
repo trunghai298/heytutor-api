@@ -6,7 +6,13 @@ import Department from "../models/department";
  */
 const addDept = async (payload) => {
   try {
-    const res = await Department.create(payload);
+    const input = {
+      id: payload.deptId,
+      termId: payload.termId,
+      deptName: payload.deptName,
+    };
+
+    const res = await Department.create(input);
     return res;
   } catch (error) {
     throw new BadRequestError({
