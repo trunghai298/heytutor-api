@@ -27,7 +27,6 @@ app.use(initCORS());
 app.get("/auth/google", authenticateGoogle());
 
 app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
-  console.log(req);
   const token = await sign({ user: req.user });
   res.redirect(`${process.env.WEB_URL}?token=${token}`);
 });
@@ -42,7 +41,7 @@ process.env.NODE_ENV !== NodeEnv.Test && app.use(initLogger());
 app.use(initSecurity());
 
 // JWT verification
-app.use(authenticateJWT());
+// app.use(authenticateJWT());
 
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));

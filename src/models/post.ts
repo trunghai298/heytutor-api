@@ -54,9 +54,11 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   },
   createdAt: {
     type: DataTypes.DATE,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   updatedAt: {
     type: DataTypes.DATE,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 

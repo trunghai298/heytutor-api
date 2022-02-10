@@ -32,7 +32,7 @@ export const initPassport = () => {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: `${process.env.API_URL}/auth/google/callback`,
+        callbackURL: "/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, cb) => {
         console.log("profile", profile);

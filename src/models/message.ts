@@ -29,7 +29,6 @@ const Message = MySQLClient.define<MessageInstance>("Message", {
   },
   seenAt: {
     type: DataTypes.DATE,
-    allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   createdAt: {
