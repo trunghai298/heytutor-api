@@ -13,9 +13,9 @@ import {
 } from "./insertData";
 
 const fapCookie =
-  "G_ENABLED_IDPS=google; __utmz=213851395.1640923448.87.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); ASP.NET_SessionId=2vbmtiuuxb1rvb3sbpcu4kyq; __utmc=213851395; G_AUTHUSER_H=2; __utma=213851395.1678693079.1637601335.1644474190.1644482884.127; __utmt=1; __utmb=213851395.4.10.1644482884";
+  "G_ENABLED_IDPS=google; __utmz=213851395.1640923448.87.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); ASP.NET_SessionId=l5khh5baat1r1p1nwlhq3gkz; __utma=213851395.1678693079.1637601335.1644566900.1644674193.131; __utmc=213851395; __utmt=1; G_AUTHUSER_H=2; __utmb=213851395.4.10.1644674193";
 
-const getRawHtml = async (url: string) => {
+const getRawHtml = async (url: string, fapCookie: string) => {
   try {
     const res = await axios.get(url, {
       headers: {
@@ -128,17 +128,17 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
   return classList;
 };
 
-(async () => {
+export const fetchFapData = async (fapCookie: string) => {
+  console.log("fapCookie", fapCookie);
   const startAt = moment().format();
   console.log("***Start at***: ", startAt);
   await Promise.all(
     map(TERMS, async (term) => {
       const urlGetDeptByTerm = getUrl(`&term=${term.termId}`);
-      const rawDeptHtml = await getRawHtml(urlGetDeptByTerm);
+      const rawDeptHtml = await getRawHtml(urlGetDeptByTerm, fapCookie);
       const dataDept = await getDepartmentByTerm(term.termId, rawDeptHtml);
       // insert department data to database
       await insertDepartment(dataDept);
-
       console.log(
         `*** fetching list departments of ${term.termName} ${moment().from(
           startAt
@@ -155,7 +155,7 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
           const urlGetCourseByDept = getUrl(
             `&term=${term.termId}&dept=${dept.deptId}`
           );
-          const rawCourseHtml = await getRawHtml(urlGetCourseByDept);
+          const rawCourseHtml = await getRawHtml(urlGetCourseByDept, fapCookie);
           const dataCourse = await getCourseByDepartment(
             dept.deptId,
             rawCourseHtml
@@ -175,7 +175,10 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
               const urlGetClassesByCourse = getUrl(
                 `&term=${term.termId}&dept=${dept.deptId}&course=${c.courseId}`
               );
-              const rawClassHtml = await getRawHtml(urlGetClassesByCourse);
+              const rawClassHtml = await getRawHtml(
+                urlGetClassesByCourse,
+                fapCookie
+              );
               const dataClass = await getClassesByCourse(
                 dept.deptId,
                 c.courseId,
@@ -193,7 +196,10 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
               const studentOfAClass = await Promise.all(
                 map(dataClass, async (cl: any) => {
                   const urlGetStudentByClass = getUrl(`&group=${cl.classId}`);
-                  const rawStudentHtml = await getRawHtml(urlGetStudentByClass);
+                  const rawStudentHtml = await getRawHtml(
+                    urlGetStudentByClass,
+                    fapCookie
+                  );
                   const dataStudent = await getListStudentByClass(
                     null,
                     rawStudentHtml
@@ -216,8 +222,8 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
           return { ...dept, courses: compact(courseData) };
         })
       );
-      const termData = { ...term, departments: deptData };
-      const dir = __dirname + `/../data/${term.termName}`;
+      // const termData = { ...term, departments: deptData };
+      // const dir = __dirname + `/../data/${term.termName}`;
 
       // try {
       //   const stats = await fs.lstat(dir);
@@ -236,4 +242,4 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
       console.log(`***Done ${moment().from(startAt)}***`);
     })
   );
-})();
+};

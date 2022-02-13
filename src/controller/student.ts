@@ -6,6 +6,13 @@ const fetch = (req, res, next) => {
     .catch(next);
 };
 
+const list = (req, res, next) => {
+  StudentServices.list(req.query.limit, req.query.offset)
+    .then((students) => res.json(students))
+    .catch(next);
+};
+
 export default {
   fetch,
+  list,
 };

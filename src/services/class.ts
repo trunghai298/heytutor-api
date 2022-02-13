@@ -7,7 +7,7 @@ import Class from "../models/class";
 const addClass = async (payload) => {
   try {
     const input = {
-      id: payload.classId,
+      classId: payload.classId,
       courseId: payload.courseId,
       deptId: payload.deptId,
       className: payload.className,

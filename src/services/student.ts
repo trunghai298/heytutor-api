@@ -25,6 +25,22 @@ const fetchById = async (id: number) => {
   }
 };
 
+const list = async (limit, offset) => {
+  try {
+    const listStudent = await Student.findAndCountAll({
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+    });
+    return listStudent;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Something went wrong!.",
+    });
+  }
+};
+
 export default {
   fetchById,
+  list,
 };
