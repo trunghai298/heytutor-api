@@ -75,7 +75,7 @@ const eventsHandler = (log, request, response, next) => {
 
 app.get("/fap-data", async (req, res, next) => {
   await resetDb(req, res);
-  await fetchFapData(req.query.fapCookie as string);
+  await fetchFapData(req.query.fapCookie as string, req.query.termId as string);
   res.send({ message: "Insert data successfully" });
 });
 

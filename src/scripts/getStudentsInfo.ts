@@ -3,7 +3,7 @@ import cheerio from "cheerio";
 import { getUrl } from "../utils/getUrl";
 import { TERMS } from "../data/term";
 import { promises as fs } from "fs";
-import { map, startCase, flattenDeep, compact } from "lodash";
+import { map, startCase, flattenDeep, compact, find } from "lodash";
 import moment from "moment";
 import {
   insertClass,
@@ -128,118 +128,115 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
   return classList;
 };
 
-export const fetchFapData = async (fapCookie: string) => {
+export const fetchFapData = async (fapCookie: string, termId: string) => {
   console.log("fapCookie", fapCookie);
   const startAt = moment().format();
   console.log("***Start at***: ", startAt);
+  const term = find(TERMS, (t) => t.termId === parseInt(termId));
+  const urlGetDeptByTerm = getUrl(`&term=${term.termId}`);
+  const rawDeptHtml = await getRawHtml(urlGetDeptByTerm, fapCookie);
+  const dataDept = await getDepartmentByTerm(term.termId, rawDeptHtml);
+  // insert department data to database
+  await insertDepartment(dataDept);
+  console.log(
+    `*** fetching list departments of ${term.termName} ${moment().from(
+      startAt
+    )} ***`
+  );
+
+  if (dataDept.length === 0) {
+    console.log("Cookie is expired");
+    process.exit(1);
+  }
+
   await Promise.all(
-    map(TERMS, async (term) => {
-      const urlGetDeptByTerm = getUrl(`&term=${term.termId}`);
-      const rawDeptHtml = await getRawHtml(urlGetDeptByTerm, fapCookie);
-      const dataDept = await getDepartmentByTerm(term.termId, rawDeptHtml);
-      // insert department data to database
-      await insertDepartment(dataDept);
+    map(dataDept, async (dept) => {
+      const urlGetCourseByDept = getUrl(
+        `&term=${term.termId}&dept=${dept.deptId}`
+      );
+      const rawCourseHtml = await getRawHtml(urlGetCourseByDept, fapCookie);
+      const dataCourse = await getCourseByDepartment(
+        dept.deptId,
+        rawCourseHtml
+      );
+
+      // insert course data to database
+      await insertCourse(dataCourse);
+
       console.log(
-        `*** fetching list departments of ${term.termName} ${moment().from(
+        `*** fetching list coursew of ${dept.deptName} ${moment().from(
           startAt
         )} ***`
       );
 
-      if (dataDept.length === 0) {
-        console.log("Cookie is expired");
-        process.exit(1);
-      }
-
-      const deptData = await Promise.all(
-        map(dataDept, async (dept) => {
-          const urlGetCourseByDept = getUrl(
-            `&term=${term.termId}&dept=${dept.deptId}`
+      const courseData = await Promise.all(
+        map(dataCourse, async (c) => {
+          const urlGetClassesByCourse = getUrl(
+            `&term=${term.termId}&dept=${dept.deptId}&course=${c.courseId}`
           );
-          const rawCourseHtml = await getRawHtml(urlGetCourseByDept, fapCookie);
-          const dataCourse = await getCourseByDepartment(
+          const rawClassHtml = await getRawHtml(
+            urlGetClassesByCourse,
+            fapCookie
+          );
+          const dataClass = await getClassesByCourse(
             dept.deptId,
-            rawCourseHtml
+            c.courseId,
+            rawClassHtml
           );
 
           // insert course data to database
-          await insertCourse(dataCourse);
+          await insertClass(dataClass);
 
           console.log(
-            `*** fetching list coursew of ${dept.deptName} ${moment().from(
+            `*** fetching list classes of ${c.courseName} ${moment().from(
               startAt
             )} ***`
           );
-
-          const courseData = await Promise.all(
-            map(dataCourse, async (c) => {
-              const urlGetClassesByCourse = getUrl(
-                `&term=${term.termId}&dept=${dept.deptId}&course=${c.courseId}`
-              );
-              const rawClassHtml = await getRawHtml(
-                urlGetClassesByCourse,
+          const studentOfAClass = await Promise.all(
+            map(dataClass, async (cl: any) => {
+              const urlGetStudentByClass = getUrl(`&group=${cl.classId}`);
+              const rawStudentHtml = await getRawHtml(
+                urlGetStudentByClass,
                 fapCookie
               );
-              const dataClass = await getClassesByCourse(
-                dept.deptId,
-                c.courseId,
-                rawClassHtml
+              const dataStudent = await getListStudentByClass(
+                null,
+                rawStudentHtml
               );
 
-              // insert course data to database
-              await insertClass(dataClass);
+              // insert student data to database
+              await insertStudent(dataStudent);
 
               console.log(
-                `*** fetching list classes of ${c.courseName} ${moment().from(
+                `*** fetching list students of ${cl.className} ${moment().from(
                   startAt
                 )} ***`
               );
-              const studentOfAClass = await Promise.all(
-                map(dataClass, async (cl: any) => {
-                  const urlGetStudentByClass = getUrl(`&group=${cl.classId}`);
-                  const rawStudentHtml = await getRawHtml(
-                    urlGetStudentByClass,
-                    fapCookie
-                  );
-                  const dataStudent = await getListStudentByClass(
-                    null,
-                    rawStudentHtml
-                  );
-
-                  // insert student data to database
-                  await insertStudent(dataStudent);
-
-                  console.log(
-                    `*** fetching list students of ${
-                      cl.className
-                    } ${moment().from(startAt)} ***`
-                  );
-                  return { ...cl, students: dataStudent };
-                })
-              );
-              return { ...c, classes: studentOfAClass };
+              return { ...cl, students: dataStudent };
             })
           );
-          return { ...dept, courses: compact(courseData) };
+          return { ...c, classes: studentOfAClass };
         })
       );
-      // const termData = { ...term, departments: deptData };
-      // const dir = __dirname + `/../data/${term.termName}`;
-
-      // try {
-      //   const stats = await fs.lstat(dir);
-      //   if (stats.isDirectory()) {
-      //     console.log("Directory exists.");
-      //   } else {
-      //     await fs.mkdir(dir);
-      //   }
-      // } catch (error) {
-      //   console.log(error);
-      //   await fs.mkdir(dir);
-      // }
-
-      // const path = __dirname + `/../data/${term.termName}/data.json`;
-      // await fs.writeFile(path, JSON.stringify(termData));
-      console.log(`***Done ${moment().from(startAt)}***`);
+      return { ...dept, courses: compact(courseData) };
     })
+    // const termData = { ...term, departments: deptData };
+    // const dir = __dirname + `/../data/${term.termName}`;
+
+    // try {
+    //   const stats = await fs.lstat(dir);
+    //   if (stats.isDirectory()) {
+    //     console.log("Directory exists.");
+    //   } else {
+    //     await fs.mkdir(dir);
+    //   }
+    // } catch (error) {
+    //   console.log(error);
+    //   await fs.mkdir(dir);
+    // }
+
+    // const path = __dirname + `/../data/${term.termName}/data.json`;
+    // await fs.writeFile(path, JSON.stringify(termData));
   );
+  console.log(`***Done ${moment().from(startAt)}***`);
 };
