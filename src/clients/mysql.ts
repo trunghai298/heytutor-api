@@ -1,11 +1,11 @@
 import { Sequelize } from "sequelize";
 
 const MySQLClient = new Sequelize(
-  process.env.DB_NAME || "hey_tutors",
-  process.env.DB_USER || "",
-  process.env.DB_PASSWORD || "",
+  process.env.DB_NAME || "heytutor",
+  process.env.DB_USER || "admin",
+  process.env.DB_PASSWORD || "kbdZZeiS",
   {
-    host: process.env.DB_HOST || "",
+    host: process.env.DB_HOST || "10518",
     port: parseInt(process.env.DB_PORT || "", 10) || 3306,
     dialect: "mysql",
     pool: {

@@ -5,8 +5,11 @@ import MySQLClient from "../clients/mysql";
 import { uuid } from "uuidv4";
 import User from "../models/user";
 
-const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
-const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
+const GOOGLE_CLIENT_ID =
+  process.env.GOOGLE_CLIENT_ID ||
+  "395446492480-n5g1o0qb93ibrulml67jhfa16r2bh9nc.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET =
+  process.env.GOOGLE_CLIENT_SECRET || "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";
 
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
