@@ -1,12 +1,18 @@
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-
+import { isEmpty } from "lodash";
 /**
  * To create a new post
  */
 const create = async (payload) => {
   try {
+    if (isEmpty(payload.content)) {
+      throw new BadRequestError({
+        field: "content",
+        message: "Failed to create this post.",
+      });
+    }
     const post = await Post.create(payload);
     return post;
   } catch (error) {

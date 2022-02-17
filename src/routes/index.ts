@@ -10,6 +10,7 @@ import Student from "./student";
 import Post from "./post";
 import Comment from "./comment";
 import Auth from "./auth";
+import File from "./file";
 
 export default (app: any) => {
   Auth(app);
@@ -24,4 +25,5 @@ export default (app: any) => {
   Student(app);
   Post(app);
   Comment(app);
+  File(app);
 };
