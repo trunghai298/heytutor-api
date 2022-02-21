@@ -5,20 +5,26 @@ interface UserInstance extends Model {
   id: number;
   name: string;
   email: string;
+  password: string;
   stdId: string;
   postCount: number;
   rateCount: number;
   isBanned: boolean;
   googleId: string;
+  isAdmin: boolean;
 }
 
 const User = MySQLClient.define<UserInstance>("User", {
   id: {
     allowNull: false,
+    autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   email: {
+    type: DataTypes.STRING,
+  },
+  password: {
     type: DataTypes.STRING,
   },
   name: {
@@ -38,6 +44,9 @@ const User = MySQLClient.define<UserInstance>("User", {
   },
   googleId: {
     type: DataTypes.STRING,
+  },
+  isAdmin: {
+    type: DataTypes.BOOLEAN,
   },
 });
 

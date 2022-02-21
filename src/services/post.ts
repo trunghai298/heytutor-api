@@ -71,7 +71,27 @@ const deletePost = async (postId: string) => {
   }
 };
 
+/**
+ * To delete an existed post
+ */
+const list = async (limit, offset) => {
+  try {
+    const listPost = await Post.findAndCountAll({
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+      order: [["createdAt", "DESC"]],
+    });
+    return listPost;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Failed to list post.",
+    });
+  }
+};
+
 export default {
+  list,
   create,
   edit,
   deletePost,

@@ -18,7 +18,26 @@ const fetch = async (req: any, res: any, next: any) => {
   }
 };
 
+const login = async (req: any, res: any, next: any) => {
+  try {
+    const result = await AuthServices.login(req.body, req.ctx);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
+// const refreshToken = async (req, res, next) => {
+//   try {
+//     const result = await AuthServices.refreshToken(req.ctx);
+//     res.json(result);
+//   } catch (e) {
+//     next(e);
+//   }
+// };
+
 export default {
+  login,
   anonymous,
   fetch,
 };

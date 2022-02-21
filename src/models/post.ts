@@ -12,9 +12,9 @@ interface PostInstance extends Model {
   isLiked: boolean;
   likeCount: number;
   commentCount: number;
-  comments: string;
   images: string;
   isResolved: boolean;
+  isBookmarked: boolean;
   isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -37,7 +37,7 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.STRING,
   },
   content: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   images: {
     type: DataTypes.STRING,
@@ -60,10 +60,11 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
-  comments: {
-    type: DataTypes.STRING,
-  },
   isResolved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  isBookmarked: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },

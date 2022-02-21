@@ -10,6 +10,7 @@ import { initLogger } from "./middlewares/logger";
 import { initCORS } from "./middlewares/cors";
 import { initSecurity } from "./middlewares/security";
 import { NodeEnv } from "./constants/server";
+import AuthController from "./controller/auth";
 
 import Route from "./routes";
 import MySQLClient from "./clients/mysql";
@@ -27,6 +28,8 @@ app.use(initPassport());
 app.use(initCORS());
 
 app.get("/auth/google", authenticateGoogle());
+// Allow to generate anonymous JWT for new user
+app.post("/auth/login", AuthController.login);
 
 const resetDb = async (req, res) => {
   await MySQLClient.sync({ force: true });
@@ -41,9 +44,6 @@ app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
 app.get("/mysql", async (req, res) => {
   await resetDb(req, res);
 });
-
-let clients = [];
-let facts = ["bla bla bla bla"];
 
 const eventsHandler = (log, request, response, next) => {
   console.log(log);
