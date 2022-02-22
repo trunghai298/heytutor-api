@@ -6,6 +6,13 @@ const fetchByEmail = (req, res, next) => {
     .catch(next);
 };
 
+const getUserProfileById = (req, res, next) => {
+  UserServices.getUserProfileById(req.params.userId)
+    .then((user) => res.json(user))
+    .catch(next);
+};
+
 export default {
+  getUserProfileById,
   fetchByEmail,
 };
