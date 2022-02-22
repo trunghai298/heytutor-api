@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "getStudentsInfo": "babel-node --max_old_space_size=8000  --extensions \".ts\" src/scripts/getStudentsInfo.ts",
-    "dev": "nodemon --delay 2 --watch src/ --exec 'babel-node src/index.ts' --extensions \".ts,.tsx\" -e ts",
+    "dev": "nodemon --delay 2 --watch src/ --exec babel-node src/index.ts --extensions \".ts,.tsx\" -e ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

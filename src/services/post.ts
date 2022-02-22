@@ -2,6 +2,8 @@ import MySQLClient from "../clients/mysql";
 import Post from "../models/post";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { isEmpty } from "lodash";
+import { map } from "lodash";
+import User from "../models/user";
 /**
  * To create a new post
  */
@@ -80,7 +82,50 @@ const list = async (limit, offset) => {
       limit: parseInt(limit, 10) || 100,
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
+      raw: true,
     });
+
+    const attachedUser = await Promise.all(
+      map(listPost.rows, async (post) => {
+        const user = await User.findOne({
+          where: { id: post.userId },
+          raw: true,
+        });
+
+        return { ...post, user };
+      })
+    );
+
+    return attachedUser;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Failed to list post.",
+    });
+  }
+};
+
+const listPostByUserId = async (userId: string, limit, offset) => {
+  try {
+    const listPost = await Post.findAndCountAll({
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+      order: [["createdAt", "DESC"]],
+      where: { userId },
+      raw: true,
+    });
+
+    // const attachedUser = await Promise.all(
+    //   map(listPost.rows, async (post) => {
+    //     const user = await User.findOne({
+    //       where: { id: post.userId },
+    //       raw: true,
+    //     });
+
+    //     return { ...post, user };
+    //   })
+    // );
+
     return listPost;
   } catch (error) {
     throw new BadRequestError({
@@ -91,6 +136,7 @@ const list = async (limit, offset) => {
 };
 
 export default {
+  listPostByUserId,
   list,
   create,
   edit,

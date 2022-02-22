@@ -43,6 +43,16 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
 });
 
 export default Comment;

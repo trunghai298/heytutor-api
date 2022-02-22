@@ -11,6 +11,7 @@ import Post from "./post";
 import Comment from "./comment";
 import Auth from "./auth";
 import File from "./file";
+import Search from "./search";
 
 export default (app: any) => {
   Auth(app);
@@ -26,4 +27,5 @@ export default (app: any) => {
   Post(app);
   Comment(app);
   File(app);
+  Search(app);
 };
