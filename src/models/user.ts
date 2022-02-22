@@ -12,6 +12,7 @@ interface UserInstance extends Model {
   isBanned: boolean;
   googleId: string;
   isAdmin: boolean;
+  sumarry: string;
 }
 
 const User = MySQLClient.define<UserInstance>("User", {
@@ -48,6 +49,9 @@ const User = MySQLClient.define<UserInstance>("User", {
   isAdmin: {
     type: DataTypes.BOOLEAN,
   },
+  sumarry: {
+    type: DataTypes.STRING,
+  }
 });
 
 export default User;
