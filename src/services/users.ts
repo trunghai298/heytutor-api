@@ -4,7 +4,7 @@ import { NotFoundError } from "../utils/errors";
 /**
  * To information of a user
  */
-const getUserInfo = async (userId: number) => {
+const getUserProfileById = async (userId: any) => {
   try {
     const user = await User.findOne({
       where: {
@@ -13,6 +13,7 @@ const getUserInfo = async (userId: number) => {
       attributes: {
         exclude: ["password"],
       },
+      raw: true,
     });
 
     if (!user) {
@@ -47,6 +48,6 @@ const fetchByEmail = async (email: string) => {
 };
 
 export default {
-  getUserInfo,
+  getUserProfileById,
   fetchByEmail,
 };

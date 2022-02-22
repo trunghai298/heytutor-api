@@ -51,7 +51,17 @@ const User = MySQLClient.define<UserInstance>("User", {
   },
   sumarry: {
     type: DataTypes.STRING,
-  }
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
 });
 
 export default User;
