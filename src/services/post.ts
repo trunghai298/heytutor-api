@@ -90,6 +90,9 @@ const list = async (limit, offset) => {
         const user = await User.findOne({
           where: { id: post.userId },
           raw: true,
+          attributes: {
+            exclude: ["password"],
+          },
         });
 
         return { ...post, user };

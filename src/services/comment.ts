@@ -43,23 +43,37 @@ export const deleteComment = (id, ctx) => {
 /**
  * To list all comments of a post
  */
-export const listComments = (params) => {
-  const { postId, offset, limit } = params;
-
-  return Comment.findAndCountAll({
+export const listComments = async (postId: string, offset, limit) => {
+  const res = await Comment.findAndCountAll({
     where: {
       postId,
     },
-    offset,
-    limit,
+    offset: offset || 0,
+    limit: limit || 100,
     order: [["createdAt", "DESC"]],
-    include: [
-      {
-        model: User,
-        attributes: ["id", "username", "email", "avatar"],
-      },
-    ],
+    raw: true,
+    // include: [
+    //   {
+    //     model: User,
+    //     attributes: ["id", "username", "email", "avatar"],
+    //   },
+    // ],
   });
+
+  const attachedUser = await Promise.all(
+    res.rows.map(async (comment) => {
+      const user = await User.findOne({
+        where: { id: comment.userId },
+        attributes: {
+          exclude: ["password"],
+        },
+        raw: true,
+      });
+      return { ...comment, user };
+    })
+  );
+
+  return attachedUser;
 };
 
 export default {

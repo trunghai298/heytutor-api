@@ -44,5 +44,5 @@ export const login = async (params: any, ctx: any) => {
     user: userDB,
   });
 
-  return { token, user: userDB };
+  return { token };
 };

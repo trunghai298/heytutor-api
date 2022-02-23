@@ -1,5 +1,15 @@
 import CommentServices from "../services/comment";
 
+const listCommentByPost = (req, res, next) => {
+  CommentServices.listComments(
+    req.params.postId,
+    req.query.limit,
+    req.query.offset
+  )
+    .then((comments) => res.json(comments))
+    .catch(next);
+};
+
 const create = (req, res, next) => {
   CommentServices.create(req.body, req.ctx)
     .then((comment) => res.json(comment))
@@ -19,6 +29,7 @@ const deleteComment = (req, res, next) => {
 };
 
 export default {
+  listCommentByPost,
   create,
   edit,
   deleteComment,
