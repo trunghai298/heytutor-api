@@ -113,6 +113,24 @@ const list = async (limit, offset, ctx) => {
 
   try {
     let whereCondition = {};
+    const titleCondition = subjectsJSON.map((s) => {
+      const title = {
+        title: {
+          [Op.like]: `%${s}%`,
+        },
+      };
+      return title;
+    });
+
+    const contentCondition = subjectsJSON.map((s) => {
+      const title = {
+        content: {
+          [Op.like]: `%${s}%`,
+        },
+      };
+      return title;
+    });
+
     if (firstTimeLogin) {
       whereCondition = {
         [Op.or]: [
@@ -121,16 +139,8 @@ const list = async (limit, offset, ctx) => {
               [Op.in]: subjectsJSON,
             },
           },
-          // {
-          //   content: {
-          //     [Op.in]: subjectsJSON,
-          //   },
-          // },
-          // {
-          //   title: {
-          //     [Op.contains]: subjectsJSON,
-          //   },
-          // },
+          ...titleCondition,
+          ...contentCondition,
         ],
         isResolved: false,
       };
