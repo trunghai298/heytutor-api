@@ -29,6 +29,16 @@ const Class = MySQLClient.define<ClassInstance>("Class", {
   className: {
     type: DataTypes.STRING,
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
 });
 
 export default Class;

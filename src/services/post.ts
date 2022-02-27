@@ -4,6 +4,8 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import { isEmpty } from "lodash";
 import { map } from "lodash";
 import User from "../models/user";
+import { Op } from "sequelize";
+
 /**
  * To create a new post
  */
@@ -104,13 +106,44 @@ const deletePost = async (postId: string) => {
 /**
  * To delete an existed post
  */
-const list = async (limit, offset) => {
+const list = async (limit, offset, ctx) => {
+  const { user } = ctx;
+  const { firstTimeLogin, semester, subjects } = user;
+  const subjectsJSON = JSON.parse(subjects.replaceAll("'", ""));
+
   try {
+    let whereCondition = {};
+    if (firstTimeLogin) {
+      whereCondition = {
+        [Op.or]: [
+          {
+            hashtag: {
+              [Op.in]: subjectsJSON,
+            },
+          },
+          // {
+          //   content: {
+          //     [Op.in]: subjectsJSON,
+          //   },
+          // },
+          // {
+          //   title: {
+          //     [Op.contains]: subjectsJSON,
+          //   },
+          // },
+        ],
+        isResolved: false,
+      };
+    } else {
+    }
+
     const listPost = await Post.findAndCountAll({
       limit: parseInt(limit, 10) || 100,
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
       raw: true,
+      logging: true,
+      where: { ...whereCondition },
     });
 
     const attachedUser = await Promise.all(

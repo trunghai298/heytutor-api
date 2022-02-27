@@ -1,6 +1,5 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import User from "./user";
 
 interface CommentInstance extends Model {
   id: number;
@@ -55,7 +54,5 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
-
-// Comment.belongsTo(User, { foreignKey: "fk_userId" }); // Adds fk_userId to Comment
 
 export default Comment;

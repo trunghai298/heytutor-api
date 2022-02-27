@@ -11,7 +11,8 @@ interface UserInstance extends Model {
   isBanned: boolean;
   googleId: string;
   isAdmin: boolean;
-  sumarry: string;
+  summary: string;
+  firstTimeLogin: boolean;
 }
 
 const User = MySQLClient.define<UserInstance>("User", {
@@ -48,8 +49,12 @@ const User = MySQLClient.define<UserInstance>("User", {
   isAdmin: {
     type: DataTypes.BOOLEAN,
   },
-  sumarry: {
+  summary: {
     type: DataTypes.STRING,
+  },
+  firstTimeLogin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
   },
   createdAt: {
     type: DataTypes.DATE,

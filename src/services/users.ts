@@ -1,4 +1,3 @@
-import Student from "../models/student";
 import User from "../models/user";
 import { NotFoundError } from "../utils/errors";
 
@@ -14,7 +13,6 @@ const getUserProfileById = async (userId: any) => {
       attributes: {
         exclude: ["password"],
       },
-      logging: console.log,
       raw: true,
     });
 

@@ -13,7 +13,7 @@ const update = (req, res, next) => {
 };
 
 const list = (req, res, next) => {
-  PostServices.list(req.query.limit, req.query.offset)
+  PostServices.list(req.query.limit, req.query.offset, req.ctx)
     .then((posts) => res.json(posts))
     .catch(next);
 };

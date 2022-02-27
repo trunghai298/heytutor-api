@@ -3,6 +3,7 @@ import { NotFoundError } from "../utils/errors";
 import { BadRequestError } from "../utils/errors";
 import * as JWTUtils from "../utils/jwt";
 import { compare, encrypt } from "../utils/bcrypt";
+import Student from "../models/student";
 
 export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
@@ -37,11 +38,17 @@ export const login = async (params: any, ctx: any) => {
     });
   }
 
-  delete userDB.password;
+  const studentData = await Student.findOne({
+    where: { stdId: userDB.stdId },
+    raw: true,
+  });
+
+  const attachStudentData = { ...userDB, ...studentData };
+  delete attachStudentData.password;
 
   const token = await JWTUtils.sign({
     ...ctx,
-    user: userDB,
+    user: attachStudentData,
   });
 
   return { token };

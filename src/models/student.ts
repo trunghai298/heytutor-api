@@ -9,6 +9,8 @@ interface StudentInstance extends Model {
   classId: number;
   major: string;
   imageUrl: string;
+  semester: string;
+  subjects: string;
 }
 
 const Student = MySQLClient.define<StudentInstance>("Student", {
@@ -36,6 +38,22 @@ const Student = MySQLClient.define<StudentInstance>("Student", {
   },
   imageUrl: {
     type: DataTypes.STRING,
+  },
+  semester: {
+    type: DataTypes.STRING,
+  },
+  subjects: {
+    type: DataTypes.STRING,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 
