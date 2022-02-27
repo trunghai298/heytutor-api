@@ -1,7 +1,7 @@
 import StudentServices from "../services/student";
 
 const fetch = (req, res, next) => {
-  StudentServices.fetchById(req.params.stdId)
+  StudentServices.fetchById(req.params.id)
     .then((student) => res.json(student))
     .catch(next);
 };

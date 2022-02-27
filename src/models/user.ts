@@ -1,6 +1,5 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
-
 interface UserInstance extends Model {
   id: number;
   name: string;

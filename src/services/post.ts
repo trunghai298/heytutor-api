@@ -26,6 +26,34 @@ const create = async (payload) => {
 };
 
 /**
+ * To update a new post
+ */
+const update = async (payload) => {
+  const { postId } = payload;
+  const transaction = await MySQLClient.transaction();
+  try {
+    const post = await Post.findOne({ where: { id: postId } });
+    if (!post) {
+      throw new NotFoundError({
+        field: "id",
+        message: "Post is not found",
+      });
+    }
+
+    await Post.update({ ...payload }, { where: { id: postId }, transaction });
+    await transaction.commit();
+    const postUpdated = await Post.findOne({ where: { id: postId } });
+    return postUpdated;
+  } catch (error) {
+    await transaction.rollback();
+    throw new BadRequestError({
+      field: "postId",
+      message: "Failed to update this post.",
+    });
+  }
+};
+
+/**
  * To edit an existed post
  */
 const edit = async (payload) => {
@@ -142,6 +170,7 @@ export default {
   listPostByUserId,
   list,
   create,
+  update,
   edit,
   deletePost,
 };
