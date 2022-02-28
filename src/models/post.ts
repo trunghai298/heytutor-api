@@ -8,16 +8,21 @@ interface PostInstance extends Model {
   title: string;
   content: string;
   hashtag: string;
-  price: string;
+  price: boolean;
   isLiked: boolean;
   likeCount: number;
   commentCount: number;
   images: string;
   isResolved: boolean;
-  isBookmarked: boolean;
   isPinned: boolean;
   createdAt: Date;
   updatedAt: Date;
+
+  // update 28/2
+  isSupporter: boolean;
+  isChanged: boolean;
+  isBaned: boolean;
+  isSaveDraf: boolean;
 }
 
 const Post = MySQLClient.define<PostInstance>("Post", {
@@ -46,7 +51,8 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.STRING,
   },
   price: {
-    type: DataTypes.STRING,
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   isLiked: {
     type: DataTypes.BOOLEAN,
@@ -64,10 +70,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  isBookmarked: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
   isPinned: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -81,6 +83,21 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  //update 28/2
+  
+  isSupporter: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },isChanged: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },isBaned: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },isSaveDraf: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
 });
 

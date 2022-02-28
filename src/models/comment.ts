@@ -10,6 +10,7 @@ interface CommentInstance extends Model {
   likedBy: string;
   comment: string;
   likeCount: number;
+  rollComment: number;
 }
 
 const Comment = MySQLClient.define<CommentInstance>("Comment", {
@@ -23,6 +24,9 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  rollComment: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isLiked: {
