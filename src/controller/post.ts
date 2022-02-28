@@ -12,8 +12,14 @@ const update = (req, res, next) => {
     .catch(next);
 };
 
-const list = (req, res, next) => {
-  PostServices.list(req.query.limit, req.query.offset, req.ctx)
+const listByUserRole = (req, res, next) => {
+  PostServices.listPostByUser(req.query.limit, req.query.offset, req.ctx)
+    .then((posts) => res.json(posts))
+    .catch(next);
+};
+
+const listAllPost = (req, res, next) => {
+  PostServices.listAllPost(req.query.limit, req.query.offset)
     .then((posts) => res.json(posts))
     .catch(next);
 };
@@ -42,7 +48,8 @@ const listPostByUserId = (req, res, next) => {
 
 export default {
   listPostByUserId,
-  list,
+  listByUserRole,
+  listAllPost,
   create,
   update,
   edit,

@@ -1,10 +1,11 @@
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-import { isEmpty } from "lodash";
+import { isEmpty, sortBy } from "lodash";
 import { map } from "lodash";
 import User from "../models/user";
 import { Op } from "sequelize";
+import Student from "../models/student";
 
 /**
  * To create a new post
@@ -104,11 +105,11 @@ const deletePost = async (postId: string) => {
 };
 
 /**
- * To delete an existed post
+ * To list post for specific user
  */
-const list = async (limit, offset, ctx) => {
+const listPostByUser = async (limit, offset, ctx) => {
   const { user } = ctx;
-  const { firstTimeLogin, semester, subjects } = user;
+  const { firstTimeLogin, semester, major, subjects } = user;
   const subjectsJSON = JSON.parse(subjects.replaceAll("'", ""));
 
   try {
@@ -145,6 +146,9 @@ const list = async (limit, offset, ctx) => {
         isResolved: false,
       };
     } else {
+      whereCondition = {
+        isResolved: false,
+      };
     }
 
     const listPost = await Post.findAndCountAll({
@@ -152,7 +156,6 @@ const list = async (limit, offset, ctx) => {
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
       raw: true,
-      logging: true,
       where: { ...whereCondition },
     });
 
@@ -166,16 +169,61 @@ const list = async (limit, offset, ctx) => {
           },
         });
 
-        return { ...post, user };
+        const studentData = await Student.findOne({
+          where: { stdId: user.stdId },
+          raw: true,
+        });
+
+        return { ...post, user: { ...user, ...studentData } };
       })
     );
 
-    return attachedUser;
+    const sortListPostByMajor = sortBy(attachedUser, (post) => {
+      return post.user.major === major;
+    }).reverse();
+
+    return sortListPostByMajor;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
       message: "Failed to list post.",
     });
+  }
+};
+
+const listAllPost = async (limit, offset) => {
+  try {
+    const listPost = await Post.findAndCountAll({
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+      order: [["createdAt", "DESC"]],
+      raw: true,
+      logging: true,
+      where: { isResolved: false },
+    });
+
+    const attachedUser = await Promise.all(
+      map(listPost.rows, async (post) => {
+        const user = await User.findOne({
+          where: { id: post.userId },
+          raw: true,
+          attributes: {
+            exclude: ["password"],
+          },
+        });
+
+        const studentData = await Student.findOne({
+          where: { stdId: user.stdId },
+          raw: true,
+        });
+
+        return { ...post, user: { ...user, ...studentData } };
+      })
+    );
+
+    return attachedUser;
+  } catch (error) {
+    console.log(error);
   }
 };
 
@@ -211,7 +259,8 @@ const listPostByUserId = async (userId: string, limit, offset) => {
 
 export default {
   listPostByUserId,
-  list,
+  listPostByUser,
+  listAllPost,
   create,
   update,
   edit,
