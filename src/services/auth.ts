@@ -24,8 +24,8 @@ export const login = async (params: any, ctx: any) => {
 
   if (!userDB) {
     throw new NotFoundError({
-      field: "password",
-      message: "Credentials are invalid",
+      field: "user",
+      message: "User not found !",
     });
   }
 
