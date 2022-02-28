@@ -74,18 +74,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  //update 28/2
-
   isSupporter: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -101,6 +89,16 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   isSaveDraf: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 

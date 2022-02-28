@@ -84,7 +84,7 @@ process.env.NODE_ENV !== NodeEnv.Test && app.use(initLogger());
 app.use(initSecurity());
 
 // JWT verification
-app.use(authenticateJWT());
+// app.use(authenticateJWT());
 
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
