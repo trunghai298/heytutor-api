@@ -85,17 +85,20 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   //update 28/2
-  
+
   isSupporter: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },isChanged: {
+  },
+  isChanged: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },isBaned: {
+  },
+  isBaned: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },isSaveDraf: {
+  },
+  isSaveDraf: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
