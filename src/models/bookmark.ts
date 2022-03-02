@@ -1,21 +1,25 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface RankingInstance extends Model {
+interface BookMarkInstance extends Model {
+  id: number;
   userId: number;
-  rankPoint: number;
-  rankCurrent: string;
+  postId: number;
 }
 
-const Ranking = MySQLClient.define<RankingInstance>("Ranking", {
+const Bookmark = MySQLClient.define<BookMarkInstance>("Bookmark", {
+  id: {
+    allowNull: false,
+    autoIncrement: true,
+    primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
   userId: {
+    primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  rankPoint: {
+  postId: {
     type: DataTypes.INTEGER.UNSIGNED,
-  },
-  rankCurrent: {
-    type: DataTypes.STRING,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -29,4 +33,4 @@ const Ranking = MySQLClient.define<RankingInstance>("Ranking", {
   },
 });
 
-export default Ranking;
+export default Bookmark;

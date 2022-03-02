@@ -12,6 +12,8 @@ import Comment from "./comment";
 import Auth from "./auth";
 import File from "./file";
 import Search from "./search";
+import Bookmark from "./bookmark";
+import Ranking from "./ranking";
 
 export default (app: any) => {
   Auth(app);
@@ -28,4 +30,6 @@ export default (app: any) => {
   Comment(app);
   File(app);
   Search(app);
+  Bookmark(app);
+  Ranking(app);
 };

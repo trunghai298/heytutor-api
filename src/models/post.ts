@@ -10,19 +10,18 @@ interface PostInstance extends Model {
   hashtag: string;
   price: boolean;
   isLiked: boolean;
+  likedBy: string;
   likeCount: number;
   commentCount: number;
   images: string;
   isResolved: boolean;
   isPinned: boolean;
-  createdAt: Date;
-  updatedAt: Date;
-
-  // update 28/2
   isSupporter: boolean;
   isChanged: boolean;
   isBaned: boolean;
-  isSaveDraf: boolean;
+  isSaveDraft: boolean;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 const Post = MySQLClient.define<PostInstance>("Post", {
@@ -58,6 +57,9 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
+  likedBy: {
+    type: DataTypes.STRING,
+  },
   likeCount: {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
@@ -86,7 +88,7 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  isSaveDraf: {
+  isSaveDraft: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
