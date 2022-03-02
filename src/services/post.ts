@@ -1,11 +1,12 @@
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-import { isEmpty, sortBy } from "lodash";
+import { isEmpty, sortBy, uniqBy } from "lodash";
 import { map } from "lodash";
 import User from "../models/user";
 import { Op } from "sequelize";
 import Student from "../models/student";
+import BookmarkServices from "./bookmark";
 
 /**
  * To create a new post
@@ -199,6 +200,8 @@ const listPostByUser = async (limit, offset, ctx) => {
       where: { ...whereCondition },
     });
 
+    const bookmarkedPost = await BookmarkServices.listBookmark(ctx);
+
     const attachedUser = await Promise.all(
       map(listPost.rows, async (post) => {
         const user = await User.findOne({
@@ -218,11 +221,16 @@ const listPostByUser = async (limit, offset, ctx) => {
       })
     );
 
-    const sortListPostByMajor = sortBy(attachedUser, (post) => {
-      return post.user.major === major;
-    }).reverse();
+    // const sortListPostByMajor = sortBy(attachedUser, (post) => {
+    //   return post.user.major === major;
+    // }).reverse();
 
-    return sortListPostByMajor;
+    const concatBookmarkPost = uniqBy(
+      attachedUser.concat(bookmarkedPost),
+      "id"
+    );
+
+    return concatBookmarkPost;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
