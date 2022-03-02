@@ -1,0 +1,3 @@
+INSERT INTO `Students` (`id`, `stdId`, `stdCode`, `fullName`, `classId`, `major`, `imageUrl`, `semester`, `subjects`, `createdAt`, `updatedAt`) VALUES
+(1, 'se06350', 'haintse06350', 'Trung Hai', NULL, NULL, NULL, NULL, '\'[\"CSD\", \"SWD\"]\'', '2022-02-28 16:24:02', '2022-02-28 16:24:02'),
+(2, 'he130977', 'anhcdhe130977', 'Duc Anh', NULL, NULL, NULL, NULL, '\'[\"LAB\", \"PRJ\"]\'', '2022-02-28 16:24:02', '2022-02-28 16:24:02');

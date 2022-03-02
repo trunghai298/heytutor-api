@@ -31,6 +31,46 @@ const create = async (payload) => {
 /**
  * To update a new post
  */
+
+const likePost = async (payload, ctx) => {
+  const { postId } = payload;
+  const { user } = ctx;
+
+  const transaction = await MySQLClient.transaction();
+  let params = null;
+  try {
+    const post = await Post.findOne({ where: { id: postId }, raw: true });
+    if (post.isLiked) {
+      params = {
+        isLiked: false,
+        likeCount: post.likeCount - 1,
+        likedBy: JSON.stringify(
+          JSON.parse(post.likedBy).filter((userId) => userId !== user.id)
+        ),
+      };
+    } else {
+      params = {
+        isLiked: true,
+        likeCount: post.likeCount + 1,
+        likedBy: post.likedBy
+          ? JSON.stringify([...JSON.parse(post.likedBy), user.id])
+          : JSON.stringify([user.id]),
+      };
+    }
+
+    await Post.update({ ...params }, { where: { id: postId }, transaction });
+    await transaction.commit();
+    const postUpdated = await Post.findOne({
+      where: { id: postId },
+      raw: true,
+    });
+
+    return postUpdated;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const update = async (payload) => {
   const { postId } = payload;
   const transaction = await MySQLClient.transaction();
@@ -258,6 +298,7 @@ const listPostByUserId = async (userId: string, limit, offset) => {
 };
 
 export default {
+  likePost,
   listPostByUserId,
   listPostByUser,
   listAllPost,

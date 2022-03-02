@@ -30,6 +30,12 @@ const edit = (req, res, next) => {
     .catch(next);
 };
 
+const likePost = (req, res, next) => {
+  PostServices.likePost(req.body, req.ctx)
+    .then((post) => res.json(post))
+    .catch(next);
+};
+
 const deletePost = (req, res, next) => {
   PostServices.deletePost(req.params.postId)
     .then((post) => res.json(post))
@@ -47,6 +53,7 @@ const listPostByUserId = (req, res, next) => {
 };
 
 export default {
+  likePost,
   listPostByUserId,
   listByUserRole,
   listAllPost,

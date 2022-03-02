@@ -8,5 +8,6 @@ export default (app) => {
     .post("/post", PostController.create)
     .put("/post/:id", PostController.edit)
     .put("/update-post", PostController.update)
+    .put("/like-post", PostController.likePost)
     .delete("/post/:id", PostController.deletePost);
 };
