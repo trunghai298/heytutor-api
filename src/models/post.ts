@@ -10,7 +10,6 @@ interface PostInstance extends Model {
   hashtag: string;
   price: boolean;
   isLiked: boolean;
-  likedBy: string;
   likeCount: number;
   commentCount: number;
   images: string;
@@ -56,9 +55,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   isLiked: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
-  },
-  likedBy: {
-    type: DataTypes.STRING,
   },
   likeCount: {
     type: DataTypes.INTEGER.UNSIGNED,
