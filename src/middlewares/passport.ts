@@ -7,9 +7,9 @@ import User from "../models/user";
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||
-  "395446492480-n5g1o0qb93ibrulml67jhfa16r2bh9nc.apps.googleusercontent.com";
+  "580901820462-tceg8k5m6v39j2ppks4o42t9ktar2sgc.apps.googleusercontent.com";
 const GOOGLE_CLIENT_SECRET =
-  process.env.GOOGLE_CLIENT_SECRET || "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";
+  process.env.GOOGLE_CLIENT_SECRET || "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";
 
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
@@ -38,7 +38,7 @@ export const initPassport = () => {
         callbackURL: "/auth/google/callback",
       },
       async (accessToken, refreshToken, profile, cb) => {
-        console.log("profile", profile);
+        console.log("accessToken", accessToken);
         try {
           const user = await MySQLClient.transaction(async (transaction) => {
             const user = await User.findOne({

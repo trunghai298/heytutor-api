@@ -72,34 +72,6 @@ app.get("/mysql", async (req, res) => {
   await setupFakeData(req, res);
 });
 
-const eventsHandler = (log, request, response, next) => {
-  console.log(log);
-  const headers = {
-    "Content-Type": "text/event-stream",
-    Connection: "keep-alive",
-    "Cache-Control": "no-cache",
-  };
-  response.writeHead(200, headers);
-
-  const data = `data: ${log}\n\n`;
-
-  response.write(data);
-
-  // const clientId = Date.now();
-
-  // const newClient = {
-  //   id: clientId,
-  //   response,
-  // };
-
-  // clients.push(newClient);
-
-  // request.on("close", () => {
-  //   console.log(`${clientId} Connection closed`);
-  //   clients = clients.filter((client) => client.id !== clientId);
-  // });
-};
-
 app.get("/fap-data", async (req, res, next) => {
   await resetDb(req, res);
   await fetchFapData(req.query.fapCookie as string, req.query.termId as string);
