@@ -7,4 +7,6 @@ INSERT INTO `Users` (`id`, `email`, `password`, `name`, `stdId`, `postCount`, `r
 (6, 'Thaonphe123486@gpt.edu,vn', '1', 'Thao', 'Thaonphe123486', NULL, 10, NULL, NULL, NULL, NULL, 0, '2022-02-28 10:33:45', '2022-02-28 10:33:45'),
 (7, 'Hienhnhe120978@fpt.edu.vn', '1', 'Hien', 'Hienhnhe120978', NULL, NULL, NULL, NULL, NULL, NULL, 0, '2022-02-28 10:33:45', '2022-02-28 10:33:45'),
 (8, 'Anhdphe585739@fpt.edu.vn', '1', 'Phuc Anh', 'Anhdphe585739', NULL, NULL, NULL, NULL, NULL, NULL, 0, '2022-02-28 10:33:45', '2022-02-28 10:33:45'),
-(9, 'admin', 'admin', 'admin', 'admin', NULL, NULL, NULL, NULL, 1, NULL, 0, '2022-02-28 10:33:45', '2022-02-28 10:33:45');
+(9, 'admin', 'admin', 'admin', 'admin', NULL, NULL, NULL, NULL, 1, NULL, 0, '2022-02-28 10:33:45', '2022-02-28 10:33:45'),
+(10, 'HuyenNTHA162001@fpt.edu.vn', '1', 'Ngô Thu Huyền', 'HA162001', NULL, NULL, NULL, NULL, NULL, NULL, 1, '2022-03-03 15:51:34', '2022-03-03 15:51:34'),
+(11, 'PhuongNVHE140784@fpt.edu.vn', '1', 'Ngô Văn Phương', 'HE140784', NULL, NULL, NULL, NULL, NULL, NULL, 1, '2022-03-03 16:09:23', '2022-03-03 16:09:23');

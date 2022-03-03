@@ -1,0 +1,2 @@
+INSERT INTO `Events` (`id`, `title`, `description`, `createdAt`, `updatedAt`, `endAt`) VALUES
+(1, 'Chuẩn bị thi PE nào các sĩ tử', 'Tìm kiếm partner cùng học tập và ôn luyện cho 1 mùa thi PE và FE sắp tới', '2022-03-02 17:44:28', '2022-03-02 17:44:28', '2022-03-16 17:44:28');

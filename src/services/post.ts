@@ -151,7 +151,7 @@ const deletePost = async (postId: string) => {
 const listPostByUser = async (limit, offset, ctx) => {
   const { user } = ctx;
   const { firstTimeLogin, semester, major, subjects } = user;
-  const subjectsJSON = JSON.parse(subjects.replaceAll("'", ""));
+  const subjectsJSON = JSON.parse(subjects);
 
   try {
     let whereCondition = {};
@@ -246,7 +246,6 @@ const listAllPost = async (limit, offset) => {
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
       raw: true,
-      logging: true,
       where: { isResolved: false },
     });
 

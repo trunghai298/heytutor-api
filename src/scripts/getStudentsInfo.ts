@@ -99,10 +99,18 @@ const getClassesByCourse = async (
   return flattenDeep(classList);
 };
 
-const getListStudentByClass = async (classId: string, htmlData: any) => {
+const getListStudentByClass = async (
+  classId: number,
+  className: string,
+  htmlData: any
+) => {
   const $ = cheerio.load(htmlData);
   // get student table
   const tableBody = $("#ctl00_mainContent_divStudents > table > tbody");
+  const subjectBody = $(
+    "#ctl00_mainContent_divCourse > table > tbody > tr > td > b"
+  );
+
   const classList: any = [];
 
   $("tr", tableBody).map((index, elem) => {
@@ -118,9 +126,10 @@ const getListStudentByClass = async (classId: string, htmlData: any) => {
       stdCode: tdData[2],
       stdId: tdData[3],
       classId,
-      major: "",
+      className,
+      subject: $(subjectBody).text().split("(")[1].split(")")[0],
+      major: tdData[3].slice(0, 2),
       fullName: tdData[4] + " " + tdData[5] + " " + tdData[6],
-      imageUrl: tdData[1],
     };
 
     classList.push(studentData);
@@ -200,7 +209,8 @@ export const fetchFapData = async (fapCookie: string, termId: string) => {
                 fapCookie
               );
               const dataStudent = await getListStudentByClass(
-                null,
+                cl.classId,
+                cl.className,
                 rawStudentHtml
               );
 

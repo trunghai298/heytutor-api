@@ -4,6 +4,7 @@ import { BadRequestError } from "../utils/errors";
 import * as JWTUtils from "../utils/jwt";
 import { compare, encrypt } from "../utils/bcrypt";
 import Student from "../models/student";
+import StudentServices from "../services/student";
 
 export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
@@ -39,11 +40,19 @@ export const login = async (params: any, ctx: any) => {
   }
 
   const studentData = await Student.findOne({
+    attributes: ["fullName", "major", "stdCode"],
     where: { stdId: userDB.stdId },
     raw: true,
   });
 
-  const attachStudentData = { ...userDB, ...studentData };
+  const subjectData = await StudentServices.getListSubjects(userDB.stdId);
+
+  const attachStudentData = {
+    ...userDB,
+    ...studentData,
+    subjects: JSON.stringify(subjectData),
+  };
+
   delete attachStudentData.password;
 
   const token = await JWTUtils.sign({

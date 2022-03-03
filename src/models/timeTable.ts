@@ -1,24 +1,23 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface TermInstance extends Model {
+interface TimeTableInstance extends Model {
   id: number;
-  termId: number;
-  termName: string;
+  classId: number;
+  subjects: string;
 }
 
-const Term = MySQLClient.define<TermInstance>("Term", {
+const TimeTable = MySQLClient.define<TimeTableInstance>("TimeTable", {
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  termId: {
-    primaryKey: true,
+  classId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  termName: {
+  subjects: {
     type: DataTypes.STRING,
   },
   createdAt: {
@@ -33,4 +32,4 @@ const Term = MySQLClient.define<TermInstance>("Term", {
   },
 });
 
-export default Term;
+export default TimeTable;

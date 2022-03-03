@@ -6,11 +6,11 @@ interface StudentInstance extends Model {
   stdId: string;
   stdCode: string;
   fullName: number;
-  classId: number;
+  classId: string;
+  className: string;
   major: string;
-  imageUrl: string;
   semester: string;
-  subjects: string;
+  subject: string;
 }
 
 const Student = MySQLClient.define<StudentInstance>("Student", {
@@ -33,16 +33,16 @@ const Student = MySQLClient.define<StudentInstance>("Student", {
   classId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  major: {
+  className: {
     type: DataTypes.STRING,
   },
-  imageUrl: {
+  major: {
     type: DataTypes.STRING,
   },
   semester: {
     type: DataTypes.STRING,
   },
-  subjects: {
+  subject: {
     type: DataTypes.STRING,
   },
   createdAt: {

@@ -11,13 +11,10 @@ import { initCORS } from "./middlewares/cors";
 import { initSecurity } from "./middlewares/security";
 import { NodeEnv } from "./constants/server";
 import AuthController from "./controller/auth";
-
+import { setupFakeData } from "./utils/setupDb";
 import Route from "./routes";
 import MySQLClient from "./clients/mysql";
 import { sign } from "./utils/jwt";
-import fs from "fs";
-import * as path from "path";
-
 import { fetchFapData } from "./scripts/getStudentsInfo";
 const app = express();
 
@@ -37,43 +34,18 @@ const resetDb = async () => {
   await MySQLClient.sync({ force: true });
 };
 
-const setupFakeData = async (req, res) => {
-  const postQuery = fs
-    .readFileSync(path.join(__dirname, "/constants/fake-data/posts.sql"), {
-      encoding: "UTF-8",
-    })
-    .split(";\n");
-
-  const userQuery = fs
-    .readFileSync(path.join(__dirname, "/constants/fake-data/users.sql"), {
-      encoding: "UTF-8",
-    })
-    .split(";\n");
-
-  const studentQuery = fs
-    .readFileSync(path.join(__dirname, "/constants/fake-data/students.sql"), {
-      encoding: "UTF-8",
-    })
-    .split(";\n");
-
-  await MySQLClient.query(postQuery[0], { type: "INSERT" });
-  await MySQLClient.query(userQuery[0], { type: "INSERT" });
-  await MySQLClient.query(studentQuery[0], { type: "INSERT" });
-  res.json({ message: "MySQL reset" });
-};
-
 app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
   const token = await sign({ user: req.user });
   res.redirect(`${process.env.WEB_URL}?token=${token}`);
 });
 
 app.get("/mysql", async (req, res) => {
-  await resetDb();
+  // await resetDb();
   await setupFakeData(req, res);
 });
 
 app.get("/fap-data", async (req, res, next) => {
-  await resetDb(req, res);
+  await resetDb();
   await fetchFapData(req.query.fapCookie as string, req.query.termId as string);
   res.send({ message: "Insert data successfully" });
 });

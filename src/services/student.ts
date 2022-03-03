@@ -1,5 +1,6 @@
 import Student from "../models/student";
 import { NotFoundError, BadRequestError } from "../utils/errors";
+import { map } from "lodash";
 
 const fetchById = async (id: number) => {
   try {
@@ -40,7 +41,19 @@ const list = async (limit, offset) => {
   }
 };
 
+const getListSubjects = async (stdId: string) => {
+  const studentSubject = await Student.findAll({
+    attributes: ["stdId", "subject"],
+    where: { stdId },
+    group: ["subject"],
+    raw: true,
+  });
+
+  return map(studentSubject, "subject");
+};
+
 export default {
+  getListSubjects,
   fetchById,
   list,
 };
