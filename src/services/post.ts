@@ -164,6 +164,15 @@ const listPostByUser = async (limit, offset, ctx) => {
       return title;
     });
 
+    const hashtagCondition = subjectsJSON.map((s) => {
+      const title = {
+        hashtag: {
+          [Op.like]: `%${s}%`,
+        },
+      };
+      return title;
+    });
+
     const contentCondition = subjectsJSON.map((s) => {
       const title = {
         content: {
@@ -175,15 +184,7 @@ const listPostByUser = async (limit, offset, ctx) => {
 
     if (firstTimeLogin) {
       whereCondition = {
-        [Op.or]: [
-          {
-            hashtag: {
-              [Op.in]: subjectsJSON,
-            },
-          },
-          ...titleCondition,
-          ...contentCondition,
-        ],
+        [Op.or]: [...hashtagCondition, ...titleCondition, ...contentCondition],
         isResolved: false,
       };
     } else {
@@ -196,6 +197,7 @@ const listPostByUser = async (limit, offset, ctx) => {
       limit: parseInt(limit, 10) || 100,
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
+      // logging: true,
       raw: true,
       where: { ...whereCondition },
     });
@@ -213,7 +215,7 @@ const listPostByUser = async (limit, offset, ctx) => {
         });
 
         const studentData = await Student.findOne({
-          where: { stdId: user.stdId },
+          where: { stdId: userDb.stdId },
           raw: true,
         });
 
