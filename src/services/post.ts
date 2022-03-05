@@ -204,7 +204,7 @@ const listPostByUser = async (limit, offset, ctx) => {
 
     const attachedUser = await Promise.all(
       map(listPost.rows, async (post) => {
-        const user = await User.findOne({
+        const userDb = await User.findOne({
           where: { id: post.userId },
           raw: true,
           attributes: {
@@ -217,7 +217,7 @@ const listPostByUser = async (limit, offset, ctx) => {
           raw: true,
         });
 
-        return { ...post, user: { ...user, ...studentData } };
+        return { ...post, user: { ...userDb, ...studentData } };
       })
     );
 
