@@ -2,7 +2,7 @@ import CommentServices from "../services/comment.service";
 
 const listCommentByPost = (req, res, next) => {
   CommentServices.listComments(
-    req.params.postId,
+    req.body.postId,
     req.query.limit,
     req.query.offset
   )

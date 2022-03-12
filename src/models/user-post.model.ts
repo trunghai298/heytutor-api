@@ -4,11 +4,10 @@ import MySQLClient from "../clients/mysql";
 interface UserPostInstance extends Model {
   id: number;
   userId: number;
-  suporterId: number;
+  supporterId: number;
   postId: number;
   eventId: number;
   conversationId: number;
-  isResolved: boolean;
   isPending: boolean;
   isActive: boolean;
   isDone: boolean;
@@ -25,7 +24,7 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
   userId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  suporterId: {
+  supporterId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
@@ -35,9 +34,6 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  isResolved: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isPending: {

@@ -8,5 +8,6 @@ export default (app) => {
     .get(
       "/get-number-people-comment-of-post/:postId",
       PostController.numberPplCommentedInPost
-    );
+    )
+    .get("/get-list-post-by-filter", PostController.getListPostByFilter)
 };
