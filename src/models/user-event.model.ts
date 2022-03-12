@@ -1,44 +1,43 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface EventInstance extends Model {
+interface UserEventInstance extends Model {
   id: number;
-  title: string;
-  description: string;
-  viewCount: number;
-  createdAt: Date;
-  updatedAt: Date;
-  endAt: Date;
+  userId: number;
+  eventId: number;
+  isSupporter: boolean;
+  isRequestor: boolean;
 }
 
-const Event = MySQLClient.define<EventInstance>("Event", {
+const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  viewCount: {
+  userId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  title: {
-    type: DataTypes.STRING,
+  eventId: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
-  description: {
-    type: DataTypes.STRING,
+  isSupporter: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  isRequestor: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
   createdAt: {
     type: DataTypes.DATE,
+    allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   updatedAt: {
     type: DataTypes.DATE,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  endAt: {
-    type: DataTypes.DATE,
+    allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 
-export default Event;
+export default UserEvent;
