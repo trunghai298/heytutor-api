@@ -3,7 +3,7 @@ import Comment from "../models/comment.model";
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-import { isEmpty, sortBy, uniqBy } from "lodash";
+import { isEmpty, omit, pick } from "lodash";
 import { map } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
@@ -168,11 +168,16 @@ const countPeopleCmtOfPost = async (postId) => {
       where: {
         postId,
       },
-      attributes: ["userId"],
-      group: ["userId"],
+      include: [User],
+      attributes: ["userId", "User.name", "User.email"],
+      group: ["userId",],
       raw: true,
     });
-    return listUsers;
+    const res = map(listUsers, user => {
+      const pickFields = pick(user, ["userId", "name", "email"]);
+      return pickFields;
+    })
+    return res;
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -187,11 +192,17 @@ const countPeopleRegisterOfPost = async (postId) => {
       where: {
         postId,
       },
-      attributes: ["userId"],
-      group: ["userId"],
+      include: [User],
+      attributes: ["userId", "User.name", "User.email"],
+      group: ["userId",],
       raw: true,
+      logging: true
     });
-    return listUsers;
+    const res = map(listUsers, user => {
+      const pickFields = pick(user, ["userId", "name", "email"]);
+      return pickFields;
+    })
+    return res;
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -206,11 +217,16 @@ const countPeopleSupporterOfPost = async (postId) => {
       where: {
         postId,
       },
-      attributes: ["userId"],
+      include: [User],
+      attributes: ["userId", "User.name", "User.email"],
       group: ["userId"],
       raw: true,
     });
-    return listUsers;
+    const res = map(listUsers, user => {
+      const pickFields = pick(user, ["userId", "name", "email"]);
+      return pickFields;
+    })
+    return res;
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -227,7 +243,11 @@ const postDetailByPostId = async (postId) => {
       raw: true,
       attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
     });
-    return postDetail;
+    const res = map(postDetail, post => {
+      const pickFields = omit(post, ["id", "postId", "email"]);
+      return pickFields;
+    })
+    return res;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -238,7 +258,7 @@ const postDetailByPostId = async (postId) => {
 
 const getAllDetailsByPostId = async (postId) => {
   try {
-    const [commentCount, pplRegisterCount, pplSupportCount, postDetailById] =
+    const [listUserComment, listUserRegister, listUserSupport, postDetailById] =
       await Promise.all([
         countPeopleCmtOfPost(postId),
         countPeopleRegisterOfPost(postId),
@@ -246,9 +266,9 @@ const getAllDetailsByPostId = async (postId) => {
         postDetailByPostId(postId),
       ]);
     return {
-      commentCount,
-      pplRegisterCount,
-      pplSupportCount,
+      listUserComment,
+      listUserRegister,
+      listUserSupport,
       postDetailById,
     };
   } catch (error) {
