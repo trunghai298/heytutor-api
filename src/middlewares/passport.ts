@@ -3,7 +3,7 @@ import passport from "passport";
 import { Response, NextFunction } from "express";
 import MySQLClient from "../clients/mysql";
 import { uuid } from "uuidv4";
-import User from "../models/user";
+import User from "../models/user.model";
 
 const GOOGLE_CLIENT_ID =
   process.env.GOOGLE_CLIENT_ID ||

@@ -1,7 +1,7 @@
 import { BadRequestError } from "../utils/errors";
 import Bookmark from "../models/bookmark";
 import { map } from "lodash";
-import Post from "../models/post";
+import Post from "../models/post.model";
 
 /**
  * To list of bookmarked posts by user

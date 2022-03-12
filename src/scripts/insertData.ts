@@ -1,7 +1,7 @@
-import Department from "../models/department";
-import Class from "../models/class";
-import Course from "../models/course";
-import Student from "../models/student";
+import Department from "../models/department.model";
+import Class from "../models/class.model";
+import Course from "../models/course.model";
+import Student from "../models/student.model";
 
 export const insertDepartment = async (payload) => {
   await Department.bulkCreate(payload, {
