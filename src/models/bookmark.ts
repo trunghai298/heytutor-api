@@ -1,33 +1,25 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface CourseInstance extends Model {
+interface BookMarkInstance extends Model {
   id: number;
-  courseId: number;
-  deptId: number;
-  courseName: string;
-  courseCode: string;
+  userId: number;
+  postId: number;
 }
 
-const Course = MySQLClient.define<CourseInstance>("Course", {
+const Bookmark = MySQLClient.define<BookMarkInstance>("Bookmark", {
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  courseId: {
+  userId: {
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  deptId: {
+  postId: {
     type: DataTypes.INTEGER.UNSIGNED,
-  },
-  courseName: {
-    type: DataTypes.STRING,
-  },
-  courseCode: {
-    type: DataTypes.STRING,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -41,4 +33,4 @@ const Course = MySQLClient.define<CourseInstance>("Course", {
   },
 });
 
-export default Course;
+export default Bookmark;

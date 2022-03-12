@@ -24,6 +24,16 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
   userId2: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
 });
 
 export default Conversation;

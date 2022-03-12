@@ -6,14 +6,32 @@ const create = (req, res, next) => {
     .catch(next);
 };
 
-const list = (req, res, next) => {
-  PostServices.list(req.query.limit, req.query.offset)
+const update = (req, res, next) => {
+  PostServices.update(req.body)
+    .then((post) => res.json(post))
+    .catch(next);
+};
+
+const listByUserRole = (req, res, next) => {
+  PostServices.listPostByUser(req.query.limit, req.query.offset, req.ctx)
+    .then((posts) => res.json(posts))
+    .catch(next);
+};
+
+const listAllPost = (req, res, next) => {
+  PostServices.listAllPost(req.query.limit, req.query.offset)
     .then((posts) => res.json(posts))
     .catch(next);
 };
 
 const edit = (req, res, next) => {
   PostServices.edit(req.body)
+    .then((post) => res.json(post))
+    .catch(next);
+};
+
+const likePost = (req, res, next) => {
+  PostServices.likePost(req.body, req.ctx)
     .then((post) => res.json(post))
     .catch(next);
 };
@@ -26,19 +44,37 @@ const deletePost = (req, res, next) => {
 
 const numberPplCommentedInPost = (req, res, next) => {
   PostServices.countPeopleCmtOfPost(req.params.postId)
-  .then((comment) => res.json(comment))
-  .catch(next);
+    .then((comment) => res.json(comment))
+    .catch(next);
 };
 
 const requestsInfoByUser = (req, res, next) => {
-  PostServices.getListPostByUser(req.params.filter, req.params.limit, req.params.offset)
-  .then((request) => res.json(request))
-  .catch(next);
-}
+  PostServices.getListPostByUser(
+    req.params.filter,
+    req.params.limit,
+    req.params.offset
+  )
+    .then((request) => res.json(request))
+    .catch(next);
+};
+
+const listPostByUserId = (req, res, next) => {
+  PostServices.listPostByUserId(
+    req.params.userId,
+    req.query.limit,
+    req.query.offset
+  )
+    .then((posts) => res.json(posts))
+    .catch(next);
+};
 
 export default {
-  list,
+  likePost,
+  listPostByUserId,
+  listByUserRole,
+  listAllPost,
   create,
+  update,
   edit,
   deletePost,
   numberPplCommentedInPost,

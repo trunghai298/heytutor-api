@@ -1,32 +1,20 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface CourseInstance extends Model {
-  id: number;
-  courseId: number;
-  deptId: number;
-  courseName: string;
-  courseCode: string;
+interface RankingInstance extends Model {
+  userId: number;
+  rankPoint: number;
+  rankCurrent: string;
 }
 
-const Course = MySQLClient.define<CourseInstance>("Course", {
-  id: {
-    allowNull: false,
-    autoIncrement: true,
-    primaryKey: true,
+const Ranking = MySQLClient.define<RankingInstance>("Ranking", {
+  userId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  courseId: {
-    primaryKey: true,
+  rankPoint: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  deptId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  courseName: {
-    type: DataTypes.STRING,
-  },
-  courseCode: {
+  rankCurrent: {
     type: DataTypes.STRING,
   },
   createdAt: {
@@ -41,4 +29,4 @@ const Course = MySQLClient.define<CourseInstance>("Course", {
   },
 });
 
-export default Course;
+export default Ranking;

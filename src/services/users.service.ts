@@ -2,7 +2,7 @@ import Subscribe from "../models/subscribe.model";
 import User from "../models/user.model";
 import Post from "../models/post.model";
 import { NotFoundError } from "../utils/errors";
-const { Op } = require("@sequelize/core");
+import { Op } from "sequelize";
 
 /**
  * To information of a user

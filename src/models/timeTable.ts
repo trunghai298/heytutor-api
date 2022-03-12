@@ -1,32 +1,23 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface CourseInstance extends Model {
+interface TimeTableInstance extends Model {
   id: number;
-  courseId: number;
-  deptId: number;
-  courseName: string;
-  courseCode: string;
+  classId: number;
+  subjects: string;
 }
 
-const Course = MySQLClient.define<CourseInstance>("Course", {
+const TimeTable = MySQLClient.define<TimeTableInstance>("TimeTable", {
   id: {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  courseId: {
-    primaryKey: true,
+  classId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  deptId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  courseName: {
-    type: DataTypes.STRING,
-  },
-  courseCode: {
+  subjects: {
     type: DataTypes.STRING,
   },
   createdAt: {
@@ -41,4 +32,4 @@ const Course = MySQLClient.define<CourseInstance>("Course", {
   },
 });
 
-export default Course;
+export default TimeTable;

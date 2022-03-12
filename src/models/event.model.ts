@@ -25,6 +25,7 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   },
   createdAt: {
     type: DataTypes.DATE,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   updatedAt: {
     type: DataTypes.DATE,

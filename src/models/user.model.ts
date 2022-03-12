@@ -1,6 +1,5 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
-
 interface UserInstance extends Model {
   id: number;
   name: string;
@@ -12,6 +11,8 @@ interface UserInstance extends Model {
   isBanned: boolean;
   googleId: string;
   isAdmin: boolean;
+  summary: string;
+  firstTimeLogin: boolean;
 }
 
 const User = MySQLClient.define<UserInstance>("User", {
@@ -47,6 +48,23 @@ const User = MySQLClient.define<UserInstance>("User", {
   },
   isAdmin: {
     type: DataTypes.BOOLEAN,
+  },
+  summary: {
+    type: DataTypes.STRING,
+  },
+  firstTimeLogin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 
