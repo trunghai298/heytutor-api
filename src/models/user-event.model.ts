@@ -1,6 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
-
+import Event from "./event.model";
 interface UserEventInstance extends Model {
   id: number;
   userId: number;
@@ -39,5 +39,8 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
+
+Event.hasMany(UserEvent, { foreignKey: "id" });
+UserEvent.belongsTo(Event, { foreignKey: "eventId" });
 
 export default UserEvent;

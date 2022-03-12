@@ -1,6 +1,11 @@
+import UserPost from "../models/user-post.model";
 import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
+import UserEvent from "../models/user-event.model";
+import { map } from "lodash";
+import { isEmpty, omit, pick } from "lodash";
+import Post from "../models/post.model";
 
 /**
  * To create a new event
@@ -65,8 +70,137 @@ const deleteEvent = async (eventId: string) => {
   }
 };
 
+const getEventStats = async (eventId) => {
+  try {
+    const [listEventPost, listEventUser, listEventDetail] = await Promise.all([
+      getEventPost(eventId),
+      getEventUser(eventId),
+      getEventDetail(eventId),
+    ]);
+    return {
+      listEventPost,
+      listEventUser,
+      listEventDetail,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
+    });
+  }
+};
+
+const getEventPost = async (eventId) => {
+  try {
+    const numberOfPost = await UserPost.count({
+      where: {
+        eventId,
+      },
+    });
+    return numberOfPost;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
+const getEventUser = async (eventId) => {
+  try {
+    const numberOfSP = await UserEvent.count({
+      where: {
+        eventId,
+      },
+      group: ["isSupporter"],
+    });
+    const numberOfRq = await UserEvent.findAndCountAll({
+      where: {
+        eventId,
+      },
+      group: ["isRequestor"],
+    });
+    const numOfSP = JSON.stringify(numberOfSP);
+    let data: {};
+    return data;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
+const getEventDetail = async (eventId) => {
+  try {
+    const eventDetail = await Event.count({
+      where: {
+        eventId,
+      },
+    });
+    return eventDetail;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
+const getPostOfEvent = async (eventId) => {
+  try {
+    const listUsers = await UserPost.findAll({
+      where: {
+        eventId,
+      },
+      include: [Post],
+      attributes: ["postId"],
+      group: ["postId"],
+      raw: true,
+    });
+    const res = map(listUsers, (user) => {
+      const pickFields = omit(user, ["postId"]);
+      return pickFields;
+    });
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event has no supporter.",
+    });
+  }
+};
+
+const listEventByUser = async (userId) => {
+  try {
+    const listEvent = await UserEvent.findAll({
+      where: {
+        userId,
+      },
+      include: [Event],
+      attributes: ["eventId"],
+      group: ["eventId"],
+      raw: true,
+    });
+    const res = map(listEvent, event => {
+      const pickFields = omit(event, [ "eventId", "isSupporter", "isRequestor", "createdAt", "updatedAt" ]);
+      return pickFields;
+    })
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
+};
+
 export default {
   create,
   edit,
   deleteEvent,
+  getEventPost,
+  getEventUser,
+  getPostOfEvent,
+  listEventByUser,
 };
