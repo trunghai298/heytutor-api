@@ -9,6 +9,7 @@ import User from "../models/user.model";
 import { Op } from "sequelize";
 import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
+import Register from "../models/register.model";
 
 /**
  * To create a new post
@@ -161,11 +162,11 @@ const listPostByUserId = async (userId: string, limit, offset) => {
 /**
  * Count people comment in one post
  */
-const countPeopleCmtOfPost = async (_postId: double) => {
+const countPeopleCmtOfPost = async (postId) => {
   try {
     const listUsers = await Comment.findAll({
       where: {
-        postId: _postId,
+        postId,
       },
       attributes: ["userId"],
       group: ["userId"],
@@ -176,6 +177,84 @@ const countPeopleCmtOfPost = async (_postId: double) => {
     throw new NotFoundError({
       field: "postId",
       message: "Post has no comment.",
+    });
+  }
+};
+
+const countPeopleRegisterOfPost = async (postId) => {
+  try {
+    const listUsers = await Register.findAll({
+      where: {
+        postId,
+      },
+      attributes: ["userId"],
+      group: ["userId"],
+      raw: true,
+    });
+    return listUsers;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post has no register.",
+    });
+  }
+};
+
+const countPeopleSupporterOfPost = async (postId) => {
+  try {
+    const listUsers = await UserPost.findAll({
+      where: {
+        postId,
+      },
+      attributes: ["userId"],
+      group: ["userId"],
+      raw: true,
+    });
+    return listUsers;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post has no supporter.",
+    });
+  }
+};
+
+const postDetailByPostId = async (postId) => {
+  try {
+    const postDetail = await UserPost.findAll({
+      where: { postId },
+      include: [Post],
+      raw: true,
+      attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
+    });
+    return postDetail;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Failed to list post.",
+    });
+  }
+};
+
+const getAllDetailsByPostId = async (postId) => {
+  try {
+    const [commentCount, pplRegisterCount, pplSupportCount, postDetailById] =
+      await Promise.all([
+        countPeopleCmtOfPost(postId),
+        countPeopleRegisterOfPost(postId),
+        countPeopleSupporterOfPost(postId),
+        postDetailByPostId(postId),
+      ]);
+    return {
+      commentCount,
+      pplRegisterCount,
+      pplSupportCount,
+      postDetailById,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
     });
   }
 };
@@ -192,7 +271,6 @@ const getListPostByFilter = async (filter, limit, offset) => {
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
       raw: true,
-      logging: true,
       attributes: { exclude: ["Post.id", "Post.userId"] },
     });
     return listPost;
@@ -211,6 +289,6 @@ export default {
   update,
   edit,
   deletePost,
-  countPeopleCmtOfPost,
   getListPostByFilter,
+  getAllDetailsByPostId,
 };

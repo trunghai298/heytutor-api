@@ -30,12 +30,6 @@ const deletePost = (req, res, next) => {
     .catch(next);
 };
 
-const numberPplCommentedInPost = (req, res, next) => {
-  PostServices.countPeopleCmtOfPost(req.params.postId)
-    .then((comment) => res.json(comment))
-    .catch(next);
-};
-
 const listPostByUserId = (req, res, next) => {
   PostServices.listPostByUserId(
     req.params.userId,
@@ -52,6 +46,13 @@ const getListPostByFilter = (req, res, next) => {
   .catch(next);
 }
 
+const listPostDetailByPostId = (req, res, next) => {
+  PostServices.getAllDetailsByPostId(req.params.postId,)
+  .then((posts) => res.json(posts))
+  .catch(next);
+}
+
+
 export default {
   listPostByUserId,
   listAllPost,
@@ -59,6 +60,6 @@ export default {
   update,
   edit,
   deletePost,
-  numberPplCommentedInPost,
   getListPostByFilter,
+  listPostDetailByPostId,
 };

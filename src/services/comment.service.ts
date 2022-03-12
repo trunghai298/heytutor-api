@@ -46,7 +46,7 @@ export const deleteComment = (id, ctx) => {
 export const listComments = async (postId, offset, limit) => {
   const res = await Comment.findAndCountAll({
     where: {
-      postId: postId,
+      postId,
     },
     offset: offset || 0,
     limit: limit || 100,

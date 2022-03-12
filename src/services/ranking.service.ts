@@ -1,5 +1,5 @@
 import { BadRequestError } from "../utils/errors";
-import Ranking from "../models/ranking";
+import Ranking from "../models/ranking.model";
 
 /**
  * To get user's ranking

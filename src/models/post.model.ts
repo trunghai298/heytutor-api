@@ -57,4 +57,7 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   },
 });
 
+Post.hasMany(UserPost, { foreignKey: "id" });
+UserPost.belongsTo(Post, { foreignKey: "postId" });
+
 export default Post;
