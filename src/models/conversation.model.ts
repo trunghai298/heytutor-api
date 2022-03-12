@@ -6,6 +6,7 @@ interface ConversationInstance extends Model {
   messageId: number;
   userId1: number;
   userId2: number;
+  status: string;
 }
 
 const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
@@ -23,6 +24,9 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
   },
   userId2: {
     type: DataTypes.INTEGER.UNSIGNED,
+  },
+  status: {
+    type: DataTypes.BOOLEAN,
   },
   createdAt: {
     type: DataTypes.DATE,

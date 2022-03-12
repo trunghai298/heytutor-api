@@ -3,9 +3,7 @@ import MySQLClient from "../clients/mysql";
 
 interface PostInstance extends Model {
   id: number;
-  eventId: number;
   userId: number;
-  supporter: number;
   title: string;
   content: string;
   hashtag: string;
@@ -13,15 +11,9 @@ interface PostInstance extends Model {
   isLiked: boolean;
   likedBy: string;
   likeCount: number;
-  commentCount: number;
   images: string;
-  isResolved: boolean;
   isPinned: boolean;
-  isPending: boolean;
-  isActive: boolean;
-  isSupporter: boolean;
-  isChanged: boolean;
-  isBaned: boolean;
+  isEdited: boolean;
   isSaveDraft: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -34,13 +26,7 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  eventId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
   userId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  supporter: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   title: {
@@ -70,27 +56,11 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
-  commentCount: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    defaultValue: 0,
-  },
-  isResolved: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
   isPinned: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  isSupporter: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  isChanged: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  isBaned: {
+  isEdited: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
@@ -107,14 +77,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  isPending: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  isActive: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
   },
 });
 

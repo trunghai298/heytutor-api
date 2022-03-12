@@ -7,6 +7,7 @@ interface MessageInstance extends Model {
   receiverId: number;
   conversationId: number;
   message: string;
+  isSeen: boolean;
   seenAt: Date;
 }
 
@@ -28,6 +29,9 @@ const Message = MySQLClient.define<MessageInstance>("Message", {
   },
   message: {
     type: DataTypes.STRING,
+  },
+  isSeen: {
+    type: DataTypes.BOOLEAN,
   },
   seenAt: {
     type: DataTypes.DATE,
