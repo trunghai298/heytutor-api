@@ -12,6 +12,7 @@ interface UserPostInstance extends Model {
   isActive: boolean;
   isDone: boolean;
   isConfirmed: boolean;
+  isEdited: boolean;
 }
 
 const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
@@ -47,6 +48,10 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
   },
   isConfirmed: {
     type: DataTypes.INTEGER.UNSIGNED,
+  },
+  isPinned: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   createdAt: {
     type: DataTypes.DATE,
