@@ -11,6 +11,8 @@ import Post from "./post.routes";
 import Comment from "./comment.routes";
 import Auth from "./auth.routes";
 import File from "./file.routes";
+import UserEvent from "./user-event.routes";
+import UserPost from "./user-post.routes";
 
 export default (app: any) => {
   Auth(app);
@@ -26,4 +28,6 @@ export default (app: any) => {
   Post(app);
   Comment(app);
   File(app);
+  UserEvent(app);
+  UserPost(app);
 };

@@ -40,8 +40,8 @@ app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
 });
 
 app.get("/mysql", async (req, res) => {
-  // await resetDb();
-  await setupFakeData(req, res);
+  await resetDb();
+  // await setupFakeData(req, res);
 });
 
 app.get("/fap-data", async (req, res, next) => {

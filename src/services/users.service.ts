@@ -1,4 +1,3 @@
-import Subscribe from "../models/subscribe.model";
 import User from "../models/user.model";
 import Post from "../models/post.model";
 import { NotFoundError } from "../utils/errors";
@@ -179,22 +178,22 @@ const getUserPostStats = async (_userId: number) => {
   }
 };
 
-const totalNumberSubscribeOfSupporter = async (_userId: number) => {
-  try {
-    Subscribe.count({
-      where: {
-        subscribeId: {
-          [Op.like]: _userId,
-        },
-      },
-    });
-  } catch (error) {
-    throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
-    });
-  }
-};
+// const totalNumberSubscribeOfSupporter = async (_userId: number) => {
+//   try {
+//     Subscribe.count({
+//       where: {
+//         subscribeId: {
+//           [Op.like]: _userId,
+//         },
+//       },
+//     });
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "userId",
+//       message: "User is not found",
+//     });
+//   }
+// };
 
 const totalNumberConfirmedOfSupporter = async (_userId: number) => {
   try {
@@ -211,90 +210,90 @@ const totalNumberConfirmedOfSupporter = async (_userId: number) => {
   }
 };
 
-const totalNumberPendingOfSupporter = async (_userId: number) => {
-  try {
-    Subscribe.hasMany(Post, { foreignKey: "id " });
-    Post.belongsTo(Subscribe, { foreignKey: "requestId" });
+// const totalNumberPendingOfSupporter = async (_userId: number) => {
+//   try {
+//     Subscribe.hasMany(Post, { foreignKey: "id " });
+//     Post.belongsTo(Subscribe, { foreignKey: "requestId" });
 
-    Post.count({
-      where: {
-        subscriberId: {
-          [Op.like]: _userId.toString(),
-        },
-        isPending: 1,
-      },
-    });
-  } catch (error) {
-    throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
-    });
-  }
-};
+//     Post.count({
+//       where: {
+//         subscriberId: {
+//           [Op.like]: _userId.toString(),
+//         },
+//         isPending: 1,
+//       },
+//     });
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "userId",
+//       message: "User is not found",
+//     });
+//   }
+// };
 
-const totalNumberActiveOfSupporter = async (_userId: number) => {
-  try {
-    Subscribe.hasMany(Post, { foreignKey: "id " });
-    Post.belongsTo(Subscribe, { foreignKey: "requestId" });
+// const totalNumberActiveOfSupporter = async (_userId: number) => {
+//   try {
+//     Subscribe.hasMany(Post, { foreignKey: "id " });
+//     Post.belongsTo(Subscribe, { foreignKey: "requestId" });
 
-    Post.count({
-      where: {
-        subscriberId: {
-          [Op.like]: _userId.toString(),
-        },
-        isActive: 1,
-      },
-    });
-  } catch (error) {
-    throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
-    });
-  }
-};
+//     Post.count({
+//       where: {
+//         subscriberId: {
+//           [Op.like]: _userId.toString(),
+//         },
+//         isActive: 1,
+//       },
+//     });
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "userId",
+//       message: "User is not found",
+//     });
+//   }
+// };
 
-const totalNumberResolvedOfSupporter = async (_userId: number) => {
-  try {
-    Subscribe.hasMany(Post, { foreignKey: "id " });
-    Post.belongsTo(Subscribe, { foreignKey: "requestId" });
+// const totalNumberResolvedOfSupporter = async (_userId: number) => {
+//   try {
+//     Subscribe.hasMany(Post, { foreignKey: "id " });
+//     Post.belongsTo(Subscribe, { foreignKey: "requestId" });
 
-    Post.count({
-      where: {
-        subscriberId: {
-          [Op.like]: _userId.toString(),
-        },
-        isResolved: 1,
-      },
-    });
-  } catch (error) {
-    throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
-    });
-  }
-};
+//     Post.count({
+//       where: {
+//         subscriberId: {
+//           [Op.like]: _userId.toString(),
+//         },
+//         isResolved: 1,
+//       },
+//     });
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "userId",
+//       message: "User is not found",
+//     });
+//   }
+// };
 
 const getSupporterStats = async (_userId: number) => {
   try {
     const [
-      totalRequestCount,
+      // totalRequestCount,
       requestConfirmedCount,
-      requestResolvedCount,
-      requestPendingCount,
-      requestActiveCount,
+      // requestResolvedCount,
+      // requestPendingCount,
+      // requestActiveCount,
     ] = await Promise.all([
-      totalNumberSubscribeOfSupporter(_userId),
+      // totalNumberSubscribeOfSupporter(_userId),
       totalNumberConfirmedOfSupporter(_userId),
-      totalNumberPendingOfSupporter(_userId),
-      totalNumberActiveOfSupporter(_userId),
-      totalNumberResolvedOfSupporter(_userId),
+      // totalNumberPendingOfSupporter(_userId),
+      // totalNumberActiveOfSupporter(_userId),
+      // totalNumberResolvedOfSupporter(_userId),
     ]);
     return {
-      totalRequestCount,
+      // totalRequestCount,
       requestConfirmedCount,
-      requestResolvedCount,
-      requestPendingCount,
-      requestActiveCount,
+      // requestResolvedCount,
+      // requestPendingCount,
+      // requestActiveCount,
     };
   } catch (error) {
     throw new NotFoundError({

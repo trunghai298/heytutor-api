@@ -1,7 +1,7 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
 
-interface UserEventInstance extends Model {
+interface UserPostInstance extends Model {
   id: number;
   userId: number;
   suporterId: number;
@@ -15,7 +15,7 @@ interface UserEventInstance extends Model {
   isConfirmed: boolean;
 }
 
-const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
+const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -64,4 +64,4 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
   },
 });
 
-export default UserEvent;
+export default UserPost;
