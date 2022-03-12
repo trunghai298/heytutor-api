@@ -13,7 +13,6 @@ interface PostInstance extends Model {
   likeCount: number;
   images: string;
   isPinned: boolean;
-  isEdited: boolean;
   isSaveDraft: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -55,10 +54,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   likeCount: {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
-  },
-  isPinned: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
   },
   isEdited: {
     type: DataTypes.BOOLEAN,
