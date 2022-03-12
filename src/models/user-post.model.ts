@@ -8,7 +8,6 @@ interface UserPostInstance extends Model {
   postId: number;
   eventId: number;
   conversationId: number;
-  isResolved: boolean;
   isPending: boolean;
   isActive: boolean;
   isDone: boolean;
@@ -36,9 +35,6 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  isResolved: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isPending: {

@@ -1,5 +1,4 @@
 import MySQLClient from "../clients/mysql";
-import Post from "../models/post";
 import { BadRequestError } from "../utils/errors";
 /**
  * To search post, user

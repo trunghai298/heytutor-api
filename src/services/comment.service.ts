@@ -43,7 +43,7 @@ export const deleteComment = (id, ctx) => {
 /**
  * To list all comments of a post
  */
-export const listComments = async (postId: string, offset, limit) => {
+export const listComments = async (postId, offset, limit) => {
   const res = await Comment.findAndCountAll({
     where: {
       postId,
@@ -52,12 +52,7 @@ export const listComments = async (postId: string, offset, limit) => {
     limit: limit || 100,
     order: [["createdAt", "DESC"]],
     raw: true,
-    // include: [
-    //   {
-    //     model: User,
-    //     attributes: ["id", "username", "email", "avatar"],
-    //   },
-    // ],
+    logging: true,
   });
 
   const attachedUser = await Promise.all(
@@ -72,7 +67,6 @@ export const listComments = async (postId: string, offset, limit) => {
       return { ...comment, user };
     })
   );
-
   return attachedUser;
 };
 

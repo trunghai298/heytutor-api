@@ -8,7 +8,8 @@ import { map } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
 import Student from "../models/student.model";
-import BookmarkServices from "./bookmark";
+import UserPost from "../models/user-post.model";
+import Register from "../models/register.model";
 
 /**
  * To create a new post
@@ -28,49 +29,6 @@ const create = async (payload) => {
       field: "postId",
       message: "Failed to create this post.",
     });
-  }
-};
-
-/**
- * To update a new post
- */
-
-const likePost = async (payload, ctx) => {
-  const { postId } = payload;
-  const { user } = ctx;
-
-  const transaction = await MySQLClient.transaction();
-  let params = null;
-  try {
-    const post = await Post.findOne({ where: { id: postId }, raw: true });
-    if (post.isLiked) {
-      params = {
-        isLiked: false,
-        likeCount: post.likeCount - 1,
-        likedBy: JSON.stringify(
-          JSON.parse(post.likedBy).filter((userId) => userId !== user.id)
-        ),
-      };
-    } else {
-      params = {
-        isLiked: true,
-        likeCount: post.likeCount + 1,
-        likedBy: post.likedBy
-          ? JSON.stringify([...JSON.parse(post.likedBy), user.id])
-          : JSON.stringify([user.id]),
-      };
-    }
-
-    await Post.update({ ...params }, { where: { id: postId }, transaction });
-    await transaction.commit();
-    const postUpdated = await Post.findOne({
-      where: { id: postId },
-      raw: true,
-    });
-
-    return postUpdated;
-  } catch (error) {
-    console.log(error);
   }
 };
 
@@ -147,102 +105,6 @@ const deletePost = async (postId: string) => {
   }
 };
 
-/**
- * To list post for specific user
- */
-const listPostByUser = async (limit, offset, ctx) => {
-  const { user } = ctx;
-  const { firstTimeLogin, semester, major, subjects } = user;
-  const subjectsJSON = JSON.parse(subjects);
-
-  try {
-    let whereCondition = {};
-    const titleCondition = subjectsJSON.map((s) => {
-      const title = {
-        title: {
-          [Op.like]: `%${s}%`,
-        },
-      };
-      return title;
-    });
-
-    const hashtagCondition = subjectsJSON.map((s) => {
-      const title = {
-        hashtag: {
-          [Op.like]: `%${s}%`,
-        },
-      };
-      return title;
-    });
-
-    const contentCondition = subjectsJSON.map((s) => {
-      const title = {
-        content: {
-          [Op.like]: `%${s}%`,
-        },
-      };
-      return title;
-    });
-
-    if (firstTimeLogin) {
-      whereCondition = {
-        [Op.or]: [...hashtagCondition, ...titleCondition, ...contentCondition],
-        isResolved: false,
-      };
-    } else {
-      whereCondition = {
-        isResolved: false,
-      };
-    }
-
-    const listPost = await Post.findAndCountAll({
-      limit: parseInt(limit, 10) || 100,
-      offset: parseInt(offset, 10) || 0,
-      order: [["createdAt", "DESC"]],
-      // logging: true,
-      raw: true,
-      where: { ...whereCondition },
-    });
-
-    const bookmarkedPost = await BookmarkServices.listBookmark(ctx);
-
-    const attachedUser = await Promise.all(
-      map(listPost.rows, async (post) => {
-        const userDb = await User.findOne({
-          where: { id: post.userId },
-          raw: true,
-          attributes: {
-            exclude: ["password"],
-          },
-        });
-
-        const studentData = await Student.findOne({
-          where: { stdId: userDb.stdId },
-          raw: true,
-        });
-
-        return { ...post, user: { ...userDb, ...studentData } };
-      })
-    );
-
-    // const sortListPostByMajor = sortBy(attachedUser, (post) => {
-    //   return post.user.major === major;
-    // }).reverse();
-
-    const concatBookmarkPost = uniqBy(
-      attachedUser.concat(bookmarkedPost),
-      "id"
-    );
-
-    return concatBookmarkPost;
-  } catch (error) {
-    throw new BadRequestError({
-      field: "postId",
-      message: "Failed to list post.",
-    });
-  }
-};
-
 const listAllPost = async (limit, offset) => {
   try {
     const listPost = await Post.findAndCountAll({
@@ -288,17 +150,6 @@ const listPostByUserId = async (userId: string, limit, offset) => {
       raw: true,
     });
 
-    // const attachedUser = await Promise.all(
-    //   map(listPost.rows, async (post) => {
-    //     const user = await User.findOne({
-    //       where: { id: post.userId },
-    //       raw: true,
-    //     });
-
-    //     return { ...post, user };
-    //   })
-    // );
-
     return listPost;
   } catch (error) {
     throw new BadRequestError({
@@ -311,11 +162,11 @@ const listPostByUserId = async (userId: string, limit, offset) => {
 /**
  * Count people comment in one post
  */
-const countPeopleCmtOfPost = async (_postId: double) => {
+const countPeopleCmtOfPost = async (postId) => {
   try {
     const listUsers = await Comment.findAll({
       where: {
-        postId: _postId,
+        postId,
       },
       attributes: ["userId"],
       group: ["userId"],
@@ -330,17 +181,114 @@ const countPeopleCmtOfPost = async (_postId: double) => {
   }
 };
 
-const getListPostByUser = async (filter, limit, offset) => {};
+const countPeopleRegisterOfPost = async (postId) => {
+  try {
+    const listUsers = await Register.findAll({
+      where: {
+        postId,
+      },
+      attributes: ["userId"],
+      group: ["userId"],
+      raw: true,
+    });
+    return listUsers;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post has no register.",
+    });
+  }
+};
+
+const countPeopleSupporterOfPost = async (postId) => {
+  try {
+    const listUsers = await UserPost.findAll({
+      where: {
+        postId,
+      },
+      attributes: ["userId"],
+      group: ["userId"],
+      raw: true,
+    });
+    return listUsers;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post has no supporter.",
+    });
+  }
+};
+
+const postDetailByPostId = async (postId) => {
+  try {
+    const postDetail = await UserPost.findAll({
+      where: { postId },
+      include: [Post],
+      raw: true,
+      attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
+    });
+    return postDetail;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Failed to list post.",
+    });
+  }
+};
+
+const getAllDetailsByPostId = async (postId) => {
+  try {
+    const [commentCount, pplRegisterCount, pplSupportCount, postDetailById] =
+      await Promise.all([
+        countPeopleCmtOfPost(postId),
+        countPeopleRegisterOfPost(postId),
+        countPeopleSupporterOfPost(postId),
+        postDetailByPostId(postId),
+      ]);
+    return {
+      commentCount,
+      pplRegisterCount,
+      pplSupportCount,
+      postDetailById,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
+    });
+  }
+};
+
+const getListPostByFilter = async (filter, limit, offset) => {
+  Post.hasMany(UserPost, { foreignKey: "id" });
+  UserPost.belongsTo(Post, { foreignKey: "postId" });
+
+  try {
+    const listPost = await UserPost.findAndCountAll({
+      where: { ...filter },
+      include: [Post],
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+      order: [["createdAt", "DESC"]],
+      raw: true,
+      attributes: { exclude: ["Post.id", "Post.userId"] },
+    });
+    return listPost;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "filter",
+      message: "Filter input wrong.",
+    });
+  }
+};
 
 export default {
-  likePost,
   listPostByUserId,
-  listPostByUser,
   listAllPost,
   create,
   update,
   edit,
   deletePost,
-  countPeopleCmtOfPost,
-  getListPostByUser,
+  getListPostByFilter,
+  getAllDetailsByPostId,
 };

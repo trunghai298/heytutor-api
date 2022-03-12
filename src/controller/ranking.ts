@@ -1,4 +1,4 @@
-import RankingServices from "../services/ranking";
+import RankingServices from "../services/ranking.service";
 
 const getRanking = (req, res, next) => {
   RankingServices.getUserRank(req.body)

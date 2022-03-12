@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
+import UserPost from "./user-post.model";
 
 interface PostInstance extends Model {
   id: number;
@@ -7,12 +8,8 @@ interface PostInstance extends Model {
   title: string;
   content: string;
   hashtag: string;
-  price: string;
-  isLiked: boolean;
-  likedBy: string;
-  likeCount: number;
   images: string;
-  isPinned: boolean;
+  isEdited: boolean;
   isSaveDraft: boolean;
   createdAt: Date;
   updatedAt: Date;
@@ -40,21 +37,6 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   hashtag: {
     type: DataTypes.STRING,
   },
-  price: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  isLiked: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-  likedBy: {
-    type: DataTypes.STRING,
-  },
-  likeCount: {
-    type: DataTypes.INTEGER.UNSIGNED,
-    defaultValue: 0,
-  },
   isEdited: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
@@ -74,5 +56,8 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
+
+Post.hasMany(UserPost, { foreignKey: "id" });
+UserPost.belongsTo(Post, { foreignKey: "postId" });
 
 export default Post;

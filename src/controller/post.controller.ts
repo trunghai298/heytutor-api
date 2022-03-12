@@ -12,12 +12,6 @@ const update = (req, res, next) => {
     .catch(next);
 };
 
-const listByUserRole = (req, res, next) => {
-  PostServices.listPostByUser(req.query.limit, req.query.offset, req.ctx)
-    .then((posts) => res.json(posts))
-    .catch(next);
-};
-
 const listAllPost = (req, res, next) => {
   PostServices.listAllPost(req.query.limit, req.query.offset)
     .then((posts) => res.json(posts))
@@ -30,31 +24,9 @@ const edit = (req, res, next) => {
     .catch(next);
 };
 
-const likePost = (req, res, next) => {
-  PostServices.likePost(req.body, req.ctx)
-    .then((post) => res.json(post))
-    .catch(next);
-};
-
 const deletePost = (req, res, next) => {
   PostServices.deletePost(req.params.postId)
     .then((post) => res.json(post))
-    .catch(next);
-};
-
-const numberPplCommentedInPost = (req, res, next) => {
-  PostServices.countPeopleCmtOfPost(req.params.postId)
-    .then((comment) => res.json(comment))
-    .catch(next);
-};
-
-const requestsInfoByUser = (req, res, next) => {
-  PostServices.getListPostByUser(
-    req.params.filter,
-    req.params.limit,
-    req.params.offset
-  )
-    .then((request) => res.json(request))
     .catch(next);
 };
 
@@ -68,15 +40,26 @@ const listPostByUserId = (req, res, next) => {
     .catch(next);
 };
 
+const getListPostByFilter = (req, res, next) => {
+  PostServices.getListPostByFilter(req.body.filter, req.body.limit, req.body.offset)
+  .then((posts) => res.json(posts))
+  .catch(next);
+}
+
+const listPostDetailByPostId = (req, res, next) => {
+  PostServices.getAllDetailsByPostId(req.params.postId,)
+  .then((posts) => res.json(posts))
+  .catch(next);
+}
+
+
 export default {
-  likePost,
   listPostByUserId,
-  listByUserRole,
   listAllPost,
   create,
   update,
   edit,
   deletePost,
-  numberPplCommentedInPost,
-  requestsInfoByUser,
+  getListPostByFilter,
+  listPostDetailByPostId,
 };

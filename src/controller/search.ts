@@ -1,4 +1,4 @@
-import SearchServices from "../services/search";
+import SearchServices from "../services/search.service";
 
 const search = (req, res, next) => {
   SearchServices.search(req.query.query)
