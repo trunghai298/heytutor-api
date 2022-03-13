@@ -4,7 +4,7 @@ import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { isEmpty, omit, pick } from "lodash";
-import { map } from "lodash";
+import { map, find, intersection } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
 import Student from "../models/student.model";
@@ -277,19 +277,76 @@ const postDetailByPostId = async (postId) => {
   }
 };
 
-const getListPostByFilter = async (filter, limit, offset) => {
+const createFilters = (userId, filters) => {
+  const where = {};
+  where["userId"] = userId;
+  map(filters, (filter) => {
+    if (
+      ["isPending", "isActive", "isDone", "isConfirmed"].includes(filter.type)
+    ) {
+      where[filter.type] = filter.value;
+    }
+    if (filter.type === "eventId") {
+      where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "supporterId") {
+      where["supporterId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "registerId") {
+      where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+  });
+
+  return where;
+};
+
+const getListPostByFilter = async (params, ctx) => {
+  const { filters, limit, offset } = params;
+  const userId = ctx?.user?.id || 2;
+
   try {
     const listPost = await UserPost.findAndCountAll({
-      where: { ...filter },
+      where: createFilters(userId, filters),
       include: [Post],
       limit: parseInt(limit, 10) || 100,
       offset: parseInt(offset, 10) || 0,
       order: [["createdAt", "DESC"]],
       raw: true,
-      attributes: { exclude: ["Post.id", "Post.userId"] },
     });
-    return listPost;
+
+    const beautifyRow = map(listPost.rows, (row) => {
+      delete row.createdAt;
+      delete row.updatedAt;
+      delete row["Post.id"];
+      delete row["Post.userId"];
+
+      return row;
+    });
+    const filterByHashtag = find(filters, (row) => row.type === "hashtag");
+    const filterByTime = find(filters, (row) => row.type === "time");
+
+    let finalResult = beautifyRow;
+
+    if (filterByHashtag) {
+      finalResult = map(finalResult, (row) => {
+        const intersectionHashtag = intersection(
+          JSON.parse(row["Post.hashtag"]),
+          filterByHashtag.value
+        );
+        if (intersectionHashtag.length > 0) {
+          return row;
+        } else {
+          return [];
+        }
+      });
+    }
+
+    if (filterByTime) {
+    }
+
+    return finalResult;
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "filter",
       message: "Filter input wrong.",

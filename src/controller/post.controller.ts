@@ -41,17 +41,16 @@ const listPostByUserId = (req, res, next) => {
 };
 
 const getListPostByFilter = (req, res, next) => {
-  PostServices.getListPostByFilter(req.body.filter, req.body.limit, req.body.offset)
-  .then((posts) => res.json(posts))
-  .catch(next);
-}
+  PostServices.getListPostByFilter(req.body, req.ctx)
+    .then((posts) => res.json(posts))
+    .catch(next);
+};
 
 const listPostDetailByPostId = (req, res, next) => {
-  PostServices.getAllDetailsByPostId(req.params.postId,)
-  .then((posts) => res.json(posts))
-  .catch(next);
-}
-
+  PostServices.getAllDetailsByPostId(req.params.postId)
+    .then((posts) => res.json(posts))
+    .catch(next);
+};
 
 export default {
   listPostByUserId,
