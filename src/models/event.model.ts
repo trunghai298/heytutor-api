@@ -25,7 +25,7 @@ const Event = MySQLClient.define<EventInstance>("Event", {
     type: DataTypes.STRING,
   },
   description: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   createdAt: {
     type: DataTypes.DATE,
