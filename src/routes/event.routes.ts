@@ -5,8 +5,7 @@ export default (app) => {
     .post("/event", EventController.create)
     .put("/event/:id", EventController.edit)
     .delete("/event/:id", EventController.deleteEvent)
-    .get("/geteventpost/:eventId", EventController.getEventPost)
-    .get("/geteventuser/:eventId", EventController.getEventUser)
+    .get("/get-event-post/:eventId", EventController.getEventPost)
     .get("/get-event-stats/:eventId", EventController.getEventStats)
-    .get("/get-list-event-of-user/:userId", EventController.getEventByUser)
+    .get("/get-list-event-of-user/:userId", EventController.getEventByUser);
 };
