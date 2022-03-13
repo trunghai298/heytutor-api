@@ -73,7 +73,7 @@ const deleteEvent = async (eventId: string) => {
 const getEventStats = async (eventId) => {
   try {
     const [listEventPost, listEventUser, listEventDetail] = await Promise.all([
-      getEventPost(eventId),
+      getNumberPostOfEvent(eventId),
       getEventUser(eventId),
       getEventDetail(eventId),
     ]);
@@ -90,7 +90,7 @@ const getEventStats = async (eventId) => {
   }
 };
 
-const getEventPost = async (eventId) => {
+const getNumberPostOfEvent = async (eventId) => {
   try {
     const numberOfPost = await UserPost.count({
       where: {
@@ -178,8 +178,10 @@ const getPostOfEvent = async (eventId) => {
   }
 };
 
-const listEventByUser = async (userId) => {
+const listEventByUser = async (ctx) => {
   try {
+    const userId = ctx?.user?.id || 2;
+
     const listEvent = await UserEvent.findAll({
       where: {
         userId,
@@ -202,11 +204,38 @@ const listEventByUser = async (userId) => {
   }
 };
 
+// const getTotalUserOfEvent = async(eventId) => {
+//   try {
+//     const events = UserEvent.count({
+//       where: {
+//         eventId,
+//       },
+//     });
+//     return events;
+//   } catch (error) {
+//      throw new NotFoundError({
+//       field: "eventId",
+//       message: "Event is not found",
+//     });
+//   }
+// }
+
+// const getListEventByDuration = async(duration) => {
+//   try {
+//     const listEvent = await Event.findAll();
+//     map(listEvent, evt => {
+
+//     })
+//   } catch (error) {
+    
+//   }
+// }
+
 export default {
   create,
   edit,
   deleteEvent,
-  getEventPost,
+  getNumberPostOfEvent,
   getEventUser,
   getPostOfEvent,
   listEventByUser,

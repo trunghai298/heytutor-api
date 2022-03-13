@@ -18,8 +18,8 @@ const deleteEvent = (req, res, next) => {
     .catch(next);
 };
 
-const getEventPost = (req, res, next) => {
-  EventServices.getEventPost(req.params.eventId)
+const getNumberPostOfEvent = (req, res, next) => {
+  EventServices.getNumberPostOfEvent(req.params.eventId)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -38,7 +38,7 @@ const getEventStats = (req, res, next) => {
 };
 
 const getEventByUser = (req, res, next) => {
-  EventServices.listEventByUser(req.params.userId)
+  EventServices.listEventByUser(req.ctx)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -47,7 +47,7 @@ export default {
   create,
   edit,
   deleteEvent,
-  getEventPost,
+  getNumberPostOfEvent,
   getEventUser,
   getEventStats,
   getEventByUser
