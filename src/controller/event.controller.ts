@@ -24,7 +24,6 @@ const getNumberPostOfEvent = (req, res, next) => {
     .catch(next);
 };
 
-
 const getEventUser = (req, res, next) => {
   EventServices.getEventUser(req.params.eventId)
     .then((evt) => res.json(evt))
@@ -50,5 +49,5 @@ export default {
   getNumberPostOfEvent,
   getEventUser,
   getEventStats,
-  getEventByUser
+  getEventByUser,
 };
