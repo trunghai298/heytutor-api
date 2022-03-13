@@ -37,6 +37,12 @@ const getEventStats = (req, res, next) => {
     .catch(next);
 };
 
+const getEventByUser = (req, res, next) => {
+  EventServices.listEventByUser(req.params.userId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
@@ -44,4 +50,5 @@ export default {
   getEventPost,
   getEventUser,
   getEventStats,
+  getEventByUser
 };
