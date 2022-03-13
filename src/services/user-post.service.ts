@@ -231,50 +231,64 @@ const getPostStats = async (ctx) => {
 
 const updatePostStatus = async (post) => {
   const { postId, status } = post;
-  const transaction = await MySQLClient.transaction();
+  console.log(postId, status);
+
   try {
-    const userPost = await UserPost.findOne({ where: { postId } });
-    let updateStatus;
-    if (userPost.isActive != status) {
-      updateStatus = await UserPost.update(
+    if (status === "isActive") {
+      await UserPost.update(
         {
           isDone: 0,
           isActive: 1,
           isPending: 0,
         },
-        { where: { postId }, transaction },
+        { where: { postId }, logging: true }
       );
-    } else if (userPost.isDone != status) {
+    } else if (status === "isDone") {
+      await UserPost.update(
+        {
+           isDone: 1, 
+          isActive: 0, 
+          isPending: 0 
+        },
+        { where: { postId }, logging: true }
+      );
+    } else if (status === "isPending") {
       {
-        updateStatus = await UserPost.update(
-          {
-            isDone: 1,
-            isActive: 0,
-            isPending: 0,
-          },
-          { where: { postId }, transaction }
-        );
-      }
-    } else if (userPost.isPending != status) {
-      {
-        updateStatus = await UserPost.update(
+        await UserPost.update(
           {
             isDone: 0,
             isActive: 0,
             isPending: 1,
           },
-          { where: { postId }, transaction }
+          { where: { postId }, logging: true }
         );
       }
     }
-    return updateStatus;
+    return { status: "done" };
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "postId",
       message: "Post is not found",
     });
   }
 };
+
+// const getStatusOfPost = async (postId) => {
+//   try {
+//     const statusOfPost = await UserPost.findOne({
+//       where: {
+//         postId,
+//       },
+//     });
+//     return statusOfPost;
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "eventId",
+//       message: "Event is not found",
+//     });
+//   }
+// };
 
 export default {
   list,

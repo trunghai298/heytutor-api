@@ -122,10 +122,17 @@ const getEventUser = async (eventId) => {
       attributes: ["isRequestor"],
       group: ["isRequestor"],
     });
+    const numberOfUser = await UserEvent.count({
+      where: {
+        eventId,
+      },
+      group:["userId"],
+    })
    
     return {
       numberOfSP: numberOfSP.length,
       numberOfRq: numberOfRq.length,
+      numberOfUser: numberOfUser,
     }
     ;
   } catch (error) {
