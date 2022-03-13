@@ -1,6 +1,7 @@
-import { BadRequestError } from "../utils/errors";
+import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
+import MySQLClient from "../clients/mysql";
 
 /**
  * To create a new term
@@ -35,6 +36,7 @@ const getNbOfAllPost = async (type, userId) => {
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
 
     return res.length;
@@ -222,10 +224,60 @@ const getPostStats = async (ctx) => {
         nbOfPostOnEvent: nbOfPostRegisteredOnEvent,
       },
     };
-  } catch (error) {}
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const updatePostStatus = async (post) => {
+  const { postId, status } = post;
+  const transaction = await MySQLClient.transaction();
+  try {
+    const userPost = await UserPost.findOne({ where: { postId } });
+    let updateStatus;
+    if (userPost.isActive != status) {
+      updateStatus = await UserPost.update(
+        {
+          isDone: 0,
+          isActive: 1,
+          isPending: 0,
+        },
+        { where: { postId }, transaction }
+      );
+    } else if (userPost.isDone != status) {
+      {
+        updateStatus = await UserPost.update(
+          {
+            isDone: 1,
+            isActive: 0,
+            isPending: 0,
+          },
+          { where: { postId }, transaction }
+        );
+      }
+    } else if (userPost.isPending != status) {
+      {
+        updateStatus = await UserPost.update(
+          {
+            isDone: 0,
+            isActive: 0,
+            isPending: 1,
+          },
+          { where: { postId }, transaction }
+        );
+      }
+    }
+    return updateStatus;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
+    });
+  }
 };
 
 export default {
   list,
   getPostStats,
+  updatePostStatus,
 };

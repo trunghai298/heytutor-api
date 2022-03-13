@@ -6,6 +6,13 @@ const getPostStats = (req, res, next) => {
     .catch(next);
 };
 
+const updatePostStatus = (req, res, next) => {
+  UserPostServices.updatePostStatus(req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   getPostStats,
+  updatePostStatus,
 };
