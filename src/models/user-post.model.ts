@@ -1,5 +1,6 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
+import User from "./user.model";
 
 interface UserPostInstance extends Model {
   id: number;
@@ -27,31 +28,42 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
   },
   supporterId: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: null,
+  },
+  registerId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: null,
   },
   eventId: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: null,
   },
   conversationId: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: null,
   },
   postId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isPending: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   isActive: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   isDone: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   isConfirmed: {
     type: DataTypes.INTEGER.UNSIGNED,
+    defaultValue: 0,
   },
   isPinned: {
     type: DataTypes.BOOLEAN,
-    defaultValue: false,
+    defaultValue: 0,
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -64,5 +76,8 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
+
+UserPost.belongsTo(User, { foreignKey: "userId" });
+User.hasMany(UserPost, { foreignKey: "id" });
 
 export default UserPost;

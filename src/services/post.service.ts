@@ -9,7 +9,6 @@ import User from "../models/user.model";
 import { Op } from "sequelize";
 import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
-import Register from "../models/register.model";
 
 /**
  * To create a new post
@@ -183,15 +182,31 @@ const countPeopleCmtOfPost = async (postId) => {
 
 const countPeopleRegisterOfPost = async (postId) => {
   try {
-    const listUsers = await Register.findAll({
+    const listUsers = await UserPost.findAll({
       where: {
         postId,
+        supporterId: {
+          [Op.eq]: null,
+        },
+        registerId: {
+          [Op.ne]: null,
+        },
       },
       attributes: ["userId"],
       group: ["userId"],
       raw: true,
     });
-    return listUsers;
+
+    const matchUserData = await Promise.all(
+      map(listUsers, async (user) => {
+        const userData = await User.findOne({
+          where: { id: user.userId },
+          raw: true,
+        });
+        return userData;
+      })
+    );
+    return matchUserData;
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -202,16 +217,30 @@ const countPeopleRegisterOfPost = async (postId) => {
 
 const countPeopleSupporterOfPost = async (postId) => {
   try {
-    const listUsers = await UserPost.findAll({
+    const supporters = await UserPost.findAll({
       where: {
         postId,
+        supporterId: {
+          [Op.ne]: null,
+        },
       },
       attributes: ["userId"],
       group: ["userId"],
       raw: true,
     });
-    return listUsers;
+
+    const matchUserData = await Promise.all(
+      map(supporters, async (user) => {
+        const userData = await User.findOne({
+          where: { id: user.userId },
+          raw: true,
+        });
+        return userData;
+      })
+    );
+    return matchUserData;
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "postId",
       message: "Post has no supporter.",
@@ -221,7 +250,7 @@ const countPeopleSupporterOfPost = async (postId) => {
 
 const postDetailByPostId = async (postId) => {
   try {
-    const postDetail = await UserPost.findAll({
+    const postDetail = await UserPost.findOne({
       where: { postId },
       include: [Post],
       raw: true,
@@ -236,33 +265,7 @@ const postDetailByPostId = async (postId) => {
   }
 };
 
-const getAllDetailsByPostId = async (postId) => {
-  try {
-    const [commentCount, pplRegisterCount, pplSupportCount, postDetailById] =
-      await Promise.all([
-        countPeopleCmtOfPost(postId),
-        countPeopleRegisterOfPost(postId),
-        countPeopleSupporterOfPost(postId),
-        postDetailByPostId(postId),
-      ]);
-    return {
-      commentCount,
-      pplRegisterCount,
-      pplSupportCount,
-      postDetailById,
-    };
-  } catch (error) {
-    throw new NotFoundError({
-      field: "postId",
-      message: "Post is not found",
-    });
-  }
-};
-
 const getListPostByFilter = async (filter, limit, offset) => {
-  Post.hasMany(UserPost, { foreignKey: "id" });
-  UserPost.belongsTo(Post, { foreignKey: "postId" });
-
   try {
     const listPost = await UserPost.findAndCountAll({
       where: { ...filter },
@@ -278,6 +281,29 @@ const getListPostByFilter = async (filter, limit, offset) => {
     throw new NotFoundError({
       field: "filter",
       message: "Filter input wrong.",
+    });
+  }
+};
+
+const getAllDetailsByPostId = async (postId) => {
+  try {
+    const [commentCount, registers, supporters, postDetails] =
+      await Promise.all([
+        countPeopleCmtOfPost(postId),
+        countPeopleRegisterOfPost(postId),
+        countPeopleSupporterOfPost(postId),
+        postDetailByPostId(postId),
+      ]);
+    return {
+      commentCount,
+      registers,
+      supporters,
+      postDetails,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
     });
   }
 };
