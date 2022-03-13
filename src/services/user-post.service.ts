@@ -242,7 +242,7 @@ const updatePostStatus = async (post) => {
           isActive: 1,
           isPending: 0,
         },
-        { where: { postId }, transaction }
+        { where: { postId }, transaction },
       );
     } else if (userPost.isDone != status) {
       {

@@ -178,8 +178,10 @@ const getPostOfEvent = async (eventId) => {
   }
 };
 
-const listEventByUser = async (userId) => {
+const listEventByUser = async (ctx) => {
   try {
+    const userId = ctx?.user?.id || 2;
+
     const listEvent = await UserEvent.findAll({
       where: {
         userId,

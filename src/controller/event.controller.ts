@@ -38,7 +38,7 @@ const getEventStats = (req, res, next) => {
 };
 
 const getEventByUser = (req, res, next) => {
-  EventServices.listEventByUser(req.params.userId)
+  EventServices.listEventByUser(req.ctx)
     .then((evt) => res.json(evt))
     .catch(next);
 };
