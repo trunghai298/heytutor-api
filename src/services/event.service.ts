@@ -122,19 +122,18 @@ const getEventUser = async (eventId) => {
       attributes: ["isRequestor"],
       group: ["isRequestor"],
     });
-    const numberOfUser = await UserEvent.count({
+    const numberOfUser = await UserEvent.findAll({
       where: {
         eventId,
       },
-      group:["userId"],
-    })
-   
+      group: ["userId"],
+    });
+
     return {
       numberOfSP: numberOfSP.length,
       numberOfRq: numberOfRq.length,
-      numberOfUser: numberOfUser,
-    }
-    ;
+      numberOfUser: numberOfUser.length,
+    };
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -150,10 +149,10 @@ const getEventDetail = async (id) => {
         id,
       },
     });
-    return {eventDetail};
+    return { eventDetail };
   } catch (error) {
     console.log(error);
-    
+
     throw new NotFoundError({
       field: "eventId",
       message: "Event is not found",
@@ -196,12 +195,12 @@ const listEventByUser = async (ctx) => {
       include: [Event],
       attributes: ["eventId"],
       raw: true,
-      logging:true
+      logging: true,
     });
-    const res = map(listEvent, event => {
-      const pickFields = omit(event, [ "eventId", "createdAt", "updatedAt" ]);
+    const res = map(listEvent, (event) => {
+      const pickFields = omit(event, ["eventId", "createdAt", "updatedAt"]);
       return pickFields;
-    })
+    });
     return res;
   } catch (error) {
     throw new NotFoundError({
@@ -234,7 +233,7 @@ const listEventByUser = async (ctx) => {
 
 //     })
 //   } catch (error) {
-    
+
 //   }
 // }
 
