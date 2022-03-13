@@ -31,10 +31,17 @@ const getEventUser = (req, res, next) => {
     .catch(next);
 };
 
+const getEventStats = (req, res, next) => {
+  EventServices.getEventStats(req.params.eventId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
   deleteEvent,
   getEventPost,
   getEventUser,
+  getEventStats,
 };

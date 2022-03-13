@@ -108,21 +108,26 @@ const getEventPost = async (eventId) => {
 
 const getEventUser = async (eventId) => {
   try {
-    const numberOfSP = await UserEvent.count({
+    const numberOfSP = await UserEvent.findAll({
       where: {
         eventId,
       },
+      attributes: ["isSupporter"],
       group: ["isSupporter"],
     });
-    const numberOfRq = await UserEvent.findAndCountAll({
+    const numberOfRq = await UserEvent.findAll({
       where: {
         eventId,
       },
+      attributes: ["isRequestor"],
       group: ["isRequestor"],
     });
-    const numOfSP = JSON.stringify(numberOfSP);
-    let data: {};
-    return data;
+   
+    return {
+      numberOfSP: numberOfSP.length,
+      numberOfRq: numberOfRq.length,
+    }
+    ;
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -131,15 +136,17 @@ const getEventUser = async (eventId) => {
   }
 };
 
-const getEventDetail = async (eventId) => {
+const getEventDetail = async (id) => {
   try {
-    const eventDetail = await Event.count({
+    const eventDetail = await Event.findAll({
       where: {
-        eventId,
+        id,
       },
     });
-    return eventDetail;
+    return {eventDetail};
   } catch (error) {
+    console.log(error);
+    
     throw new NotFoundError({
       field: "eventId",
       message: "Event is not found",
@@ -203,4 +210,5 @@ export default {
   getEventUser,
   getPostOfEvent,
   listEventByUser,
+  getEventStats,
 };
