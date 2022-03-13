@@ -169,7 +169,10 @@ const getNbOfOnEvent = async (type, userId) => {
   } catch (error) {}
 };
 
-const getPostStats = async (userId) => {
+const getPostStats = async (ctx) => {
+  const { user } = ctx;
+  const userId = user.id || 2;
+
   try {
     const nbOfAllPost = await getNbOfAllPost("myRequest", userId);
     const nbOfAllPostRegistered = await getNbOfAllPost("registered", userId);
