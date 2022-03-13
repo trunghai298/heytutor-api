@@ -170,8 +170,8 @@ const getNbOfOnEvent = async (type, userId) => {
 };
 
 const getPostStats = async (ctx) => {
-  const { user } = ctx;
-  const userId = user.id || 2;
+  // const { user } = ctx;
+  const userId = ctx?.user?.id || 2;
 
   try {
     const nbOfAllPost = await getNbOfAllPost("myRequest", userId);
