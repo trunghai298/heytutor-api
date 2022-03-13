@@ -3,7 +3,7 @@ import Comment from "../models/comment.model";
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-import { isEmpty, sortBy, uniqBy } from "lodash";
+import { isEmpty, omit, pick } from "lodash";
 import { map } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
@@ -167,11 +167,20 @@ const countPeopleCmtOfPost = async (postId) => {
       where: {
         postId,
       },
-      attributes: ["userId"],
-      group: ["userId"],
+      include: [User],
       raw: true,
     });
-    return listUsers;
+    const res = map(listUsers, (user) => {
+      const pickFields = pick(user, [
+        "userId",
+        "User.name",
+        "User.email",
+        "rollComment",
+        "comment",
+      ]);
+      return pickFields;
+    });
+    return res;
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -192,15 +201,13 @@ const countPeopleRegisterOfPost = async (postId) => {
           [Op.ne]: null,
         },
       },
-      attributes: ["userId"],
-      group: ["userId"],
       raw: true,
     });
 
     const matchUserData = await Promise.all(
       map(listUsers, async (user) => {
         const userData = await User.findOne({
-          where: { id: user.userId },
+          where: { id: user.registerId },
           raw: true,
         });
         return userData;
@@ -224,15 +231,13 @@ const countPeopleSupporterOfPost = async (postId) => {
           [Op.ne]: null,
         },
       },
-      attributes: ["userId"],
-      group: ["userId"],
       raw: true,
     });
 
     const matchUserData = await Promise.all(
       map(supporters, async (user) => {
         const userData = await User.findOne({
-          where: { id: user.userId },
+          where: { id: user.supporterId },
           raw: true,
         });
         return userData;
@@ -256,7 +261,14 @@ const postDetailByPostId = async (postId) => {
       raw: true,
       attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
     });
-    return postDetail;
+    const res = omit(postDetail, [
+      "id",
+      "postId",
+      "email",
+      "supporterId",
+      "registerId",
+    ]);
+    return res;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
