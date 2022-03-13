@@ -1,4 +1,3 @@
-import eventController from "../controller/event.controller";
 import EventController from "../controller/event.controller";
 
 export default (app) => {
@@ -8,5 +7,6 @@ export default (app) => {
     .delete("/event/:id", EventController.deleteEvent)
     .get("/geteventpost/:eventId", EventController.getEventPost)
     .get("/geteventuser/:eventId", EventController.getEventUser)
-    .get("/get-event-stats/:eventId", eventController.getEventStats)
+    .get("/get-event-stats/:eventId", EventController.getEventStats)
+    .get("/get-list-event-of-user/:userId", EventController.getEventByUser)
 };

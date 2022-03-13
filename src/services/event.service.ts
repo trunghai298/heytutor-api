@@ -186,11 +186,11 @@ const listEventByUser = async (userId) => {
       },
       include: [Event],
       attributes: ["eventId"],
-      group: ["eventId"],
       raw: true,
+      logging:true
     });
     const res = map(listEvent, event => {
-      const pickFields = omit(event, [ "eventId", "isSupporter", "isRequestor", "createdAt", "updatedAt" ]);
+      const pickFields = omit(event, [ "eventId", "createdAt", "updatedAt" ]);
       return pickFields;
     })
     return res;
