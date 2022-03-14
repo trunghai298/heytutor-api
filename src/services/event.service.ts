@@ -143,7 +143,7 @@ const getEventUser = async (eventId) => {
 
 const getEventDetail = async (id) => {
   try {
-    const eventDetail = await Event.findAll({
+    const eventDetail = await Event.findOne({
       where: {
         id,
       },
