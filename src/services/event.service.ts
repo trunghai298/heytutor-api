@@ -6,7 +6,6 @@ import UserEvent from "../models/user-event.model";
 import { map } from "lodash";
 import { isEmpty, omit, pick } from "lodash";
 import Post from "../models/post.model";
-import User from "../models/user.model";
 
 /**
  * To create a new event
@@ -84,11 +83,9 @@ const getEventStats = async (eventId) => {
       listEventDetail,
     };
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
-      field: "eventId",
-      message: "Event is not found",
+      field: "postId",
+      message: "Post is not found",
     });
   }
 };
@@ -111,29 +108,17 @@ const getNumberPostOfEvent = async (eventId) => {
 
 const getEventUser = async (eventId) => {
   try {
-    const listSupporter = await UserEvent.findAll({
+    const numberOfSP = await UserEvent.findAll({
       where: {
         eventId,
         isSupporter: 1,
       },
-      include: [User],
-      raw: true,
     });
-    const supportList = map(listSupporter, (user) => {
-      const pickFields = pick(user, ["userId", "User.name", "User.email"]);
-      return pickFields;
-    });
-    const listRequestor = await UserEvent.findAll({
+    const numberOfRq = await UserEvent.findAll({
       where: {
         eventId,
         isRequestor: 1,
       },
-      include: [User],
-      raw: true,
-    });
-    const requestorList = map(listRequestor, (user) => {
-      const pickFields = pick(user, ["userId", "User.name", "User.email"]);
-      return pickFields;
     });
     const numberOfUser = await UserEvent.findAll({
       where: {
@@ -143,8 +128,8 @@ const getEventUser = async (eventId) => {
     });
 
     return {
-      listUserSupporter: supportList,
-      listUserRequestor: requestorList,
+      numberOfSP: numberOfSP.length,
+      numberOfRq: numberOfRq.length,
       numberOfUser: numberOfUser.length,
     };
   } catch (error) {
