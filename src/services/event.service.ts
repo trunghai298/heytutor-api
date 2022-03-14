@@ -6,6 +6,7 @@ import UserEvent from "../models/user-event.model";
 import { map } from "lodash";
 import { isEmpty, omit, pick } from "lodash";
 import Post from "../models/post.model";
+import User from "../models/user.model";
 
 /**
  * To create a new event
@@ -142,12 +143,12 @@ const getEventUser = async (eventId) => {
 
 const getEventDetail = async (id) => {
   try {
-    const eventDetail = await Event.findAll({
+    const eventDetail = await Event.findOne({
       where: {
         id,
       },
     });
-    return { eventDetail };
+    return eventDetail;
   } catch (error) {
     console.log(error);
 
@@ -177,7 +178,7 @@ const getPostOfEvent = async (eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event has no supporter.",
+      message: "Event has no post.",
     });
   }
 };
@@ -204,6 +205,53 @@ const listEventByUser = async (ctx) => {
     throw new NotFoundError({
       field: "userId",
       message: "User is not found",
+    });
+  }
+};
+
+const getEventUserPostDetail = async (eventId) => {
+  try {
+
+    const listSupporter = await UserEvent.findAll({
+      where: {
+        eventId,
+        isSupporter: 1,
+      },
+      include: [User],
+      raw: true,
+    });
+    const supportList = map(listSupporter, (user) => {
+      const pickFields = pick(user, ["userId", "User.name", "User.email"]);
+      return pickFields;
+    });
+
+    const listRequestor = await UserEvent.findAll({
+      where: {
+        eventId,
+        isRequestor: 1,
+      },
+      include: [User],
+      raw: true,
+    });
+    const requestorList = map(listRequestor, (user) => {
+      const pickFields = pick(user, ["userId", "User.name", "User.email"]);
+      return pickFields;
+    });
+
+    const eventPosts = await getPostOfEvent(eventId);
+    const eventDetail = await getEventDetail(eventId);
+    return {
+      eventContent: eventDetail,
+      listUserSupporter: supportList,
+      listUserRequestor: requestorList,
+      listPostOfEvent: eventPosts,
+    };
+  } catch (error) {
+    console.log(error);
+
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
     });
   }
 };
@@ -244,4 +292,5 @@ export default {
   getPostOfEvent,
   listEventByUser,
   getEventStats,
+  getEventUserPostDetail,
 };
