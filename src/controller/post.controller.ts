@@ -41,7 +41,7 @@ const listPostByUserId = (req, res, next) => {
 };
 
 const getListPostByFilter = (req, res, next) => {
-  PostServices.getListPostByFilter(req.body, req.ctx)
+  PostServices.getListPostByFilter(req.query.filter, req.ctx)
     .then((posts) => res.json(posts))
     .catch(next);
 };

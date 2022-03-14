@@ -3,7 +3,7 @@ import Comment from "../models/comment.model";
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
-import { isEmpty, omit, pick } from "lodash";
+import { isEmpty, omit, pick, compact } from "lodash";
 import { map, find, intersection } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
@@ -300,16 +300,16 @@ const createFilters = (userId, filters) => {
   return where;
 };
 
-const getListPostByFilter = async (params, ctx) => {
-  const { filters, limit, offset } = params;
+const getListPostByFilter = async (filters, ctx) => {
+  const filterObj = JSON.parse(filters)?.filters;
   const userId = ctx?.user?.id || 2;
 
   try {
     const listPost = await UserPost.findAndCountAll({
-      where: createFilters(userId, filters),
+      where: createFilters(userId, filterObj),
       include: [Post],
-      limit: parseInt(limit, 10) || 100,
-      offset: parseInt(offset, 10) || 0,
+      limit: 100,
+      offset: 0,
       order: [["createdAt", "DESC"]],
       raw: true,
     });
@@ -352,12 +352,11 @@ const getListPostByFilter = async (params, ctx) => {
 
       return row;
     });
-    const filterByHashtag = find(filters, (row) => row.type === "hashtag");
-    const filterByTime = find(filters, (row) => row.type === "time");
-
+    const filterByHashtag = find(filterObj, (row) => row.type === "hashtag");
+    const filterByTime = find(filterObj, (row) => row.type === "time");
     let finalResult = beautifyRow;
 
-    if (filterByHashtag) {
+    if (filterByHashtag && filterByHashtag.value.length > 0) {
       finalResult = map(finalResult, (row) => {
         const intersectionHashtag = intersection(
           JSON.parse(row["Post.hashtag"]),
@@ -365,8 +364,6 @@ const getListPostByFilter = async (params, ctx) => {
         );
         if (intersectionHashtag.length > 0) {
           return row;
-        } else {
-          return [];
         }
       });
     }
@@ -374,7 +371,7 @@ const getListPostByFilter = async (params, ctx) => {
     if (filterByTime) {
     }
 
-    return finalResult;
+    return compact(finalResult);
   } catch (error) {
     console.log(error);
     throw new NotFoundError({
