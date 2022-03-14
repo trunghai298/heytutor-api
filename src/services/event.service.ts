@@ -111,16 +111,14 @@ const getEventUser = async (eventId) => {
     const numberOfSP = await UserEvent.findAll({
       where: {
         eventId,
+        isSupporter: 1,
       },
-      attributes: ["isSupporter"],
-      group: ["isSupporter"],
     });
     const numberOfRq = await UserEvent.findAll({
       where: {
         eventId,
+        isRequestor: 1,
       },
-      attributes: ["isRequestor"],
-      group: ["isRequestor"],
     });
     const numberOfUser = await UserEvent.findAll({
       where: {
