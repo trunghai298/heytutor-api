@@ -111,8 +111,6 @@ const getNumberPostOfEvent = async (eventId) => {
 
 const getEventUser = async (eventId) => {
   try {
-    User.hasMany(UserEvent, { foreignKey: "id" });
-    UserEvent.belongsTo(User, { foreignKey: "userId" });
     const listSupporter = await UserEvent.findAll({
       where: {
         eventId,

@@ -44,4 +44,7 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
 Event.hasMany(UserEvent, { foreignKey: "id" });
 UserEvent.belongsTo(Event, { foreignKey: "eventId" });
 
+User.hasMany(UserEvent, { foreignKey: "id" });
+UserEvent.belongsTo(User, { foreignKey: "userId" });
+
 export default UserEvent;
