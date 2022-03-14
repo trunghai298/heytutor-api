@@ -42,6 +42,12 @@ const getEventByUser = (req, res, next) => {
     .catch(next);
 };
 
+const getEventUserPostDetail = (req, res, next) => {
+  EventServices.getEventUserPostDetail(req.params.eventId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
@@ -50,4 +56,5 @@ export default {
   getEventUser,
   getEventStats,
   getEventByUser,
+  getEventUserPostDetail,
 };
