@@ -148,7 +148,7 @@ const getEventDetail = async (id) => {
         id,
       },
     });
-    return { eventDetail };
+    return eventDetail;
   } catch (error) {
     console.log(error);
 
@@ -211,7 +211,7 @@ const listEventByUser = async (ctx) => {
 
 const getEventUserPostDetail = async (eventId) => {
   try {
-    
+
     const listSupporter = await UserEvent.findAll({
       where: {
         eventId,
@@ -239,8 +239,9 @@ const getEventUserPostDetail = async (eventId) => {
     });
 
     const eventPosts = await getPostOfEvent(eventId);
-
+    const eventDetail = await getEventDetail(eventId);
     return {
+      eventContent: eventDetail,
       listUserSupporter: supportList,
       listUserRequestor: requestorList,
       listPostOfEvent: eventPosts,
