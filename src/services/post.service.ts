@@ -314,11 +314,41 @@ const getListPostByFilter = async (params, ctx) => {
       raw: true,
     });
 
-    const beautifyRow = map(listPost.rows, (row) => {
+    const attachedUser = await Promise.all(
+      map(listPost.rows, async (post) => {
+        const registerUsers = await Promise.all(
+          map(post.registerId, async (id) => {
+            const user = await User.findOne({
+              where: { id },
+              raw: true,
+              attributes: { exclude: ["password"] },
+            });
+            return user;
+          })
+        );
+
+        const supporterUsers = await Promise.all(
+          map(post.supporterId, async (id) => {
+            const user = await User.findOne({
+              where: { id },
+              raw: true,
+              attributes: { exclude: ["password"] },
+            });
+            return user;
+          })
+        );
+
+        return { ...post, registerUsers, supporterUsers };
+      })
+    );
+
+    const beautifyRow = map(attachedUser, (row) => {
       delete row.createdAt;
       delete row.updatedAt;
       delete row["Post.id"];
       delete row["Post.userId"];
+      delete row["registerId"];
+      delete row["supporterId"];
 
       return row;
     });
