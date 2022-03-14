@@ -321,7 +321,7 @@ const getListPostByFilter = async (params, ctx) => {
             const user = await User.findOne({
               where: { id },
               raw: true,
-              attributes: { exclude: ["password"] },
+              attributes: ["email", "name", "id", "stdId"],
             });
             return user;
           })
@@ -332,7 +332,7 @@ const getListPostByFilter = async (params, ctx) => {
             const user = await User.findOne({
               where: { id },
               raw: true,
-              attributes: { exclude: ["password"] },
+              attributes: ["email", "name", "id", "stdId"],
             });
             return user;
           })
