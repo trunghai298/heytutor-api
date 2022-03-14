@@ -286,7 +286,7 @@ const createFilters = (userId, filters) => {
     ) {
       where[filter.type] = filter.value;
     }
-    if (filter.type === "eventId") {
+    if (filter.type === "onEvent") {
       where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
     }
     if (filter.type === "supporterId") {
@@ -296,7 +296,7 @@ const createFilters = (userId, filters) => {
       where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
     }
   });
-
+  console.log(where);
   return where;
 };
 
