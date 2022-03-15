@@ -32,7 +32,7 @@ const deletePost = (req, res, next) => {
 
 const listPostByUserId = (req, res, next) => {
   PostServices.listPostByUserId(
-    req.params.userId,
+    req.ctx,
     req.query.limit,
     req.query.offset
   )
@@ -52,6 +52,12 @@ const listPostDetailByPostId = (req, res, next) => {
     .catch(next);
 };
 
+const getListHashtag = (req, res, next) => {
+  PostServices.getListHashtag(req.ctx)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   listPostByUserId,
   listAllPost,
@@ -61,4 +67,5 @@ export default {
   deletePost,
   getListPostByFilter,
   listPostDetailByPostId,
+  getListHashtag
 };

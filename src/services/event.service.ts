@@ -14,6 +14,7 @@ import User from "../models/user.model";
 const create = async (payload) => {
   try {
     const event = await Event.create(payload);
+
     return event;
   } catch (error) {
     throw new BadRequestError({
@@ -57,7 +58,7 @@ const edit = async (payload) => {
 /**
  * To delete an existed event
  */
-const deleteEvent = async (eventId: string) => {
+const deleteEvent = async (eventId) => {
   const transaction = await MySQLClient.transaction();
   try {
     await Event.destroy({ where: { id: eventId }, transaction });
@@ -141,11 +142,11 @@ const getEventUser = async (eventId) => {
   }
 };
 
-const getEventDetail = async (id) => {
+const getEventDetail = async (eventId) => {
   try {
     const eventDetail = await Event.findOne({
       where: {
-        id,
+        eventId,
       },
     });
     return eventDetail;
@@ -209,7 +210,30 @@ const listEventByUser = async (ctx) => {
   }
 };
 
-const getEventUserPostDetail = async (eventId) => {
+const getUserRoleInEvent = async (ctx, eventId) => {
+  try {
+    const userId = ctx?.user?.id || 2;
+    
+    const userRole = await UserPost.findOne({
+      where: {
+        userId,
+        eventId
+      }, 
+      attributes: [ "isSupporter", "isRequester" ],
+      logging: true,
+    })
+    return userRole;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+}
+
+
+
+const getEventUserPostDetail = async (ctx, eventId) => {
   try {
 
     const listSupporter = await UserEvent.findAll({
@@ -240,11 +264,13 @@ const getEventUserPostDetail = async (eventId) => {
 
     const eventPosts = await getPostOfEvent(eventId);
     const eventDetail = await getEventDetail(eventId);
+    const eventRole = await getUserRoleInEvent(ctx, eventId);
     return {
       eventContent: eventDetail,
       listUserSupporter: supportList,
       listUserRequestor: requestorList,
       listPostOfEvent: eventPosts,
+      userRoleInEvent: eventRole,
     };
   } catch (error) {
     console.log(error);
