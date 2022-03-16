@@ -9,6 +9,7 @@ import User from "../models/user.model";
 import { Op } from "sequelize";
 import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
+import Ranking from "../models/ranking.model";
 
 /**
  * To create a new post
@@ -139,8 +140,10 @@ const listAllPost = async (limit, offset) => {
   }
 };
 
-const listPostByUserId = async (userId: string, limit, offset) => {
+const listPostByUserId = async (ctx, limit, offset) => {
   try {
+    const userId = ctx?.user?.id || 2;
+
     const listPost = await Post.findAndCountAll({
       limit: parseInt(limit, 10) || 100,
       offset: parseInt(offset, 10) || 0,
@@ -234,16 +237,37 @@ const countPeopleSupporterOfPost = async (postId) => {
       raw: true,
     });
 
-    const matchUserData = await Promise.all(
+    const matchUserSupporter = await Promise.all(
       map(supporters, async (user) => {
         const userData = await User.findOne({
           where: { id: user.supporterId },
           raw: true,
         });
-        return userData;
+        return matchUserSupporter;
       })
     );
-    return matchUserData;
+
+    const matchUserRank = await Promise.all(
+      map(supporters, async (user) => {
+        const userData = await Ranking.findOne({
+          where: { userId: user.supporterId },
+          raw: true,
+        });
+        return matchUserRank;
+      })
+    );
+
+    let mapResult = new Map();
+
+    for (const supporter of matchUserSupporter) {
+      for (const rankInfo of matchUserRank) {
+        if (supporter.userId === rankInfo.userId) {
+          map.set(supporter, rankInfo.rankPoint);
+        }
+      }
+    }
+
+    return mapResult;
   } catch (error) {
     console.log(error);
     throw new NotFoundError({
@@ -404,6 +428,132 @@ const getAllDetailsByPostId = async (postId) => {
   }
 };
 
+const getListHashtag = async (ctx) => {
+  const userId = ctx?.user?.id || 2;
+
+  try {
+    const listHashtag = UserPost.findAndCountAll({
+      where: {
+        userId,
+        isDone: 0,
+      },
+      include: [Post],
+      group: ["Post.hashTag"],
+      raw: true,
+    });
+    return (await listHashtag).count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getListPostByFilterSupporter = async (params, ctx) => {
+  const { filters, limit, offset } = params;
+  const userId = ctx?.user?.id || 2;
+
+  try {
+    const listPost = await UserPost.findAndCountAll({
+      where: supportFilters(userId, filters),
+      include: [Post],
+      limit: parseInt(limit, 10) || 100,
+      offset: parseInt(offset, 10) || 0,
+      order: [["createdAt", "DESC"]],
+      raw: true,
+    });
+
+    const attachedUser = await Promise.all(
+      map(listPost.rows, async (post) => {
+        const registerUsers = await Promise.all(
+          map(post.registerId, async (id) => {
+            const user = await User.findOne({
+              where: { id },
+              raw: true,
+              attributes: ["email", "name", "id", "stdId"],
+            });
+            return user;
+          })
+        );
+
+        const supporterUsers = await Promise.all(
+          map(post.supporterId, async (id) => {
+            const user = await User.findOne({
+              where: { id },
+              raw: true,
+              attributes: ["email", "name", "id", "stdId"],
+            });
+            return user;
+          })
+        );
+
+        return { ...post, registerUsers, supporterUsers };
+      })
+    );
+
+    const beautifyRow = map(attachedUser, (row) => {
+      delete row.createdAt;
+      delete row.updatedAt;
+      delete row["Post.id"];
+      delete row["Post.userId"];
+      delete row["registerId"];
+      delete row["supporterId"];
+
+      return row;
+    });
+    const filterByHashtag = find(filters, (row) => row.type === "hashtag");
+    const filterByTime = find(filters, (row) => row.type === "time");
+
+    let finalResult = beautifyRow;
+
+    if (filterByHashtag) {
+      finalResult = map(finalResult, (row) => {
+        const intersectionHashtag = intersection(
+          JSON.parse(row["Post.hashtag"]),
+          filterByHashtag.value
+        );
+        if (intersectionHashtag.length > 0) {
+          return row;
+        } else {
+          return [];
+        }
+      });
+    }
+
+    if (filterByTime) {
+    }
+
+    return finalResult;
+  } catch (error) {
+    console.log(error);
+    throw new NotFoundError({
+      field: "filter",
+      message: "Filter input wrong.",
+    });
+  }
+};
+
+const supportFilters = (userId, filters) => {
+  const where = {};
+  where["isSupporter"] = userId;
+  map(filters, (filter) => {
+    if (
+      ["isPending", "isActive", "isDone", "isConfirmed"].includes(filter.type)
+    ) {
+      where[filter.type] = filter.value;
+    }
+    if (filter.type === "eventId") {
+      where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "supporterId") {
+      where["supporterId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "registerId") {
+      where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+  });
+
+  return where;
+};
+
 export default {
   listPostByUserId,
   listAllPost,
@@ -413,4 +563,5 @@ export default {
   deletePost,
   getListPostByFilter,
   getAllDetailsByPostId,
+  getListHashtag,
 };

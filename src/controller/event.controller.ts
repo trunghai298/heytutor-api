@@ -43,7 +43,13 @@ const getEventByUser = (req, res, next) => {
 };
 
 const getEventUserPostDetail = (req, res, next) => {
-  EventServices.getEventUserPostDetail(req.params.eventId)
+  EventServices.getEventUserPostDetail(req.ctx, req.params.eventId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+const getUserRoleInEvent = (req, res, next) => {
+  EventServices.getEventUserPostDetail(req.ctx, req.params.eventId)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -57,4 +63,5 @@ export default {
   getEventStats,
   getEventByUser,
   getEventUserPostDetail,
+  getUserRoleInEvent,
 };

@@ -7,4 +7,5 @@ export default (app) => {
     .delete("/post/:id", PostController.deletePost)
     .get("/get-list-post-by-filter", PostController.getListPostByFilter)
     .get("/get-postdetail-by-postid/:postId", PostController.listPostDetailByPostId)
-};
+    .get("/get-list-hashtag", PostController.getListHashtag)
+  };
