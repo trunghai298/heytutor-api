@@ -309,6 +309,56 @@ const getEventUserPostDetail = async (ctx, eventId) => {
 //   }
 // }
 
+const getEventShortTerm = async () => {
+  try {
+    const listEvent = Event.findAll({
+    });
+
+    let mapResult = [];
+
+    for(const event of await listEvent) {
+      const endDate = event.endAt.getTime();
+      const createDate = event.createdAt.getTime();
+
+      if(endDate - createDate < (1000 * 60 * 60 * 24 * 7)) {
+        mapResult.push(event);
+      }
+    }
+
+    return mapResult;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+} 
+
+const getEventLongTerm = async () => {
+  try {
+    const listEvent = Event.findAll({
+    });
+
+    let mapResult = [];
+
+    for(const event of await listEvent) {
+      const endDate = event.endAt.getTime();
+      const createDate = event.createdAt.getTime();
+
+      if((endDate - createDate) > (1000 * 60 * 60 * 24 * 7)) {
+        mapResult.push(event);
+      }
+    }
+
+    return mapResult;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+}
+
 export default {
   create,
   edit,
@@ -319,4 +369,6 @@ export default {
   listEventByUser,
   getEventStats,
   getEventUserPostDetail,
+  getEventShortTerm,
+  getEventLongTerm,
 };

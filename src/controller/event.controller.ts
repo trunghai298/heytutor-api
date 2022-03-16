@@ -54,6 +54,18 @@ const getUserRoleInEvent = (req, res, next) => {
     .catch(next);
 };
 
+const getEventShortTerm = (req, res, next) => {
+  EventServices.getEventShortTerm()
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+const getEventLongTerm = (req, res, next) => {
+  EventServices.getEventLongTerm()
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
@@ -64,4 +76,6 @@ export default {
   getEventByUser,
   getEventUserPostDetail,
   getUserRoleInEvent,
+  getEventShortTerm,
+  getEventLongTerm,
 };

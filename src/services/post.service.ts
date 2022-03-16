@@ -453,6 +453,26 @@ const getListHashtag = async (ctx) => {
 const getListPostByFilterSupporter = async (params, ctx) => {
   const { filters, limit, offset } = params;
   const userId = ctx?.user?.id || 2;
+  const where = {};
+  where["isSupporter"] = userId;
+  map(filters, (filter) => {
+    if (
+      ["isPending", "isActive", "isDone", "isConfirmed"].includes(filter.type)
+    ) {
+      where[filter.type] = filter.value;
+    }
+    if (filter.type === "eventId") {
+      where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "supporterId") {
+      where["supporterId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+    if (filter.type === "registerId") {
+      where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+    }
+  });
+
+  return where;
 
   try {
     const listPost = await UserPost.findAndCountAll({
@@ -464,48 +484,13 @@ const getListPostByFilterSupporter = async (params, ctx) => {
       raw: true,
     });
 
-    const attachedUser = await Promise.all(
-      map(listPost.rows, async (post) => {
-        const registerUsers = await Promise.all(
-          map(post.registerId, async (id) => {
-            const user = await User.findOne({
-              where: { id },
-              raw: true,
-              attributes: ["email", "name", "id", "stdId"],
-            });
-            return user;
-          })
-        );
 
-        const supporterUsers = await Promise.all(
-          map(post.supporterId, async (id) => {
-            const user = await User.findOne({
-              where: { id },
-              raw: true,
-              attributes: ["email", "name", "id", "stdId"],
-            });
-            return user;
-          })
-        );
 
-        return { ...post, registerUsers, supporterUsers };
-      })
-    );
 
-    const beautifyRow = map(attachedUser, (row) => {
-      delete row.createdAt;
-      delete row.updatedAt;
-      delete row["Post.id"];
-      delete row["Post.userId"];
-      delete row["registerId"];
-      delete row["supporterId"];
-
-      return row;
-    });
     const filterByHashtag = find(filters, (row) => row.type === "hashtag");
     const filterByTime = find(filters, (row) => row.type === "time");
 
-    let finalResult = beautifyRow;
+    let finalResult = listPost;
 
     if (filterByHashtag) {
       finalResult = map(finalResult, (row) => {
