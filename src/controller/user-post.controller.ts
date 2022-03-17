@@ -21,10 +21,31 @@ const listRegisteredRequests = (req, res, next) => {
     .then((result) => res.json(result))
     .catch(next);
 };
-listRegisteredRequests;
+
+const countRegisterOfPost = (req, res, next) => {
+  UserPostServices.countRegisterOfPost(req.ctx, req.query.limit, req.query.offset)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const registerDetailOfPost = (req, res, next) => {
+  UserPostServices.registerDetailOfPost(req.params.postId, req.query.limit, req.query.offset)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const supporterDetailOfPost = (req, res, next) => {
+  UserPostServices.supporterDetailOfPost(req.params.postId, req.query.limit, req.query.offset)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 
 export default {
   getPostStats,
   updatePostStatus,
   listRegisteredRequests,
+  countRegisterOfPost,
+  registerDetailOfPost,
+  supporterDetailOfPost,
 };

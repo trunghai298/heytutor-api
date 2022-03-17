@@ -5,6 +5,7 @@ import MySQLClient from "../clients/mysql";
 import { map, countBy, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
+import Ranking from "../models/ranking.model";
 
 /**
  * To create a new term
@@ -321,6 +322,109 @@ const listRegisteredRequests = async (ctx, limit, offset) => {
   }
 };
 
+const countRegisterOfPost = async (ctx, limit, offset) => {
+  const userId = ctx?.user?.id || 2;
+  const limitValue = limit || 100;
+  const offsetValue = offset || 0;
+
+  try {
+    const listPost = await UserPost.findAll({
+      where: {
+        userId,
+      },
+      raw: true,
+      limit: limitValue,
+      offset: offsetValue,
+    });
+    const attachPostData = await Promise.all(
+      map(listPost, async (post) => {
+        const registerCount = post.registerId ? post.registerId.length : 0;
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        return { ...post, registerCount, postData };
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const registerDetailOfPost = async (postId, limit, offset) => {
+  const limitValue = limit || 100;
+  const offsetValue = offset || 0;
+
+  try {
+    const listRegister = await UserPost.findOne({
+      where: { postId },
+      attributes: ["registerId"],
+      raw: true,
+      limit: limitValue,
+      offset: offsetValue,
+    });
+    const attachPostData = await Promise.all(
+      map(listRegister, async (registerId) => {
+        const userData = await User.findAll({
+          where: { id: registerId },
+          raw: true,
+        });
+        const userRank = await Ranking.findAll({
+          where: { userId: registerId},
+          attributes: [ "userId", "rankPoint", ],
+          raw: true,
+        });
+        return { registerId, userData, userRank,};
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Post not found.",
+    });
+  }
+};
+
+const supporterDetailOfPost = async (postId, limit, offset) => {
+  const limitValue = limit || 100;
+  const offsetValue = offset || 0;
+
+  try {
+    const listSupporter = await UserPost.findOne({
+      where: { postId },
+      attributes: ["supporterId"],
+      raw: true,
+      limit: limitValue,
+      offset: offsetValue,
+    });
+    const attachPostData = await Promise.all(
+      map(listSupporter, async (supporterId) => {
+        const userData = await User.findAll({
+          where: { id: supporterId },
+          raw: true,
+        });
+        const userRank = await Ranking.findAll({
+          where: { userId: supporterId},
+          attributes: [ "userId", "rankPoint", ],
+          raw: true,
+        });
+        return { supporterId, userData, userRank,};
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Post not found.",
+    });
+  }
+};
+
 // const getStatusOfPost = async (postId) => {
 //   try {
 //     const statusOfPost = await UserPost.findOne({
@@ -342,4 +446,7 @@ export default {
   getPostStats,
   updatePostStatus,
   listRegisteredRequests,
+  countRegisterOfPost,
+  registerDetailOfPost,
+  supporterDetailOfPost,
 };
