@@ -146,7 +146,7 @@ const getEventDetail = async (eventId) => {
   try {
     const eventDetail = await Event.findOne({
       where: {
-        eventId,
+        id: eventId,
       },
     });
     return eventDetail;
@@ -213,15 +213,15 @@ const listEventByUser = async (ctx) => {
 const getUserRoleInEvent = async (ctx, eventId) => {
   try {
     const userId = ctx?.user?.id || 2;
-    
+
     const userRole = await UserPost.findOne({
       where: {
         userId,
-        eventId
-      }, 
-      attributes: [ "isSupporter", "isRequester" ],
+        eventId,
+      },
+      attributes: ["isSupporter", "isRequester"],
       logging: true,
-    })
+    });
     return userRole;
   } catch (error) {
     throw new NotFoundError({
@@ -229,13 +229,10 @@ const getUserRoleInEvent = async (ctx, eventId) => {
       message: "Event is not found",
     });
   }
-}
-
-
+};
 
 const getEventUserPostDetail = async (ctx, eventId) => {
   try {
-
     const listSupporter = await UserEvent.findAll({
       where: {
         eventId,
@@ -311,34 +308,33 @@ const getEventUserPostDetail = async (ctx, eventId) => {
 
 const getEventByDuration = async () => {
   try {
-    const listEvent = Event.findAll({
-    });
+    const listEvent = Event.findAll({});
 
     let mapShortTerm = [];
 
-    for(const event of await listEvent) {
+    for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
       const createDate = event.createdAt.getTime();
 
-      if(endDate - createDate < (1000 * 60 * 60 * 24 * 7)) {
+      if (endDate - createDate < 1000 * 60 * 60 * 24 * 7) {
         mapShortTerm.push(event);
       }
     }
 
     let mapLongTerm = [];
 
-    for(const event of await listEvent) {
+    for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
       const createDate = event.createdAt.getTime();
 
-      if((endDate - createDate) > (1000 * 60 * 60 * 24 * 7)) {
+      if (endDate - createDate > 1000 * 60 * 60 * 24 * 7) {
         mapLongTerm.push(event);
       }
     }
 
     return {
       shortTermEvents: mapShortTerm,
-      longTermEvent: mapLongTerm
+      longTermEvent: mapLongTerm,
     };
   } catch (error) {
     throw new NotFoundError({
@@ -346,7 +342,7 @@ const getEventByDuration = async () => {
       message: "Event is not found",
     });
   }
-} 
+};
 
 export default {
   create,
