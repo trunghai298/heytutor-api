@@ -9,4 +9,6 @@ export default (app) => {
     .get("/get-event-stats/:eventId", EventController.getEventStats)
     .get("/get-list-event-of-user", EventController.getEventByUser)
     .get("/get-event-detail/:eventId", EventController.getEventUserPostDetail)
+    .get("/get-user-role/:eventId", EventController.getUserRoleInEvent)
+    .get("/get-event-by-duration", EventController.getEventByDuration)
   };
