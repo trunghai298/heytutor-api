@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import { map, groupBy } from "lodash";
+import { map, countBy, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 
 /**
@@ -233,7 +233,6 @@ const getPostStats = async (ctx) => {
 
 const updatePostStatus = async (post) => {
   const { postId, status } = post;
-  console.log(postId, status);
 
   try {
     if (status === "isActive") {
@@ -297,14 +296,14 @@ const listRegisteredRequests = async (ctx, limit, offset) => {
       })
     );
 
-    const groupByHashtag = groupBy(
-      attachPostData,
-      (item) => item.postData.hashtag
+    const allHashtag = map(attachPostData, (item) =>
+      JSON.parse(item.postData.hashtag)
     );
+    const hashTagGroup = countBy(flattenDeep(allHashtag));
 
     return {
       attachPostData,
-      groupByHashtag,
+      hashTagGroup,
     };
   } catch (error) {
     throw new BadRequestError({
