@@ -355,76 +355,6 @@ const countRegisterOfPost = async (ctx, limit, offset) => {
   }
 };
 
-const registerDetailOfPost = async (postId, limit, offset) => {
-  const limitValue = limit || 100;
-  const offsetValue = offset || 0;
-
-  try {
-    const listRegister = await UserPost.findOne({
-      where: { postId },
-      attributes: ["registerId"],
-      raw: true,
-      limit: limitValue,
-      offset: offsetValue,
-    });
-    const attachPostData = await Promise.all(
-      map(listRegister, async (registerId) => {
-        const userData = await User.findAll({
-          where: { id: registerId },
-          raw: true,
-        });
-        const userRank = await Ranking.findAll({
-          where: { userId: registerId},
-          attributes: [ "userId", "rankPoint", ],
-          raw: true,
-        });
-        return { registerId, userData, userRank,};
-      })
-    );
-    return attachPostData;
-  } catch (error) {
-    throw new BadRequestError({
-      field: "postId",
-      message: "Post not found.",
-    });
-  }
-};
-
-const supporterDetailOfPost = async (postId, limit, offset) => {
-  const limitValue = limit || 100;
-  const offsetValue = offset || 0;
-
-  try {
-    const listSupporter = await UserPost.findOne({
-      where: { postId },
-      attributes: ["supporterId"],
-      raw: true,
-      limit: limitValue,
-      offset: offsetValue,
-    });
-    const attachPostData = await Promise.all(
-      map(listSupporter, async (supporterId) => {
-        const userData = await User.findAll({
-          where: { id: supporterId },
-          raw: true,
-        });
-        const userRank = await Ranking.findAll({
-          where: { userId: supporterId},
-          attributes: [ "userId", "rankPoint", ],
-          raw: true,
-        });
-        return { supporterId, userData, userRank,};
-      })
-    );
-    return attachPostData;
-  } catch (error) {
-    throw new BadRequestError({
-      field: "postId",
-      message: "Post not found.",
-    });
-  }
-};
-
 // const getStatusOfPost = async (postId) => {
 //   try {
 //     const statusOfPost = await UserPost.findOne({
@@ -447,6 +377,4 @@ export default {
   updatePostStatus,
   listRegisteredRequests,
   countRegisterOfPost,
-  registerDetailOfPost,
-  supporterDetailOfPost,
 };

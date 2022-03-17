@@ -9,7 +9,5 @@ export default (app) => {
       "/get-number-register-of-post-by-user",
       UserPostController.countRegisterOfPost
     )
-    .get("/get-register-detail/:postId", UserPostController.registerDetailOfPost)
-    .get("/get-supporter-detail/:postId", UserPostController.supporterDetailOfPost)
 
 };
