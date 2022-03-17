@@ -1,7 +1,7 @@
 import User from "../models/user.model";
 import Post from "../models/post.model";
 import { NotFoundError } from "../utils/errors";
-import { Op } from "sequelize";
+import Ranking from "../models/ranking.model";
 
 /**
  * To information of a user

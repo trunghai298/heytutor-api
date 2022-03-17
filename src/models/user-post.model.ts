@@ -27,11 +27,11 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   supporterId: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.JSONB,
     defaultValue: null,
   },
   registerId: {
-    type: DataTypes.INTEGER.UNSIGNED,
+    type: DataTypes.JSONB,
     defaultValue: null,
   },
   eventId: {

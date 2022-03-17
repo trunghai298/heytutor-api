@@ -4,7 +4,7 @@ import MySQLClient from "../clients/mysql";
 interface RankingInstance extends Model {
   userId: number;
   rankPoint: number;
-  rankCurrent: string;
+  voteCount: number;
 }
 
 const Ranking = MySQLClient.define<RankingInstance>("Ranking", {
@@ -14,8 +14,8 @@ const Ranking = MySQLClient.define<RankingInstance>("Ranking", {
   rankPoint: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  rankCurrent: {
-    type: DataTypes.STRING,
+  voteCount: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
   createdAt: {
     type: DataTypes.DATE,

@@ -12,7 +12,19 @@ const updatePostStatus = (req, res, next) => {
     .catch(next);
 };
 
+const listRegisteredRequests = (req, res, next) => {
+  UserPostServices.listRegisteredRequests(
+    req.ctx,
+    req.query.limit,
+    req.query.offset
+  )
+    .then((result) => res.json(result))
+    .catch(next);
+};
+listRegisteredRequests;
+
 export default {
   getPostStats,
   updatePostStatus,
+  listRegisteredRequests,
 };

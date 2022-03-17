@@ -13,6 +13,7 @@ import Auth from "./auth.routes";
 import File from "./file.routes";
 import UserEvent from "./user-event.routes";
 import UserPost from "./user-post.routes";
+import Ranking from "./ranking.routes";
 
 export default (app: any) => {
   Auth(app);
@@ -30,4 +31,5 @@ export default (app: any) => {
   File(app);
   UserEvent(app);
   UserPost(app);
+  Ranking(app);
 };

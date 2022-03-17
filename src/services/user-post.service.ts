@@ -2,6 +2,8 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
+import { map, groupBy } from "lodash";
+import Post from "../models/post.model";
 
 /**
  * To create a new term
@@ -246,9 +248,9 @@ const updatePostStatus = async (post) => {
     } else if (status === "isDone") {
       await UserPost.update(
         {
-           isDone: 1, 
-          isActive: 0, 
-          isPending: 0 
+          isDone: 1,
+          isActive: 0,
+          isPending: 0,
         },
         { where: { postId }, logging: true }
       );
@@ -274,6 +276,44 @@ const updatePostStatus = async (post) => {
   }
 };
 
+const listRegisteredRequests = async (ctx, limit, offset) => {
+  const userId = ctx?.user?.id || 2;
+  const limitValue = limit || 100;
+  const offsetValue = offset || 0;
+
+  try {
+    const res = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
+      { type: "SELECT" }
+    );
+
+    const attachPostData = await Promise.all(
+      map(res, async (post) => {
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        return { ...post, postData };
+      })
+    );
+
+    const groupByHashtag = groupBy(
+      attachPostData,
+      (item) => item.postData.hashtag
+    );
+
+    return {
+      attachPostData,
+      groupByHashtag,
+    };
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Failed to create this item.",
+    });
+  }
+};
+
 // const getStatusOfPost = async (postId) => {
 //   try {
 //     const statusOfPost = await UserPost.findOne({
@@ -294,4 +334,5 @@ export default {
   list,
   getPostStats,
   updatePostStatus,
+  listRegisteredRequests,
 };
