@@ -9,5 +9,4 @@ export default (app) => {
       "/get-register-detail",
       UserPostController.countRegisterOfPost
     )
-
 };

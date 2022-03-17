@@ -277,7 +277,7 @@ const updatePostStatus = async (post) => {
   }
 };
 
-const listRegisteredRequests = async (ctx, limit, offset) => {
+const listRegistedRequests = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id || 2;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
