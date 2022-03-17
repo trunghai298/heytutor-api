@@ -4,6 +4,7 @@ import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
 import { map, countBy, flattenDeep } from "lodash";
 import Post from "../models/post.model";
+import User from "../models/user.model";
 
 /**
  * To create a new term
@@ -292,7 +293,14 @@ const listRegisteredRequests = async (ctx, limit, offset) => {
           where: { id: post.postId },
           raw: true,
         });
-        return { ...post, postData };
+        const userData = await User.findOne({
+          where: { id: post.userId },
+          raw: true,
+          attributes: {
+            exclude: ["password", "isAdmin"],
+          },
+        });
+        return { ...post, postData, userData };
       })
     );
 
