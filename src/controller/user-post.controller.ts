@@ -12,8 +12,8 @@ const updatePostStatus = (req, res, next) => {
     .catch(next);
 };
 
-const listRegisteredRequests = (req, res, next) => {
-  UserPostServices.listRegisteredRequests(
+const listRegistedRequests = (req, res, next) => {
+  UserPostServices.listRegistedRequests(
     req.ctx,
     req.query.limit,
     req.query.offset
@@ -21,10 +21,9 @@ const listRegisteredRequests = (req, res, next) => {
     .then((result) => res.json(result))
     .catch(next);
 };
-listRegisteredRequests;
 
 export default {
   getPostStats,
   updatePostStatus,
-  listRegisteredRequests,
+  listRegistedRequests,
 };
