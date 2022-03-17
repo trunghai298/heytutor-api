@@ -6,7 +6,7 @@ export default (app) => {
     .get("/user-post/registered", UserPostController.listRegisteredRequests)
     .put("/update-user-status", UserPostController.updatePostStatus)
     .get(
-      "/get-number-register-of-post-by-user",
+      "/get-register-detail",
       UserPostController.countRegisterOfPost
     )
 
