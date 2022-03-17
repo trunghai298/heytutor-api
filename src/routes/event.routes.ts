@@ -10,6 +10,5 @@ export default (app) => {
     .get("/get-list-event-of-user", EventController.getEventByUser)
     .get("/get-event-detail/:eventId", EventController.getEventUserPostDetail)
     .get("/get-user-role/:eventId", EventController.getUserRoleInEvent)
-    .get("/get-short-term-event", EventController.getEventShortTerm)
-    .get("/get-long-term-event", EventController.getEventLongTerm)
+    .get("/get-event-by-duration", EventController.getEventByDuration)
   };
