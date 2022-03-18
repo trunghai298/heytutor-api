@@ -12,16 +12,6 @@ const updatePostStatus = (req, res, next) => {
     .catch(next);
 };
 
-const listRegistedRequests = (req, res, next) => {
-  UserPostServices.listRegistedRequests(
-    req.ctx,
-    req.query.limit,
-    req.query.offset
-  )
-    .then((result) => res.json(result))
-    .catch(next);
-};
-
 const countRegisterOfPost = (req, res, next) => {
   UserPostServices.countRegisterOfPost(req.ctx, req.query.limit, req.query.offset)
     .then((result) => res.json(result))
@@ -31,6 +21,5 @@ const countRegisterOfPost = (req, res, next) => {
 export default {
   getPostStats,
   updatePostStatus,
-  listRegisteredRequests,
   countRegisterOfPost,
 };
