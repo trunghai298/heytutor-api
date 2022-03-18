@@ -405,13 +405,75 @@ const getListPostByFilter = async (filters, ctx) => {
   }
 };
 
+const registerDetailOfPost = async (postId) => {
+
+  try {
+    const listRegister = await UserPost.findOne({
+      where: { postId },
+      attributes: ["registerId"],
+      raw: true,
+    });
+    const attachPostData = await Promise.all(
+      map(listRegister, async (registerId) => {
+        const userData = await User.findAll({
+          where: { id: registerId },
+          raw: true,
+        });
+        const userRank = await Ranking.findAll({
+          where: { userId: registerId},
+          attributes: [ "userId", "rankPoint", ],
+          raw: true,
+        });
+        return { registerId, userData, userRank, };
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Post not found.",
+    });
+  }
+};
+
+const supporterDetailOfPost = async (postId) => {
+
+  try {
+    const listSupporter = await UserPost.findOne({
+      where: { postId },
+      attributes: ["supporterId"],
+      raw: true,
+    });
+    const attachPostData = await Promise.all(
+      map(listSupporter, async (supporterId) => {
+        const userData = await User.findAll({
+          where: { id: supporterId },
+          raw: true,
+        });
+        const userRank = await Ranking.findAll({
+          where: { userId: supporterId},
+          attributes: [ "userId", "rankPoint", ],
+          raw: true,
+        });
+        return { supporterId, userData, userRank, };
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: "Post not found.",
+    });
+  }
+};
+
 const getAllDetailsByPostId = async (postId) => {
   try {
     const [commentCount, registers, supporters, postDetails] =
       await Promise.all([
         countPeopleCmtOfPost(postId),
-        countPeopleRegisterOfPost(postId),
-        countPeopleSupporterOfPost(postId),
+        registerDetailOfPost(postId),
+        supporterDetailOfPost(postId),
         postDetailByPostId(postId),
       ]);
     return {

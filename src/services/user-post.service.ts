@@ -5,6 +5,7 @@ import MySQLClient from "../clients/mysql";
 import { map, countBy, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
+import Ranking from "../models/ranking.model";
 
 /**
  * To create a new term
@@ -321,6 +322,39 @@ const listRegistedRequests = async (ctx, limit, offset) => {
   }
 };
 
+const countRegisterOfPost = async (ctx, limit, offset) => {
+  const userId = ctx?.user?.id || 2;
+  const limitValue = limit || 100;
+  const offsetValue = offset || 0;
+
+  try {
+    const listPost = await UserPost.findAll({
+      where: {
+        userId,
+      },
+      raw: true,
+      limit: limitValue,
+      offset: offsetValue,
+    });
+    const attachPostData = await Promise.all(
+      map(listPost, async (post) => {
+        const registerCount = post.registerId ? post.registerId.length : 0;
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        return { ...post, registerCount, postData };
+      })
+    );
+    return attachPostData;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
 // const getStatusOfPost = async (postId) => {
 //   try {
 //     const statusOfPost = await UserPost.findOne({
@@ -341,5 +375,6 @@ export default {
   list,
   getPostStats,
   updatePostStatus,
-  listRegistedRequests,
+  listRegisteredRequests,
+  countRegisterOfPost,
 };

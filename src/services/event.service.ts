@@ -311,6 +311,7 @@ const getEventByDuration = async () => {
     const listEvent = Event.findAll({});
 
     let mapShortTerm = [];
+    let mapShortTerm1 = [];
 
     for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
@@ -320,8 +321,15 @@ const getEventByDuration = async () => {
         mapShortTerm.push(event);
       }
     }
+    const shortTermEvents = await Promise.all(
+      map(mapShortTerm, async (event) => {
+        const shortEventData = await getEventStats(event.id);
+        mapShortTerm1.push(shortEventData);
+      })
+    );
 
     let mapLongTerm = [];
+    let mapLongTerm1 = [];
 
     for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
@@ -331,10 +339,16 @@ const getEventByDuration = async () => {
         mapLongTerm.push(event);
       }
     }
+    const longTermEvents = await Promise.all(
+      map(mapLongTerm, async (event) => {
+        const longEventData = await getEventStats(event.id);
+        mapLongTerm1.push(longEventData);
+      })
+    );
 
     return {
-      shortTermEvents: mapShortTerm,
-      longTermEvent: mapLongTerm,
+      shortTermEvents: mapShortTerm1,
+      longTermEvent: mapLongTerm1,
     };
   } catch (error) {
     throw new NotFoundError({

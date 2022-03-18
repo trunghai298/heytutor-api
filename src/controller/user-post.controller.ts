@@ -22,8 +22,15 @@ const listRegistedRequests = (req, res, next) => {
     .catch(next);
 };
 
+const countRegisterOfPost = (req, res, next) => {
+  UserPostServices.countRegisterOfPost(req.ctx, req.query.limit, req.query.offset)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   getPostStats,
   updatePostStatus,
-  listRegistedRequests,
+  listRegisteredRequests,
+  countRegisterOfPost,
 };
