@@ -333,31 +333,189 @@ const listRegistedRequests = async (ctx, limit, offset) => {
   }
 };
 
-const countRegisterOfPost = async (ctx, limit, offset) => {
+const listPostHasRegister = async (userId, limit, offset) => {
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        registerId: {
+          [Op.ne]: null,
+        },
+      },
+      raw: true,
+      limit,
+      offset,
+    });
+    const res = await Promise.all(
+      map(postHasRegister, async (post) => {
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        const registerUsers = await Promise.all(
+          map(post.registerId, async (id) => {
+            const registerUser = await User.findOne({
+              where: { id },
+              raw: true,
+            });
+            return {
+              id: registerUser.id,
+              username: registerUser.name,
+              email: registerUser.email,
+            };
+          })
+        );
+        return { ...post, postData, registerUsers };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const listPostHasNoRegister = async (userId, limit, offset) => {
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        registerId: {
+          [Op.eq]: null,
+        },
+      },
+      raw: true,
+      limit,
+      offset,
+    });
+    const res = await Promise.all(
+      map(postHasRegister, async (post) => {
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        return { ...post, postData };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const listPostHasSupporter = async (userId, limit, offset) => {
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        supporterId: {
+          [Op.ne]: null,
+        },
+      },
+      raw: true,
+      limit,
+      offset,
+    });
+    const res = await Promise.all(
+      map(postHasRegister, async (post) => {
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        const supporterUsers = await Promise.all(
+          map(post.registerId, async (id) => {
+            const supporterUser = await User.findOne({
+              where: { id },
+              raw: true,
+            });
+            return {
+              id: supporterUser.id,
+              username: supporterUser.name,
+              email: supporterUser.email,
+            };
+          })
+        );
+        return { ...post, postData, supporterUsers };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const listPostOnEvent = async (userId, limit, offset) => {
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        eventId: {
+          [Op.ne]: null,
+        },
+      },
+      raw: true,
+      limit,
+      offset,
+    });
+    const res = await Promise.all(
+      map(postHasRegister, async (post) => {
+        const postData = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
+        return { ...post, postData };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const getListMyRequests = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id || 2;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 
   try {
-    const listPost = await UserPost.findAll({
-      where: {
-        userId,
-      },
-      raw: true,
-      limit: limitValue,
-      offset: offsetValue,
-    });
-    const attachPostData = await Promise.all(
-      map(listPost, async (post) => {
-        const registerCount = post.registerId ? post.registerId.length : 0;
-        const postData = await Post.findOne({
-          where: { id: post.postId },
-          raw: true,
-        });
-        return { ...post, registerCount, postData };
-      })
+    const postHasRegister = await listPostHasRegister(
+      userId,
+      limitValue,
+      offsetValue
     );
-    return attachPostData;
+    const postHasNoRegister = await listPostHasNoRegister(
+      userId,
+      limitValue,
+      offsetValue
+    );
+    const postHasSupporter = await listPostHasSupporter(
+      userId,
+      limitValue,
+      offsetValue
+    );
+    const postOnEvent = await listPostOnEvent(userId, limitValue, offsetValue);
+
+    return {
+      postHasRegister,
+      postHasNoRegister,
+      postHasSupporter,
+      postOnEvent,
+    };
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
@@ -386,6 +544,6 @@ export default {
   list,
   getPostStats,
   updatePostStatus,
-  countRegisterOfPost,
+  getListMyRequests,
   listRegistedRequests,
 };
