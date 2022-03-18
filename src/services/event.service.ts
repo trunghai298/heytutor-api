@@ -80,9 +80,9 @@ const getEventStats = async (eventId) => {
       getEventDetail(eventId),
     ]);
     return {
-      listEventPost,
-      listEventUser,
-      listEventDetail,
+      numberOfPost: listEventPost,
+      numberOfUser: listEventUser,
+      eventDetail: listEventDetail,
     };
   } catch (error) {
     throw new NotFoundError({
@@ -195,13 +195,17 @@ const listEventByUser = async (ctx) => {
       include: [Event],
       attributes: ["eventId"],
       raw: true,
-      logging: true,
     });
-    const res = map(listEvent, (event) => {
-      const pickFields = omit(event, ["eventId", "createdAt", "updatedAt"]);
-      return pickFields;
-    });
-    return res;
+    let mapEvent = [];
+    const EventStats = await Promise.all(
+      map(listEvent, async(event) => {
+        const eventStats = await getEventStats(event.eventId);
+        mapEvent.push(eventStats);
+      })
+    );
+    return {
+      listEvent: mapEvent,
+    };
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
