@@ -301,7 +301,18 @@ const listRegistedRequests = async (ctx, limit, offset) => {
             exclude: ["password", "isAdmin"],
           },
         });
-        return { ...post, postData, userData };
+        const userRank = await Ranking.findOne({
+          where: { userId: post.userId },
+          raw: true,
+        });
+
+        return {
+          ...post,
+          postData,
+          userData,
+          rankPoint: userRank?.rankPoint || 0,
+          voteCount: userRank?.voteCount || 0,
+        };
       })
     );
 
@@ -317,7 +328,7 @@ const listRegistedRequests = async (ctx, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: error,
     });
   }
 };
