@@ -376,4 +376,5 @@ export default {
   getPostStats,
   updatePostStatus,
   countRegisterOfPost,
+  listRegistedRequests,
 };
