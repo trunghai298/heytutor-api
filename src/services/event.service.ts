@@ -352,7 +352,7 @@ const getEventByDuration = async () => {
 
     return {
       shortTermEvents: mapShortTerm1,
-      longTermEvent: mapLongTerm1,
+      longTermEvents: mapLongTerm1,
     };
   } catch (error) {
     throw new NotFoundError({

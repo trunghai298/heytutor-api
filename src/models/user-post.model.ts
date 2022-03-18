@@ -5,7 +5,8 @@ import User from "./user.model";
 interface UserPostInstance extends Model {
   id: number;
   userId: number;
-  supporterId: number;
+  registerId: any;
+  supporterId: any;
   postId: number;
   eventId: number;
   conversationId: number;
