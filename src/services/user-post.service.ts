@@ -350,7 +350,7 @@ const listRegisteredRequests = async (ctx, limit, offset) => {
           where: { userId: post.userId },
           raw: true,
         });
-        const nbOfPostDone = await getNbOfPostDone(post.userId);
+        const nbOfDonePost = await getNbOfDonePost( "myRequest" ,post.userId);
 
         return {
           ...post,
@@ -358,7 +358,7 @@ const listRegisteredRequests = async (ctx, limit, offset) => {
           userData,
           rankPoint: userRank?.rankPoint || 0,
           voteCount: userRank?.voteCount || 0,
-          nbOfPostDone: nbOfPostDone,
+          nbOfPostDone: nbOfDonePost,
         };
       })
     );
