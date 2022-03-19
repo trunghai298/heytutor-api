@@ -277,6 +277,35 @@ const updatePostStatus = async (post) => {
   }
 };
 
+const getUser = async (id) => {
+  return User.findOne({
+    where: { id },
+    raw: true,
+  });
+};
+
+const getUserRank = async (id) => {
+  return Ranking.findOne({
+    where: { userId: id },
+    raw: true,
+  });
+};
+
+const getPost = async (id) => {
+  return Post.findOne({
+    where: { id },
+    raw: true,
+  });
+};
+
+const getUserData = async (id) => {
+  const [user, ranking] = await Promise.all([getUser(id), getUserRank(id)]);
+  return {
+    ...user,
+    ...ranking,
+  };
+};
+
 const listRegistedRequests = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id || 2;
   const limitValue = limit || 100;
@@ -290,28 +319,15 @@ const listRegistedRequests = async (ctx, limit, offset) => {
 
     const attachPostData = await Promise.all(
       map(res, async (post) => {
-        const postData = await Post.findOne({
-          where: { id: post.postId },
-          raw: true,
-        });
-        const userData = await User.findOne({
-          where: { id: post.userId },
-          raw: true,
-          attributes: {
-            exclude: ["password", "isAdmin"],
-          },
-        });
-        const userRank = await Ranking.findOne({
-          where: { userId: post.userId },
-          raw: true,
-        });
+        const [postData, userData] = await Promise.all([
+          getPost(post.postId),
+          getUserData(post.userId),
+        ]);
 
         return {
           ...post,
           postData,
           userData,
-          rankPoint: userRank?.rankPoint || 0,
-          voteCount: userRank?.voteCount || 0,
         };
       })
     );
@@ -348,20 +364,16 @@ const listPostHasRegister = async (userId, limit, offset) => {
     });
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
-        const postData = await Post.findOne({
-          where: { id: post.postId },
-          raw: true,
-        });
+        const postData = await getPost(post.postId);
         const registerUsers = await Promise.all(
           map(post.registerId, async (id) => {
-            const registerUser = await User.findOne({
-              where: { id },
-              raw: true,
-            });
+            const registerUser = await getUserData(id);
             return {
               id: registerUser.id,
               username: registerUser.name,
               email: registerUser.email,
+              rankPoint: registerUser.rankPoint || 0,
+              voteCount: registerUser.voteCount || 0,
             };
           })
         );
@@ -393,10 +405,7 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
     });
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
-        const postData = await Post.findOne({
-          where: { id: post.postId },
-          raw: true,
-        });
+        const postData = await getPost(post.postId);
         return { ...post, postData };
       })
     );
@@ -431,14 +440,13 @@ const listPostHasSupporter = async (userId, limit, offset) => {
         });
         const supporterUsers = await Promise.all(
           map(post.registerId, async (id) => {
-            const supporterUser = await User.findOne({
-              where: { id },
-              raw: true,
-            });
+            const userData = await getUserData(id);
             return {
-              id: supporterUser.id,
-              username: supporterUser.name,
-              email: supporterUser.email,
+              id: userData.id,
+              username: userData.name,
+              email: userData.email,
+              rankPoint: userData?.rankPoint || 0,
+              voteCount: userData?.voteCount || 0,
             };
           })
         );
@@ -468,12 +476,10 @@ const listPostOnEvent = async (userId, limit, offset) => {
       limit,
       offset,
     });
+
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
-        const postData = await Post.findOne({
-          where: { id: post.postId },
-          raw: true,
-        });
+        const postData = await getPost(post.postId);
         return { ...post, postData };
       })
     );
@@ -523,22 +529,6 @@ const getListMyRequests = async (ctx, limit, offset) => {
     });
   }
 };
-
-// const getStatusOfPost = async (postId) => {
-//   try {
-//     const statusOfPost = await UserPost.findOne({
-//       where: {
-//         postId,
-//       },
-//     });
-//     return statusOfPost;
-//   } catch (error) {
-//     throw new NotFoundError({
-//       field: "eventId",
-//       message: "Event is not found",
-//     });
-//   }
-// };
 
 export default {
   list,
