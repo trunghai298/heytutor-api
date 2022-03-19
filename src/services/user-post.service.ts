@@ -157,6 +157,52 @@ const getNbOfDonePost = async (type, userId) => {
   } catch (error) {}
 };
 
+const getNbOfPostDone = async (userId) => {
+  try {
+    const res = await UserPost.findAll({
+      where: {
+        isPending: {
+          [Op.eq]: 0,
+        },
+        isActive: {
+          [Op.eq]: 0,
+        },
+        isDone: {
+          [Op.eq]: 1,
+        },
+        isConfirmed: {
+          [Op.eq]: 0,
+        },
+      },
+      raw: true,
+      attributes: ["supporterId"],
+      group: ["supporterId"],
+    });
+
+    let tempArray = [];
+    for (const array of res) {
+      if (array.supporterId !== null && array.supporterId.length !== 0) {
+        if (tempArray.length === 0) {
+          tempArray = array.supporterId;
+        } else if (tempArray.length !== 0) {
+          tempArray = tempArray.concat(array.supporterId);
+        }
+      }
+    }
+
+    let count = 0;
+    for (let i = 0; i <= tempArray.length; i++) {
+      if (tempArray[i] === userId) {
+        count++;
+      }
+    }
+
+    return count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const getNbOfOnEvent = async (type, userId) => {
   try {
     const condition = createCondition(type, userId);
@@ -203,7 +249,6 @@ const getPostStats = async (ctx) => {
 
     const nbOfDonePost = await getNbOfDonePost("myRequest", userId);
     const nbOfDonePostRegistered = await getNbOfDonePost("registered", userId);
-
     const nbOfPostOnEvent = await getNbOfOnEvent("myRequest", userId);
     const nbOfPostRegisteredOnEvent = await getNbOfOnEvent(
       "registered",
@@ -277,7 +322,7 @@ const updatePostStatus = async (post) => {
   }
 };
 
-const listRegistedRequests = async (ctx, limit, offset) => {
+const listRegisteredRequests = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id || 2;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
@@ -305,6 +350,7 @@ const listRegistedRequests = async (ctx, limit, offset) => {
           where: { userId: post.userId },
           raw: true,
         });
+        const nbOfPostDone = await getNbOfPostDone(post.userId);
 
         return {
           ...post,
@@ -312,6 +358,7 @@ const listRegistedRequests = async (ctx, limit, offset) => {
           userData,
           rankPoint: userRank?.rankPoint || 0,
           voteCount: userRank?.voteCount || 0,
+          nbOfPostDone: nbOfPostDone,
         };
       })
     );
@@ -545,5 +592,5 @@ export default {
   getPostStats,
   updatePostStatus,
   getListMyRequests,
-  listRegistedRequests,
+  listRegisteredRequests,
 };

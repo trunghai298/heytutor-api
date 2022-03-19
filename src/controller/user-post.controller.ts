@@ -18,8 +18,8 @@ const getListMyRequests = (req, res, next) => {
     .catch(next);
 };
 
-const listRegistedRequests = (req, res, next) => {
-  UserPostServices.listRegistedRequests(
+const listRegisteredRequests = (req, res, next) => {
+  UserPostServices.listRegisteredRequests(
     req.ctx,
     req.query.limit,
     req.query.offset
@@ -32,5 +32,5 @@ export default {
   getPostStats,
   updatePostStatus,
   getListMyRequests,
-  listRegistedRequests,
+  listRegisteredRequests,
 };
