@@ -31,7 +31,11 @@ app.get("/auth/google", authenticateGoogle());
 app.post("/auth/login", AuthController.login);
 
 const resetDb = async () => {
-  await MySQLClient.sync({ force: true });
+  try {
+    await MySQLClient.sync({ force: true });
+  } catch (error) {
+    console.log(error);
+  }
 };
 
 app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
@@ -56,7 +60,7 @@ app.use(initSecurity());
 
 // JWT verification
 // app.use(authenticateJWT());
-
+console.log(process.env.DB_NAME);
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
 
