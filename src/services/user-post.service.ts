@@ -22,25 +22,13 @@ const list = async (payload) => {
   }
 };
 
-const createCondition = (type, userId) =>
-  type === "myRequest"
-    ? {
-        userId: userId,
-      }
-    : {
-        registerId: userId,
-      };
-
-const getNbOfAllPost = async (type, userId) => {
+const getNbOfAllPost = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
-
     const res = await UserPost.findAll({
-      where: condition,
+      where: userId,
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
-      logging: true,
     });
 
     return res.length;
@@ -49,12 +37,57 @@ const getNbOfAllPost = async (type, userId) => {
   }
 };
 
-const getNbOfPendingPost = async (type, userId) => {
+const getNbOfAllPostRegistered = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
     const res = await UserPost.findAll({
       where: {
-        ...condition,
+        isPending: {
+          [Op.eq]: 0,
+        },
+        isActive: {
+          [Op.eq]: 1,
+        },
+        isDone: {
+          [Op.eq]: 0,
+        },
+        isConfirmed: {
+          [Op.eq]: 0,
+        },
+      },
+      raw: true,
+      attributes: ["registerId"],
+      group: ["registerId"],
+    });
+
+    let tempArray = [];
+    for (const array of res) {
+      if (array.registerId !== null && array.registerId.length !== 0) {
+        if (tempArray.length === 0) {
+          tempArray = array.registerId;
+        } else if (tempArray.length !== 0) {
+          tempArray = tempArray.concat(array.registerId);
+        }
+      }
+    }
+
+    let count = 0;
+    for (let i = 0; i <= tempArray.length; i++) {
+      if (tempArray[i] === userId) {
+        count++;
+      }
+    }
+
+    return count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getNbOfPendingPost = async (userId) => {
+  try {
+    const res = await UserPost.findAll({
+      where: {
+        userId,
         isPending: {
           [Op.eq]: 1,
         },
@@ -76,12 +109,11 @@ const getNbOfPendingPost = async (type, userId) => {
   } catch (error) {}
 };
 
-const getNbOfConfirmedPost = async (type, userId) => {
+const getNbOfConfirmedPost = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
     const res = await UserPost.findAll({
       where: {
-        ...condition,
+        userId,
         isPending: {
           [Op.eq]: 0,
         },
@@ -103,12 +135,57 @@ const getNbOfConfirmedPost = async (type, userId) => {
   } catch (error) {}
 };
 
-const getNbOfActivePost = async (type, userId) => {
+const getNbOfConfirmedPostRegistered = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
     const res = await UserPost.findAll({
       where: {
-        ...condition,
+        userId,
+        isPending: {
+          [Op.eq]: 0,
+        },
+        isActive: {
+          [Op.eq]: 0,
+        },
+        isDone: {
+          [Op.eq]: 0,
+        },
+        isConfirmed: {
+          [Op.eq]: 1,
+        },
+      },
+      raw: true,
+      attributes: ["supporterId"],
+      group: ["supporterId"],
+      logging:true,
+    });
+
+    let tempArray = [];
+    for (const array of res) {
+      if (array.supporterId !== null && array.supporterId.length !== 0) {
+        if (tempArray.length === 0) {
+          tempArray = array.supporterId;
+        } else if (tempArray.length !== 0) {
+          tempArray = tempArray.concat(array.supporterId);
+        }
+      }
+    }
+
+    let count = 0;
+    for (let i = 0; i <= tempArray.length; i++) {
+      if (tempArray[i] === userId) {
+        count++;
+      }
+    }
+
+    return count;
+  } catch (error) {}
+};
+
+const getNbOfActivePost = async (userId) => {
+  try {
+    const res = await UserPost.findAll({
+      where: {
+        userId,
         isPending: {
           [Op.eq]: 0,
         },
@@ -130,12 +207,11 @@ const getNbOfActivePost = async (type, userId) => {
   } catch (error) {}
 };
 
-const getNbOfDonePost = async (type, userId) => {
+const getNbOfDonePost = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
     const res = await UserPost.findAll({
       where: {
-        ...condition,
+        userId,
         isPending: {
           [Op.eq]: 0,
         },
@@ -157,12 +233,57 @@ const getNbOfDonePost = async (type, userId) => {
   } catch (error) {}
 };
 
-const getNbOfOnEvent = async (type, userId) => {
+const getNbOfPostDone = async (userId) => {
   try {
-    const condition = createCondition(type, userId);
     const res = await UserPost.findAll({
       where: {
-        ...condition,
+        isPending: {
+          [Op.eq]: 0,
+        },
+        isActive: {
+          [Op.eq]: 0,
+        },
+        isDone: {
+          [Op.eq]: 1,
+        },
+        isConfirmed: {
+          [Op.eq]: 0,
+        },
+      },
+      raw: true,
+      attributes: ["supporterId"],
+      group: ["supporterId"],
+    });
+
+    let tempArray = [];
+    for (const array of res) {
+      if (array.supporterId !== null && array.supporterId.length !== 0) {
+        if (tempArray.length === 0) {
+          tempArray = array.supporterId;
+        } else if (tempArray.length !== 0) {
+          tempArray = tempArray.concat(array.supporterId);
+        }
+      }
+    }
+
+    let count = 0;
+    for (let i = 0; i <= tempArray.length; i++) {
+      if (tempArray[i] === userId) {
+        count++;
+      }
+    }
+
+    return count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+const getNbOfOnEvent = async (userId) => {
+  try {
+    const res = await UserPost.findAll({
+      where: {
+        userId,
         eventId: {
           [Op.ne]: null,
         },
@@ -175,40 +296,76 @@ const getNbOfOnEvent = async (type, userId) => {
   } catch (error) {}
 };
 
+const getNbOfOnEventRegistered = async (userId) => {
+  try {
+    const res = await UserPost.findAll({
+      where: {
+        eventId: {
+          [Op.ne]: null,
+        },
+        isPending: {
+          [Op.eq]: 0,
+        },
+        isActive: {
+          [Op.eq]: 1,
+        },
+        isDone: {
+          [Op.eq]: 0,
+        },
+        isConfirmed: {
+          [Op.eq]: 0,
+        },
+      },
+      raw: true,
+      attributes: ["registerId"],
+      group: ["registerId"],
+      logging: true,
+    });
+
+    let tempArray = [];
+    for (const array of res) {
+      if (array.registerId !== null && array.registerId.length !== 0) {
+        if (tempArray.length === 0) {
+          tempArray = array.registerId;
+        } else if (tempArray.length !== 0) {
+          tempArray = tempArray.concat(array.registerId);
+        }
+      }
+    }
+
+    let count = 0;
+    for (let i = 0; i <= tempArray.length; i++) {
+      if (tempArray[i] === userId) {
+        count++;
+      }
+    }
+
+    return count;
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 const getPostStats = async (ctx) => {
   // const { user } = ctx;
   const userId = ctx?.user?.id || 2;
 
   try {
-    const nbOfAllPost = await getNbOfAllPost("myRequest", userId);
-    const nbOfAllPostRegistered = await getNbOfAllPost("registered", userId);
+    const nbOfAllPost = await getNbOfAllPost(userId);
 
-    const nbOfPendingPost = await getNbOfPendingPost("myRequest", userId);
-    const nbOfPendingPostRegistered = await getNbOfPendingPost(
-      "registered",
-      userId
-    );
+    const nbOfPendingPost = await getNbOfPendingPost(userId);
 
-    const nbOfConfirmedPost = await getNbOfConfirmedPost("myRequest", userId);
-    const nbOfConfirmedPostRegistered = await getNbOfConfirmedPost(
-      "registered",
-      userId
-    );
+    const nbOfConfirmedPost = await getNbOfConfirmedPost(userId);
+    const nbOfConfirmedPostRegistered = await getNbOfConfirmedPostRegistered(userId);
 
-    const nbOfActivePost = await getNbOfActivePost("myRequest", userId);
-    const nbOfActivePostRegistered = await getNbOfActivePost(
-      "registered",
-      userId
-    );
+    const nbOfActivePost = await getNbOfActivePost(userId);
+    const nbOfActivePostRegistered = await getNbOfAllPostRegistered(userId);
 
-    const nbOfDonePost = await getNbOfDonePost("myRequest", userId);
-    const nbOfDonePostRegistered = await getNbOfDonePost("registered", userId);
+    const nbOfDonePost = await getNbOfDonePost(userId);
+    const nbOfDonePostRegistered = await getNbOfPostDone(userId);
 
-    const nbOfPostOnEvent = await getNbOfOnEvent("myRequest", userId);
-    const nbOfPostRegisteredOnEvent = await getNbOfOnEvent(
-      "registered",
-      userId
-    );
+    const nbOfPostOnEvent = await getNbOfOnEvent(userId);
+    const nbOfPostRegisteredOnEvent = await getNbOfOnEventRegistered(userId);
 
     return {
       myRequestStats: {
@@ -220,10 +377,8 @@ const getPostStats = async (ctx) => {
         nbOfPostOnEvent,
       },
       myRegisterStats: {
-        nbOfAllPost: nbOfAllPostRegistered,
-        nbOfPendingPost: nbOfPendingPostRegistered,
-        nbOfConfirmedPost: nbOfConfirmedPostRegistered,
         nbOfActivePost: nbOfActivePostRegistered,
+        nbOfConfirmedPost: nbOfConfirmedPostRegistered,
         nbOfDonePost: nbOfDonePostRegistered,
         nbOfPostOnEvent: nbOfPostRegisteredOnEvent,
       },
