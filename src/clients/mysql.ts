@@ -1,7 +1,7 @@
 import { Sequelize } from "sequelize";
 
 const MySQLClient = new Sequelize(
-  process.env.DB_NAME || "heytutor-2",
+  process.env.DB_NAME || "heytutor-test",
   process.env.DB_USER || "admin",
   process.env.DB_PASSWORD || "kbdZZeiS",
   {
