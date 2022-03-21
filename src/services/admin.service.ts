@@ -198,8 +198,6 @@ const systemDetailsInXDays = async (nbOfDays) => {
     let percentXdaysEventChange = nbEventInXDays*100;
     if(nbEventInPreviousXDays !== 0) {
       percentXdaysEventChange = (nbEventInXDays-nbEventInPreviousXDays)/nbEventInPreviousXDays*100;
-    } else {
-      percentXdaysEventChange = nbEventInXDays;
     }
 
     let percentXdaysPostChange = nbOfNewPostInXDays*100;
