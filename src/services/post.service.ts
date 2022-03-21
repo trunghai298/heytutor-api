@@ -283,8 +283,10 @@ const postDetailByPostId = async (postId) => {
       where: { postId },
       include: [Post],
       raw: true,
+      logging: true,
       attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
     });
+    console.log(postDetail);
     const res = omit(postDetail, [
       "id",
       "postId",
