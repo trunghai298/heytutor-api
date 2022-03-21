@@ -18,8 +18,15 @@ const listAllCollaborator = (req, res, next) => {
   .catch(next);
 }
 
+const systemDetailsInXDays = (req, res, next) => {
+  AdminServices.systemDetailsInXDays(req.query.nbOfDays)
+  .then((result) => res.json(result))
+  .catch(next);
+}
+
 export default {
   addCollaborator,
   updateCollaborator,
   listAllCollaborator,
+  systemDetailsInXDays,
 };
