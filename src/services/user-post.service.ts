@@ -6,6 +6,7 @@ import { map, countBy, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
+const sequelize = require("sequelize");
 
 /**
  * To create a new term
@@ -685,10 +686,59 @@ const getListMyRequests = async (ctx, limit, offset) => {
   }
 };
 
+const countPostDoneByMonth = async () => {
+  try {
+    let currentMonth = new Date().getMonth() + 1;
+    let postByMonth = [];
+    for (let i = 0; i < 5; i++) {
+      let countDone = 0;
+      const posts = await UserPost.findAll ({
+        where: sequelize.where(
+          sequelize.fn("month", sequelize.col("updatedAt")),
+          currentMonth
+        ),
+      });
+      map(posts, async (event) => {
+        if(event.isDone === 1) {
+          countDone++;
+        }
+      });
+      postByMonth.push(countDone);
+      currentMonth--;
+    }
+    return postByMonth;
+  } catch (error) {
+    return error;
+  }
+}
+
+const countPostCreatedByMonth = async () => {
+  try {
+    let currentMonth = new Date().getMonth() + 1;
+    let postByMonth = [];
+
+    for (let i = 0; i < 5; i++) {
+      const posts = await UserPost.findAll ({
+        where: sequelize.where(
+          sequelize.fn("month", sequelize.col("createdAt")),
+          currentMonth
+        ),
+      });
+
+      postByMonth.push(posts.length);
+    }
+    return postByMonth;
+  } catch (error) {
+    return error;
+  }
+}
+
 export default {
   list,
   getPostStats,
   updatePostStatus,
   getListMyRequests,
   listRegistedRequests,
+  countPostDoneByMonth,
+  countPostCreatedByMonth,
 };

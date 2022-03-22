@@ -24,9 +24,16 @@ const systemDetailsInXDays = (req, res, next) => {
   .catch(next);
 }
 
+// const topEvent = (req, res, next) => {
+//   AdminServices.topEvent(req.query.nbOfDays)
+//   .then((result) => res.json(result))
+//   .catch(next);
+// }
+
 export default {
   addCollaborator,
   updateCollaborator,
   listAllCollaborator,
   systemDetailsInXDays,
+  // topEvent,
 };

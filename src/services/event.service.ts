@@ -7,7 +7,7 @@ import { map } from "lodash";
 import { isEmpty, omit, pick } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
-
+const sequelize = require("sequelize");
 /**
  * To create a new event
  */
@@ -198,7 +198,7 @@ const listEventByUser = async (ctx) => {
     });
     let mapEvent = [];
     const EventStats = await Promise.all(
-      map(listEvent, async(event) => {
+      map(listEvent, async (event) => {
         const eventStats = await getEventStats(event.eventId);
         mapEvent.push(eventStats);
       })
@@ -362,6 +362,30 @@ const getEventByDuration = async () => {
   }
 };
 
+const countViewEventCreatedByMonth = async () => {
+  try {
+    let currentMonth = new Date().getMonth() + 1;
+    let viewByMonth = [];
+    for (let i = 0; i < 5; i++) {
+      const eventView = await Event.findAll({
+        where: sequelize.where(
+          sequelize.fn("month", sequelize.col("createdAt")),
+          currentMonth
+        ),
+      });
+      let monthEventView = 0;
+      map(eventView, async (event) => {
+        monthEventView += event.viewCount;
+      });
+      viewByMonth.push(monthEventView);
+      currentMonth--;
+    }
+    return viewByMonth;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   create,
   edit,
@@ -373,4 +397,5 @@ export default {
   getEventStats,
   getEventUserPostDetail,
   getEventByDuration,
+  countViewEventCreatedByMonth,
 };

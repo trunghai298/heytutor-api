@@ -16,6 +16,22 @@ const getUserRank = async (payload) => {
   }
 };
 
+const top5User = async () => {
+  try {
+    const topUser = await Ranking.findAll({
+      limit: 5,
+      order: [
+        ['rankPoint', 'DESC'],
+        ['voteCount', 'DESC'],
+      ]
+    });
+    return topUser
+  } catch (error) {
+    return (error);
+  }
+};
+
 export default {
   getUserRank,
+  top5User,
 };

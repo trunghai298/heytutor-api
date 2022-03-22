@@ -10,6 +10,7 @@ import { Op } from "sequelize";
 import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
 import Ranking from "../models/ranking.model";
+const sequelize = require("sequelize");
 
 /**
  * To create a new post
@@ -601,6 +602,27 @@ const supportFilters = (userId, filters) => {
   return where;
 };
 
+const countPostCreatedByMonth = async () => {
+  try {
+    let currentMonth = new Date().getMonth() + 1;
+    let postByMonth = [];
+
+    for (let i = 0; i < 5; i++) {
+      const posts = await Post.findAll ({
+        where: sequelize.where(
+          sequelize.fn("month", sequelize.col("createdAt")),
+          currentMonth
+        ),
+      });
+      postByMonth.push(posts.length);
+      currentMonth--;
+    }
+    return postByMonth;
+  } catch (error) {
+    return error;
+  }
+}
+
 export default {
   listPostByUserId,
   listAllPost,
@@ -611,4 +633,5 @@ export default {
   getListPostByFilter,
   getAllDetailsByPostId,
   getListHashtag,
+  countPostCreatedByMonth,
 };
