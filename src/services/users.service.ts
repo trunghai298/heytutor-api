@@ -2,6 +2,8 @@ import User from "../models/user.model";
 import Post from "../models/post.model";
 import { NotFoundError } from "../utils/errors";
 import Ranking from "../models/ranking.model";
+import UserPost from "../models/user-post.model";
+import { filter } from "lodash";
 
 /**
  * To information of a user
@@ -15,7 +17,24 @@ const getUserInfo = async (userId: number) => {
       attributes: {
         exclude: ["password"],
       },
+      raw: true,
     });
+
+    const userRanking = await Ranking.findOne({
+      where: { userId },
+      raw: true,
+    });
+
+    const userPostStats = await UserPost.findAll({
+      where: {
+        userId,
+      },
+      raw: true,
+    });
+
+    const nbTotalPost = userPostStats.length || 0;
+    const nbDonePost =
+      filter(userPostStats, (post) => post.isDone === 1).length || 0;
 
     if (!user) {
       throw new NotFoundError({
@@ -24,7 +43,13 @@ const getUserInfo = async (userId: number) => {
       });
     }
 
-    return user;
+    return {
+      ...user,
+      voteCount: userRanking.voteCount,
+      rankPoint: userRanking.rankPoint,
+      nbTotalPost,
+      nbDonePost,
+    };
   } catch (error) {}
 };
 

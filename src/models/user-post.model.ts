@@ -14,7 +14,7 @@ interface UserPostInstance extends Model {
   isActive: boolean;
   isDone: boolean;
   isConfirmed: boolean;
-  isEdited: boolean;
+  isPinned: boolean;
 }
 
 const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
@@ -28,12 +28,15 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   supporterId: {
-    type: DataTypes.JSONB,
+    type: DataTypes.JSON,
     defaultValue: null,
   },
   registerId: {
-    type: DataTypes.JSONB,
+    type: DataTypes.JSON,
     defaultValue: null,
+  },
+  postId: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
     type: DataTypes.INTEGER.UNSIGNED,
@@ -42,9 +45,6 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
   conversationId: {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: null,
-  },
-  postId: {
-    type: DataTypes.INTEGER.UNSIGNED,
   },
   isPending: {
     type: DataTypes.INTEGER.UNSIGNED,

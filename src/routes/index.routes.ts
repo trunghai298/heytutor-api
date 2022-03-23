@@ -14,6 +14,9 @@ import File from "./file.routes";
 import UserEvent from "./user-event.routes";
 import UserPost from "./user-post.routes";
 import Ranking from "./ranking.routes";
+import Admin from "./admin.routes";
+import Activity from "./activity.routes";
+import Ban from "./ban.routes";
 
 export default (app: any) => {
   Auth(app);
@@ -32,4 +35,7 @@ export default (app: any) => {
   UserEvent(app);
   UserPost(app);
   Ranking(app);
+  Admin(app);
+  Activity(app);
+  Ban(app);
 };

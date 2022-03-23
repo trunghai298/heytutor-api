@@ -11,6 +11,7 @@ interface PostInstance extends Model {
   images: string;
   isEdited: boolean;
   isSaveDraft: boolean;
+  deadline: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -44,6 +45,11 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   isSaveDraft: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
+  },
+  deadline: {
+    type: DataTypes.DATE,
+    allowNull: true,
+    defaultValue: null,
   },
   createdAt: {
     type: DataTypes.DATE,
