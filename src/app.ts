@@ -60,7 +60,7 @@ app.use(initSecurity());
 
 // JWT verification
 // app.use(authenticateJWT());
-console.log(process.env.DB_NAME);
+
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
 

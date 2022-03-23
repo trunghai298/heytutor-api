@@ -6,6 +6,13 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
+const registerEvent = (req, res, next) => {
+  UserEventServices.registerEvent(req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   list,
+  registerEvent,
 };

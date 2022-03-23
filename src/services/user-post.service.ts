@@ -391,41 +391,89 @@ const getPostStats = async (ctx) => {
   }
 };
 
-const updatePostStatus = async (post) => {
-  const { postId, status } = post;
+const updatePostStatus = async (payload) => {
+  const { postId, status, userId } = payload;
 
   try {
+    const listRegister = await UserPost.findOne({
+      where: { postId },
+    });
+
+    let mapRegister = listRegister.registerId;
+
+    const listSupporter = await UserPost.findOne({
+      where: { postId },
+      attributes: ["supporterId"],
+    });
+    let mapSupporter = listSupporter.supporterId;
+
     if (status === "isActive") {
-      await UserPost.update(
-        {
-          isDone: 0,
-          isActive: 1,
-          isPending: 0,
-        },
-        { where: { postId }, logging: true }
-      );
+      if (mapRegister === null) {
+        mapRegister = [userId];
+        await UserPost.update(
+          {
+            isDone: 0,
+            isActive: 1,
+            isPending: 0,
+            isConfirmed: 0,
+            registerId: mapRegister,
+          },
+          { where: { postId } }
+        );
+      } else {
+        mapRegister.push(userId);
+        await UserPost.update(
+          {
+            registerId: mapRegister,
+          },
+          { where: { postId } }
+        );
+      }
+    } else if (status == "isConfirmed") {
+      if (mapSupporter === null) {
+        mapSupporter = [userId];
+        await UserPost.update(
+          {
+            isDone: 0,
+            isActive: 0,
+            isPending: 0,
+            isConfirmed: 1,
+            supporterId: mapSupporter,
+          },
+          { where: { postId } }
+        );
+      } else {
+        mapSupporter.push(userId);
+        await UserPost.update(
+          {
+            supporterId: mapSupporter,
+          },
+          { where: { postId } }
+        );
+      }
     } else if (status === "isDone") {
       await UserPost.update(
         {
           isDone: 1,
           isActive: 0,
           isPending: 0,
+          isConfirmed: 0,
         },
-        { where: { postId }, logging: true }
+        { where: { postId } }
       );
     } else if (status === "isPending") {
-      {
-        await UserPost.update(
-          {
-            isDone: 0,
-            isActive: 0,
-            isPending: 1,
-          },
-          { where: { postId }, logging: true }
-        );
-      }
+      await UserPost.update(
+        {
+          isDone: 0,
+          isActive: 0,
+          isPending: 1,
+          isConfirmed: 0,
+        },
+        { where: { postId } }
+      );
     }
-    return { status: "done" };
+
+    return { postId, status, userId };
   } catch (error) {
     console.log(error);
     throw new NotFoundError({
