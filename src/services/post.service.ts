@@ -284,8 +284,10 @@ const postDetailByPostId = async (postId) => {
       where: { postId },
       include: [Post],
       raw: true,
+      logging: true,
       attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
     });
+    console.log(postDetail);
     const res = omit(postDetail, [
       "id",
       "postId",
@@ -295,6 +297,7 @@ const postDetailByPostId = async (postId) => {
     ]);
     return res;
   } catch (error) {
+    console.log(error);
     throw new BadRequestError({
       field: "postId",
       message: "Failed to list post.",
@@ -407,7 +410,6 @@ const getListPostByFilter = async (filters, ctx) => {
 };
 
 const registerDetailOfPost = async (postId) => {
-
   try {
     const listRegister = await UserPost.findOne({
       where: { postId },
@@ -421,11 +423,11 @@ const registerDetailOfPost = async (postId) => {
           raw: true,
         });
         const userRank = await Ranking.findAll({
-          where: { userId: registerId},
-          attributes: [ "userId", "rankPoint", ],
+          where: { userId: registerId },
+          attributes: ["userId", "rankPoint"],
           raw: true,
         });
-        return { registerId, userData, userRank, };
+        return { registerId, userData, userRank };
       })
     );
     return attachPostData;
@@ -438,7 +440,6 @@ const registerDetailOfPost = async (postId) => {
 };
 
 const supporterDetailOfPost = async (postId) => {
-
   try {
     const listSupporter = await UserPost.findOne({
       where: { postId },
@@ -452,11 +453,11 @@ const supporterDetailOfPost = async (postId) => {
           raw: true,
         });
         const userRank = await Ranking.findAll({
-          where: { userId: supporterId},
-          attributes: [ "userId", "rankPoint", ],
+          where: { userId: supporterId },
+          attributes: ["userId", "rankPoint"],
           raw: true,
         });
-        return { supporterId, userData, userRank, };
+        return { supporterId, userData, userRank };
       })
     );
     return attachPostData;
@@ -469,6 +470,7 @@ const supporterDetailOfPost = async (postId) => {
 };
 
 const getAllDetailsByPostId = async (postId) => {
+  console.log(postId, process.env.DB_NAME);
   try {
     const [commentCount, registers, supporters, postDetails] =
       await Promise.all([
@@ -484,6 +486,7 @@ const getAllDetailsByPostId = async (postId) => {
       postDetails,
     };
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "postId",
       message: "Post is not found",
@@ -543,9 +546,6 @@ const getListPostByFilterSupporter = async (params, ctx) => {
       order: [["createdAt", "DESC"]],
       raw: true,
     });
-
-
-
 
     const filterByHashtag = find(filters, (row) => row.type === "hashtag");
     const filterByTime = find(filters, (row) => row.type === "time");

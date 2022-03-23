@@ -157,7 +157,7 @@ const getNbOfConfirmedPostRegistered = async (userId) => {
       raw: true,
       attributes: ["supporterId"],
       group: ["supporterId"],
-      logging:true,
+      logging: true,
     });
 
     let tempArray = [];
@@ -357,7 +357,9 @@ const getPostStats = async (ctx) => {
     const nbOfPendingPost = await getNbOfPendingPost(userId);
 
     const nbOfConfirmedPost = await getNbOfConfirmedPost(userId);
-    const nbOfConfirmedPostRegistered = await getNbOfConfirmedPostRegistered(userId);
+    const nbOfConfirmedPostRegistered = await getNbOfConfirmedPostRegistered(
+      userId
+    );
 
     const nbOfActivePost = await getNbOfActivePost(userId);
     const nbOfActivePostRegistered = await getNbOfAllPostRegistered(userId);
@@ -491,7 +493,7 @@ const listRegistedRequests = async (ctx, limit, offset) => {
     const allHashtag = map(attachPostData, (item) =>
       JSON.parse(item.postData.hashtag)
     );
-    const hashTagGroup = countBy(flattenDeep(allHashtag));
+    const hashTagGroup = countBy(flattenDeep(allHashtag || []));
 
     return {
       attachPostData,
