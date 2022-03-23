@@ -218,13 +218,12 @@ const getUserRoleInEvent = async (ctx, eventId) => {
   try {
     const userId = ctx?.user?.id || 2;
 
-    const userRole = await UserPost.findOne({
+    const userRole = await UserEvent.findAll({
       where: {
         userId,
         eventId,
       },
-      attributes: ["isSupporter", "isRequester"],
-      logging: true,
+      attributes: ["isSupporter", "isRequestor"],
     });
     return userRole;
   } catch (error) {
@@ -274,8 +273,6 @@ const getEventUserPostDetail = async (ctx, eventId) => {
       userRoleInEvent: eventRole,
     };
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
       field: "eventId",
       message: "Event is not found",
@@ -352,7 +349,7 @@ const getEventByDuration = async () => {
 
     return {
       shortTermEvents: mapShortTerm1,
-      longTermEvent: mapLongTerm1,
+      longTermEvents: mapLongTerm1,
     };
   } catch (error) {
     throw new NotFoundError({
