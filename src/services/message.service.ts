@@ -111,7 +111,7 @@ const listMessages = async (params) => {
       },
       offset: parseInt(offset) || 0,
       limit: parseInt(limit) || 10,
-      order: [["createdAt", "DESC"]],
+      order: [["createdAt", "ASC"]],
       raw: true,
     });
 
