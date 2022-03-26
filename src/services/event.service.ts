@@ -126,7 +126,6 @@ const getEventUser = async (eventId) => {
       where: {
         eventId,
       },
-      group: ["userId"],
     });
 
     return {

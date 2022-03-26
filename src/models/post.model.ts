@@ -7,6 +7,7 @@ interface PostInstance extends Model {
   userId: number;
   title: string;
   content: string;
+  minPrice: number;
   hashtag: string;
   images: string;
   isEdited: boolean;
@@ -31,6 +32,9 @@ const Post = MySQLClient.define<PostInstance>("Post", {
   },
   content: {
     type: DataTypes.TEXT,
+  },
+  minPrice: {
+    type: DataTypes.DOUBLE,
   },
   images: {
     type: DataTypes.STRING,
