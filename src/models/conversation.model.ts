@@ -26,7 +26,7 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   status: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.STRING,
   },
   createdAt: {
     type: DataTypes.DATE,

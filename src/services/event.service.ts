@@ -50,7 +50,7 @@ const edit = async (payload) => {
     await transaction.rollback();
     throw new BadRequestError({
       field: "eventId",
-      message: "Failed to edit this item.",
+      message: error,
     });
   }
 };
@@ -197,7 +197,7 @@ const listEventByUser = async (ctx) => {
     });
     let mapEvent = [];
     const EventStats = await Promise.all(
-      map(listEvent, async(event) => {
+      map(listEvent, async (event) => {
         const eventStats = await getEventStats(event.eventId);
         mapEvent.push(eventStats);
       })

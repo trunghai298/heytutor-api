@@ -14,86 +14,54 @@ import { Op } from "sequelize";
 const create = async (body, ctx) => {
   const userId = ctx?.user.id || 2;
   const { message, receiverId, receiverName, postId } = body;
-
-  if (receiverId === userId) {
-    throw new BadRequestError({
-      field: "receiverId",
-      message: "You can not send message to yourself.",
-    });
-  }
-
-  if (!receiverId) {
-    throw new BadRequestError({
-      field: "receiverId",
-      message: "Receiver is not a valid user",
-    });
-  }
-
-  if (!userId) {
-    throw new BadRequestError({
-      field: "senderId",
-      message: "Sender is not a valid user",
-    });
-  }
-
-  if (isEmpty(message)) {
-    throw new BadRequestError({
-      field: "message",
-      message: "Field message is empty.",
-    });
-  }
-  const transaction = await MySQLClient.transaction();
-  let conversation = await Conversation.findOne({
-    where: {
-      postId,
-      [Op.or]: [
-        {
-          userId1: {
-            [Op.eq]: userId,
+  try {
+    let conversation = await Conversation.findOne({
+      where: {
+        postId,
+        [Op.or]: [
+          {
+            userId1: {
+              [Op.eq]: userId,
+            },
           },
-        },
-        {
-          userId2: { [Op.eq]: userId },
-        },
-      ],
-    },
-    logging: true,
-  });
+          {
+            userId2: { [Op.eq]: userId },
+          },
+        ],
+      },
+      logging: true,
+      raw: true,
+    });
 
-  if (!conversation) {
-    if (!receiverId) {
-      throw new BadRequestError({
-        field: "receiverId",
-        message: "Field receiverId is empty.",
-      });
-    }
-
-    conversation = await Conversation.create(
-      {
+    if (!conversation) {
+      conversation = await Conversation.create({
         userId1: userId,
         userId2: receiverId,
         postId,
-      },
-      { transaction }
-    );
-  }
+        status: "open",
+      });
+    }
 
-  const messageResult = await Message.create(
-    {
+    const messageResult = await Message.create({
       receiverId,
       receiverName,
       senderId: userId,
       message,
+      isSeen: 0,
+      seenAt: null,
       conversationId: conversation.id,
-      createdAt: moment(),
-    },
-    { transaction }
-  );
+    });
 
-  // send message to socket
-  // sendNewMessage(receiver.email, conversation.id, session.id, settings);
+    // send message to socket
+    // sendNewMessage(receiver.email, conversation.id, session.id, settings);
 
-  return messageResult;
+    return messageResult;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "eventId",
+      message: error,
+    });
+  }
 };
 
 /**
@@ -103,13 +71,6 @@ const listMessages = async (params) => {
   const { conversationId, offset, limit } = params;
 
   try {
-    if (!conversationId) {
-      throw new BadRequestError({
-        field: "conversationId",
-        message: "Field conversationId is empty.",
-      });
-    }
-
     const messages = await Message.findAndCountAll({
       where: {
         conversationId: parseInt(conversationId),
@@ -122,7 +83,10 @@ const listMessages = async (params) => {
 
     return messages;
   } catch (error) {
-    throw error;
+    throw new BadRequestError({
+      field: "eventId",
+      message: error,
+    });
   }
 };
 
