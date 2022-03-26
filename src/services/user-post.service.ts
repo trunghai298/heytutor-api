@@ -357,7 +357,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
           raw: true,
         });
         const supporterUsers = await Promise.all(
-          map(post.registerId, async (id) => {
+          map(post.supporterId, async (id) => {
             const userData = await getUserData(id);
             return {
               id: userData.id,
