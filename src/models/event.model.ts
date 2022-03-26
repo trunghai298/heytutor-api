@@ -21,6 +21,7 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   },
   createId: {
     type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: true,
   },
   viewCount: {
     type: DataTypes.INTEGER.UNSIGNED,

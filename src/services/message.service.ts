@@ -3,8 +3,9 @@ import { BadRequestError } from "../utils/errors";
 import { isEmpty } from "lodash";
 import MySQLClient from "../clients/mysql";
 import Conversation from "../models/conversation.model";
-import { uuid } from "uuidv4";
 import moment from "moment";
+import { map } from "lodash";
+import User from "../models/user.model";
 
 /**
  * To create a new message
@@ -66,7 +67,6 @@ const create = async (body, ctx) => {
 
     conversation = await Conversation.create(
       {
-        id: uuid(),
         userId1: user.id,
         userId2: receiverId,
       },
@@ -94,9 +94,8 @@ const create = async (body, ctx) => {
 /**
  * To list all messages of a conversation
  */
-const listMessages = (params, ctx) => {
+const listMessages = async (params) => {
   const { conversationId, offset, limit } = params;
-  const { user } = ctx;
 
   if (!conversationId) {
     throw new BadRequestError({
@@ -105,22 +104,17 @@ const listMessages = (params, ctx) => {
     });
   }
 
-  return Message.findAndCountAll({
+  const messages = await Message.findAndCountAll({
     where: {
-      $or: [
-        {
-          receiverId: user.id,
-        },
-        {
-          senderId: user.id,
-        },
-      ],
       conversationId,
     },
     offset,
     limit,
     order: [["createdAt", "DESC"]],
+    raw: true,
   });
+
+  return messages;
 };
 
 export default {
