@@ -6,29 +6,30 @@ import Conversation from "../models/conversation.model";
 import moment from "moment";
 import { map } from "lodash";
 import User from "../models/user.model";
+import { Op } from "sequelize";
 
 /**
  * To create a new message
  */
 const create = async (body, ctx) => {
-  const { user } = ctx;
-  const { message, receiverId, cId } = body;
+  const userId = ctx?.user.id || 2;
+  const { message, receiverId, receiverName, postId } = body;
 
-  if (receiverId === user.id) {
+  if (receiverId === userId) {
     throw new BadRequestError({
       field: "receiverId",
       message: "You can not send message to yourself.",
     });
   }
 
-  if (receiverId === 0) {
+  if (!receiverId) {
     throw new BadRequestError({
       field: "receiverId",
       message: "Receiver is not a valid user",
     });
   }
 
-  if (user.id === 0) {
+  if (!userId) {
     throw new BadRequestError({
       field: "senderId",
       message: "Sender is not a valid user",
@@ -44,17 +45,19 @@ const create = async (body, ctx) => {
   const transaction = await MySQLClient.transaction();
   let conversation = await Conversation.findOne({
     where: {
-      $or: [
+      postId,
+      [Op.or]: [
         {
-          userId1: user.id,
-          id: cId,
+          userId1: {
+            [Op.eq]: userId,
+          },
         },
         {
-          userId2: user.id,
-          id: cId,
+          userId2: { [Op.eq]: userId },
         },
       ],
     },
+    logging: true,
   });
 
   if (!conversation) {
@@ -67,8 +70,9 @@ const create = async (body, ctx) => {
 
     conversation = await Conversation.create(
       {
-        userId1: user.id,
+        userId1: userId,
         userId2: receiverId,
+        postId,
       },
       { transaction }
     );
@@ -77,7 +81,8 @@ const create = async (body, ctx) => {
   const messageResult = await Message.create(
     {
       receiverId,
-      senderId: user.id,
+      receiverName,
+      senderId: userId,
       message,
       conversationId: conversation.id,
       createdAt: moment(),
