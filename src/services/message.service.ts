@@ -76,7 +76,7 @@ const listMessages = async (params) => {
         conversationId: parseInt(conversationId),
       },
       offset: parseInt(offset) || 0,
-      limit: parseInt(limit) || 10,
+      limit: parseInt(limit) || 100,
       order: [["createdAt", "ASC"]],
       raw: true,
     });
