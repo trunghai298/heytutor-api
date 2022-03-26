@@ -3,6 +3,7 @@ import MySQLClient from "../clients/mysql";
 
 interface EventInstance extends Model {
   id: number;
+  createId: number;
   title: string;
   description: string;
   viewCount: number;
@@ -16,6 +17,9 @@ const Event = MySQLClient.define<EventInstance>("Event", {
     allowNull: false,
     autoIncrement: true,
     primaryKey: true,
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  createId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   viewCount: {
