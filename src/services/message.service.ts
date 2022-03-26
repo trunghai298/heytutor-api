@@ -97,24 +97,28 @@ const create = async (body, ctx) => {
 const listMessages = async (params) => {
   const { conversationId, offset, limit } = params;
 
-  if (!conversationId) {
-    throw new BadRequestError({
-      field: "conversationId",
-      message: "Field conversationId is empty.",
+  try {
+    if (!conversationId) {
+      throw new BadRequestError({
+        field: "conversationId",
+        message: "Field conversationId is empty.",
+      });
+    }
+
+    const messages = await Message.findAndCountAll({
+      where: {
+        conversationId: parseInt(conversationId),
+      },
+      offset: parseInt(offset) || 0,
+      limit: parseInt(limit) || 10,
+      order: [["createdAt", "DESC"]],
+      raw: true,
     });
+
+    return messages;
+  } catch (error) {
+    throw error;
   }
-
-  const messages = await Message.findAndCountAll({
-    where: {
-      conversationId,
-    },
-    offset,
-    limit,
-    order: [["createdAt", "DESC"]],
-    raw: true,
-  });
-
-  return messages;
 };
 
 export default {
