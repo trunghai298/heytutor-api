@@ -608,7 +608,7 @@ const countPostCreatedByMonth = async () => {
     let postByMonth = [];
 
     for (let i = 0; i < 5; i++) {
-      const posts = await Post.findAll ({
+      const posts = await Post.findAll({
         where: sequelize.where(
           sequelize.fn("month", sequelize.col("createdAt")),
           currentMonth
@@ -621,7 +621,147 @@ const countPostCreatedByMonth = async () => {
   } catch (error) {
     return error;
   }
-}
+};
+
+const listPosts = async (filter) => {
+  const { status, fromDate, toDate } = filter;
+  const from = fromDate || new Date();
+  const to = toDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+  try {
+    let listPosts = {};
+    if (status === "reportedBy") {
+      listPosts = await Post.findAll({
+        where: {
+          reportedBy: {
+            [Op.not]: null,
+          },
+        },
+      });
+    } else if (status === "") {
+    } else if (status === "isPinned") {
+      listPosts = await UserPost.findAll({
+        where: {
+          isPinned: 1,
+        },
+      });
+    } else if (status === "isPending") {
+      listPosts = await UserPost.findAll({
+        where: {
+          isPending: 1,
+        },
+      });
+    } else if (status === "isConfirmed") {
+      listPosts = await UserPost.findAll({
+        where: {
+          isConfirmed: 1,
+        },
+      });
+    } else if (status === "isDone") {
+      listPosts = await UserPost.findAll({
+        where: {
+          isDone: 1,
+        },
+      });
+    }
+  } catch (error) {}
+};
+
+const cancelRegister = async (ctx, postId) => {
+  const userId = ctx?.user?.id || 2;
+  const postDetail = await UserPost.findOne({
+    where: { postId },
+    attributes: ["registerId", "supporterId"],
+    raw: true,
+  });
+
+  let role = 0;
+  let mapRegister = postDetail.registerId;
+  let mapSupporter = postDetail.supporterId;
+
+  if (mapRegister.includes(userId, 0)) {
+    role = 1;
+  } else if (mapSupporter.includes(userId, 0)) {
+    role = 2;
+  }
+
+  if (role === 1) {
+    for (let i = 0; i < mapRegister.length; i++) {
+      if (mapRegister[i] === userId) {
+        mapRegister.splice(i, 1);
+      }
+    }
+    if (mapRegister.length !== 0) {
+      await UserPost.update(
+        {
+          registerId: mapRegister,
+        },
+        {
+          where: { postId },
+        }
+      );
+    } else {
+      await UserPost.update(
+        {
+          isDone: 0,
+          isActive: 0,
+          isPending: 1,
+          isConfirmed: 0,
+          registerId: mapRegister,
+        },
+        {
+          where: { postId },
+        }
+      );
+    }
+  } else if (role === 2) {
+    for (let i = 0; i < mapSupporter.length; i++) {
+      if (mapSupporter[i] === userId) {
+        mapSupporter.splice(i, 1);
+      }
+    }
+
+    const creditPoint = await Ranking.findOne ({
+      where: {
+        userId
+      },
+      attribute: ["creditPoint"],
+      raw: true,
+    });
+
+    await Ranking.update(
+      {
+        creditPoint: creditPoint - 0.5,
+      },
+      {
+        where: { userId },
+      }
+      );
+
+    if (mapSupporter.length !== 0) {
+      await UserPost.update(
+        {
+          supporterId: mapRegister,
+        },
+        {
+          where: { postId },
+        }
+      );
+    } else {
+      await UserPost.update(
+        {
+          isDone: 0,
+          isActive: 0,
+          isPending: 1,
+          isConfirmed: 0,
+          supporterId: mapSupporter,
+        },
+        {
+          where: { postId },
+        }
+      );
+    }
+  }
+};
 
 export default {
   listPostByUserId,

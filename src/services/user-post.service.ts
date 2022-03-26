@@ -395,17 +395,12 @@ const updatePostStatus = async (payload) => {
   const { postId, status, userId } = payload;
 
   try {
-    const listRegister = await UserPost.findOne({
+    const postDetail = await UserPost.findOne({
       where: { postId },
     });
 
-    let mapRegister = listRegister.registerId;
-
-    const listSupporter = await UserPost.findOne({
-      where: { postId },
-      attributes: ["supporterId"],
-    });
-    let mapSupporter = listSupporter.supporterId;
+    let mapRegister = postDetail.registerId;
+    let mapSupporter = postDetail.supporterId;
 
     if (status === "isActive") {
       if (mapRegister === null) {

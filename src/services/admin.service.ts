@@ -205,6 +205,10 @@ const topEvent = async (nbOfDays) => {
   }
 };
 
+const controlUserAndPost = async (filter) => {
+  
+}
+
 const systemDetailsInXDays = async (nbOfDays) => {
   const twoTimeNbOfDays = nbOfDays * 2;
 
