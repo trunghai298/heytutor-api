@@ -41,6 +41,7 @@ const getPostStats = async (ctx) => {
   const userId = ctx?.user?.id || 2;
 
   try {
+    // my request
     const myRequests = await getNbOfAllPost(userId);
     const nbOfConfirmedPost = filter(
       myRequests,
@@ -51,7 +52,17 @@ const getPostStats = async (ctx) => {
       myRequests,
       (item) => item.eventId !== null
     ).length;
+    const nbOfPostHasRegister = filter(
+      myRequests,
+      (item) => item.supporterId === null && item.registerId !== null
+    ).length;
+    const nbOfPostHasNoRegister = filter(
+      myRequests,
+      (item) => item.supporterId === null && item.registerId === null
+    ).length;
+    //
 
+    // request di dang ki lam support
     const registeredRequest = await MySQLClient.query(
       `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
       { type: "SELECT" }
@@ -83,6 +94,8 @@ const getPostStats = async (ctx) => {
         nbOfConfirmedPost,
         nbOfDonePost,
         nbOfPostOnEvent,
+        nbOfPostHasRegister,
+        nbOfPostHasNoRegister,
       },
       myRegisterStats: {
         nbOfTotalRegisteredPost: totalRegisterPost,
