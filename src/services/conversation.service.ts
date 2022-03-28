@@ -7,19 +7,23 @@ import { Op } from "sequelize";
  */
 const getConversationOfPost = async (params, ctx) => {
   const myUserId = ctx?.user.id || 2;
-  const { postId } = params;
+  const { postId, userId } = params;
 
   const conversations = await Conversation.findOne({
     where: {
-      postId,
+      postId: parseInt(postId),
       [Op.or]: [
         {
           userId1: {
             [Op.eq]: myUserId,
           },
+          userId2: {
+            [Op.eq]: parseInt(userId),
+          },
         },
         {
           userId2: { [Op.eq]: myUserId },
+          userId1: { [Op.eq]: parseInt(userId) },
         },
       ],
     },
