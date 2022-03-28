@@ -67,7 +67,11 @@ const getEventByDuration = (req, res, next) => {
 // };
 
 const getListEventNotEnroll = (req, res, next) => {
-  EventServices.getListEventNotEnroll(req.ctx)
+  EventServices.getListEventNotEnroll(
+    req.ctx,
+    req.query.limit,
+    req.query.offset
+  )
     .then((evt) => res.json(evt))
     .catch(next);
 };

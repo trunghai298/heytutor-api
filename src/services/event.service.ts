@@ -7,7 +7,7 @@ import { map } from "lodash";
 import { isEmpty, omit, pick } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import PostService from "./post.service";
 
 /**
@@ -278,51 +278,31 @@ const getPostOfUserInEvent = async (ctx, eventId) => {
   }
 };
 
+// const listActiveUser = async (eventId) => {
+//   try {
+//     const listUser = await UserEvent.findAll({
+//       where: {
+//         eventId,
+//         isRequestor: 1,
+//       },
+//       include: [User],
+//       attributes: ["userId"],
+//       raw: true,
+//     });
+//     const requestorList = map(listRequestor, (user) => {
+//       const pickFields = pick(user, ["userId", "User.name", "User.email"]);
+//       return pickFields;
+//     });
 
-
-const listActiveUser = async (eventId) => {
-  try {
-    let listActiveRequestor = [];
-    let listActiveSupporter = [];
-    const listUser = await UserEvent.findAll({
-      where: {
-        eventId,
-      },
-      attributes: ["userId"],
-      raw: true,
-    });
-    const matchUserData = await Promise.all(
-      map(listUser, async (user) => {
-        if (await isActiveRequestor(user.userId, eventId)) {
-          const userData = await User.findOne({
-            where: {
-              id: user.userId,
-            },
-            raw: true,
-          });
-          listActiveRequestor.push(userData);
-        }
-
-        if (await isActiveSupporter(user.userId, eventId)) {
-          const userData = await User.findOne({
-            where: {
-              id: user.userId,
-            },
-            raw: true,
-          });
-          listActiveSupporter.push(userData);
-        }
-      })
-    );
-
-    return {
-      numberActiveRequestor: listActiveRequestor.length,
-      numberActiveSupporter: listActiveSupporter.length,
-    };
-  } catch (error) {
-    return error;
-  }
-};
+//     const eventPosts = await getPostOfEvent(eventId);
+//     return {
+//       numberActiveRequestor: listActiveRequestor.length,
+//       numberActiveSupporter: listActiveSupporter.length,
+//     };
+//   } catch (error) {
+//     return error;
+//   }
+// };
 
 const isActiveRequestor = async (userId, eventId) => {
   try {
@@ -499,60 +479,77 @@ const getEventUserPostDetail = async (ctx, eventId) => {
   }
 };
 
-const getListEventNotEnroll = async (ctx) => {
+const getListEventNotEnroll = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id || 2;
   const today = new Date(Date.now());
   try {
-    const listEventOfUser = await UserEvent.findAll({
+    const eventNotEnroll = await UserEvent.findAll({
       where: {
-        userId,
+        userId: {
+          [Op.ne]: userId,
+        },
       },
-      attributes: ["eventId"],
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("eventId")), "eventId"],
+      ],
       raw: true,
+      logging: true,
+      limit: parseInt(limit) || 3,
+      offset: parseInt(offset) || 0,
     });
 
-    let mapEventUserId = [];
-    let mapEventId = [];
-
-    const EventStats = await Promise.all(
-      map(listEventOfUser, async (event) => {
-        const lists = await Event.findAll({
+    const listEventActive = await Promise.all(
+      map(eventNotEnroll, async (event) => {
+        const eventData = await Event.findOne({
           where: {
             id: event.eventId,
             endAt: {
               [Op.gt]: today,
             },
           },
+          attributes: ["id"],
           raw: true,
         });
-        if (lists.length !== 0) mapEventUserId.push(lists[0].id);
+        return eventData;
       })
     );
 
-    const listEvents = await Event.findAll({
-      attributes: ["id"],
-      raw: true,
-    });
+    const listEventNotEnroll = await Promise.all(
+      map(listEventActive, async (event) => {
+        if (event !== null) {
+          const eventDetail = await getEventDetail(event.id);
+          const eventUser = await getEventUser(event.id);
+          const listPost = await getNumberPostOfEvent(event.id);
+          const listPostDone = await getPostDoneInEvent(event.id);
+          // const listActiveUsers = await listActiveUser(event.eventId);
+          return { eventDetail, eventUser, listPost, listPostDone };
+        }
+      })
+    );
 
-    map(listEvents, async (event) => {
-      mapEventId.push(event.id);
-    });
+    return listEventNotEnroll;
 
-    let difference = mapEventId.filter((x) => !mapEventUserId.includes(x));
+    // let difference = mapEventId.filter((x) => !mapEventUserId.includes(x));
 
-    let events = [];
+    // let events = [];
 
-    for (let i = 0; i < difference.length; i++) {
-      const eventDetail = await getEventDetail(difference[i]);
-      const eventUser = await getEventUser(difference[i]);
-      const listActiveUsers = await listActiveUser(difference[i]);
-      const listPost = await getNumberPostOfEvent(difference[i]);
-      const listPostDone = await getPostDoneInEvent(difference[i]);
-      const res = {eventDetail, eventUser, listActiveUsers, listPost, listPostDone};
-      events.push(res);
-    }
+    // for (let i = 0; i < difference.length; i++) {
+    //   const eventDetail = await getEventDetail(difference[i]);
+    //   const eventUser = await getEventUser(difference[i]);
+    //   const listActiveUsers = await listActiveUser(difference[i]);
+    //   const listPost = await getNumberPostOfEvent(difference[i]);
+    //   const listPostDone = await getPostDoneInEvent(difference[i]);
+    //   const res = {
+    //     eventDetail,
+    //     eventUser,
+    //     listActiveUsers,
+    //     listPost,
+    //     listPostDone,
+    //   };
+    //   events.push(res);
+    // }
 
-    return events;
+    // return events;
   } catch (error) {
     return error;
   }
@@ -698,13 +695,13 @@ const getPostDoneInEvent = async (eventId) => {
         isDone: 1,
       },
       raw: true,
-    })
+    });
 
     return listPost.length;
   } catch (error) {
     return error;
   }
-}
+};
 
 export default {
   create,
@@ -717,6 +714,6 @@ export default {
   getEventStats,
   getEventUserPostDetail,
   getEventByDuration,
-  listActiveUser,
+  // listActiveUser,
   getListEventNotEnroll,
 };
