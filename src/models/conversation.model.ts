@@ -3,7 +3,7 @@ import MySQLClient from "../clients/mysql";
 
 interface ConversationInstance extends Model {
   id: number;
-  messageId: number;
+  postId: number;
   userId1: number;
   userId2: number;
   status: string;
@@ -16,7 +16,7 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  messageId: {
+  postId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId1: {
@@ -26,7 +26,7 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   status: {
-    type: DataTypes.BOOLEAN,
+    type: DataTypes.STRING,
   },
   createdAt: {
     type: DataTypes.DATE,
