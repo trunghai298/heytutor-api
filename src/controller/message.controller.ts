@@ -7,7 +7,7 @@ const create = (req, res, next) => {
 };
 
 const list = (req, res, next) => {
-  MessageServices.listMessages(req.params, req.ctx)
+  MessageServices.listMessages(req.query)
     .then((msg) => res.json(msg))
     .catch(next);
 };
