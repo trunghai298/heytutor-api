@@ -29,6 +29,7 @@ const getNbOfAllPost = async (userId) => {
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
 
     return res.length;
@@ -57,6 +58,7 @@ const getNbOfAllPostRegistered = async (userId) => {
       raw: true,
       attributes: ["registerId"],
       group: ["registerId"],
+      logging: true,
     });
 
     let tempArray = [];
@@ -84,6 +86,8 @@ const getNbOfAllPostRegistered = async (userId) => {
 };
 
 const getNbOfPendingPost = async (userId) => {
+  // const today = new Date(Date.now());
+
   try {
     const res = await UserPost.findAll({
       where: {
@@ -100,10 +104,14 @@ const getNbOfPendingPost = async (userId) => {
         isConfirmed: {
           [Op.eq]: 0,
         },
+        // deadline: {
+        //   [Op.gt]: today,
+        // }
       },
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
     return res.length;
   } catch (error) {}
@@ -130,6 +138,7 @@ const getNbOfConfirmedPost = async (userId) => {
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
     return res.length;
   } catch (error) {}
@@ -139,7 +148,6 @@ const getNbOfConfirmedPostRegistered = async (userId) => {
   try {
     const res = await UserPost.findAll({
       where: {
-        userId,
         isPending: {
           [Op.eq]: 0,
         },
@@ -182,6 +190,8 @@ const getNbOfConfirmedPostRegistered = async (userId) => {
 };
 
 const getNbOfActivePost = async (userId) => {
+  // const today = new Date(Date.now());
+
   try {
     const res = await UserPost.findAll({
       where: {
@@ -198,6 +208,9 @@ const getNbOfActivePost = async (userId) => {
         isConfirmed: {
           [Op.eq]: 0,
         },
+        // deadline: {
+        //   [Op.gt]: today,
+        // },
       },
       raw: true,
       attributes: ["userId", "postId"],
@@ -228,6 +241,7 @@ const getNbOfDonePost = async (userId) => {
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
     return res.length;
   } catch (error) {}
@@ -253,6 +267,7 @@ const getNbOfPostDone = async (userId) => {
       raw: true,
       attributes: ["supporterId"],
       group: ["supporterId"],
+      logging: true,
     });
 
     let tempArray = [];
@@ -291,6 +306,7 @@ const getNbOfOnEvent = async (userId) => {
       raw: true,
       attributes: ["userId", "postId"],
       group: ["userId", "postId"],
+      logging: true,
     });
     return res.length;
   } catch (error) {}
@@ -366,23 +382,16 @@ const getPostStats = async (ctx) => {
     const nbOfDonePost = await getNbOfDonePost(userId);
     const nbOfDonePostRegistered = await getNbOfPostDone(userId);
 
-    const nbOfPostOnEvent = await getNbOfOnEvent(userId);
-    const nbOfPostRegisteredOnEvent = await getNbOfOnEventRegistered(userId);
-
     return {
       myRequestStats: {
-        nbOfAllPost,
         nbOfPendingPost,
         nbOfConfirmedPost,
         nbOfActivePost,
-        nbOfDonePost,
-        nbOfPostOnEvent,
       },
       myRegisterStats: {
         nbOfActivePost: nbOfActivePostRegistered,
         nbOfConfirmedPost: nbOfConfirmedPostRegistered,
         nbOfDonePost: nbOfDonePostRegistered,
-        nbOfPostOnEvent: nbOfPostRegisteredOnEvent,
       },
     };
   } catch (error) {

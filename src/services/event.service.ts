@@ -206,23 +206,35 @@ const listEventByUser = async (ctx) => {
 
     const EventStats = await Promise.all(
       map(listEvent, async (event) => {
-        const lists = await Event.findAll({
+        const lists = await Event.findOne({
           where: {
             id: event.eventId,
             endAt: {
               [Op.gt]: today,
             },
           },
+          attributes: ["id"],
           raw: true,
         });
-        if (lists.length !== 0) mapEvent.push(lists[0]);
+        if (lists !== undefined) {
+          // mapEvent.push(lists[0]);
+          return lists;
+        }
       })
     );
 
-    for (let i = 0; i < mapEvent.length; i++) {
-      const eventStats = await getEventUserPostDetail(userId, mapEvent[i].id);
-      mapDetail.push(eventStats);
-    }
+    const listEventDetail = await Promise.all(
+      map(EventStats, async (event) => {
+        if (event !== null) {
+          console.log(event.id);
+          
+          const eventStats = await getEventUserPostDetail(userId, event.id);
+          return eventStats;
+        }
+      })
+    );
+
+    console.log(listEventDetail);
 
     // map(EventStats, async (event) => {
     //   console.log(event, "event", event.id);
@@ -232,13 +244,10 @@ const listEventByUser = async (ctx) => {
     // });
 
     return {
-      listEvent: mapDetail,
+      listEvent: listEventDetail,
     };
   } catch (error) {
-    throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
-    });
+    return error;
   }
 };
 
@@ -660,11 +669,12 @@ const getPostNearEndInEvent = async (eventId) => {
         });
 
         if (posts.length !== 0) {
-          arrayPosts.push(posts);
+          // arrayPosts.push(posts);
+          return posts;
         }
       })
     );
-    return arrayPosts;
+    return listPosts;
   } catch (error) {
     return error;
   }
@@ -715,12 +725,12 @@ const getEventForCreatePost = async () => {
       },
       attributes: ["id", "title", "hashtag"],
       raw: true,
-    })
+    });
     return res;
   } catch (error) {
     return error;
   }
-}
+};
 
 export default {
   create,
