@@ -1,4 +1,3 @@
-import { double } from "aws-sdk/clients/lightsail";
 import Comment from "../models/comment.model";
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
@@ -512,71 +511,71 @@ const getListHashtag = async (ctx) => {
   }
 };
 
-const getListPostByFilterSupporter = async (params, ctx) => {
-  const { filters, limit, offset } = params;
-  const userId = ctx?.user?.id || 2;
-  const where = {};
-  where["isSupporter"] = userId;
-  map(filters, (filter) => {
-    if (
-      ["isPending", "isActive", "isDone", "isConfirmed"].includes(filter.type)
-    ) {
-      where[filter.type] = filter.value;
-    }
-    if (filter.type === "eventId") {
-      where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
-    }
-    if (filter.type === "supporterId") {
-      where["supporterId"] = filter.value === 1 ? { [Op.ne]: null } : null;
-    }
-    if (filter.type === "registerId") {
-      where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
-    }
-  });
+// const getListPostByFilterSupporter = async (params, ctx) => {
+//   const { filters, limit, offset } = params;
+//   const userId = ctx?.user?.id || 2;
+//   const where = {};
+//   where["isSupporter"] = userId;
+//   map(filters, (filter) => {
+//     if (
+//       ["isPending", "isActive", "isDone", "isConfirmed"].includes(filter.type)
+//     ) {
+//       where[filter.type] = filter.value;
+//     }
+//     if (filter.type === "eventId") {
+//       where["eventId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+//     }
+//     if (filter.type === "supporterId") {
+//       where["supporterId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+//     }
+//     if (filter.type === "registerId") {
+//       where["registerId"] = filter.value === 1 ? { [Op.ne]: null } : null;
+//     }
+//   });
 
-  return where;
+//   return where;
 
-  try {
-    const listPost = await UserPost.findAndCountAll({
-      where: supportFilters(userId, filters),
-      include: [Post],
-      limit: parseInt(limit, 10) || 100,
-      offset: parseInt(offset, 10) || 0,
-      order: [["createdAt", "DESC"]],
-      raw: true,
-    });
+//   try {
+//     const listPost = await UserPost.findAndCountAll({
+//       where: supportFilters(userId, filters),
+//       include: [Post],
+//       limit: parseInt(limit, 10) || 100,
+//       offset: parseInt(offset, 10) || 0,
+//       order: [["createdAt", "DESC"]],
+//       raw: true,
+//     });
 
-    const filterByHashtag = find(filters, (row) => row.type === "hashtag");
-    const filterByTime = find(filters, (row) => row.type === "time");
+//     const filterByHashtag = find(filters, (row) => row.type === "hashtag");
+//     const filterByTime = find(filters, (row) => row.type === "time");
 
-    let finalResult = listPost;
+//     let finalResult = listPost;
 
-    if (filterByHashtag) {
-      finalResult = map(finalResult, (row) => {
-        const intersectionHashtag = intersection(
-          JSON.parse(row["Post.hashtag"]),
-          filterByHashtag.value
-        );
-        if (intersectionHashtag.length > 0) {
-          return row;
-        } else {
-          return [];
-        }
-      });
-    }
+//     if (filterByHashtag) {
+//       finalResult = map(finalResult, (row) => {
+//         const intersectionHashtag = intersection(
+//           JSON.parse(row["Post.hashtag"]),
+//           filterByHashtag.value
+//         );
+//         if (intersectionHashtag.length > 0) {
+//           return row;
+//         } else {
+//           return [];
+//         }
+//       });
+//     }
 
-    if (filterByTime) {
-    }
+//     if (filterByTime) {
+//     }
 
-    return finalResult;
-  } catch (error) {
-    console.log(error);
-    throw new NotFoundError({
-      field: "filter",
-      message: "Filter input wrong.",
-    });
-  }
-};
+//     return finalResult;
+//   } catch (error) {
+//     console.log(error);
+//     throw new NotFoundError({
+//       field: "filter",
+//       message: "Filter input wrong.",
+//     });
+//   }
+// };
 
 const supportFilters = (userId, filters) => {
   const where = {};
@@ -611,4 +610,5 @@ export default {
   getListPostByFilter,
   getAllDetailsByPostId,
   getListHashtag,
+  countPeopleSupporterOfPost,
 };
