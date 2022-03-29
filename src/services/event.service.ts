@@ -201,9 +201,6 @@ const listEventByUser = async (ctx) => {
       raw: true,
     });
 
-    let mapEvent = [];
-    let mapDetail = [];
-
     const EventStats = await Promise.all(
       map(listEvent, async (event) => {
         const lists = await Event.findOne({
@@ -216,18 +213,21 @@ const listEventByUser = async (ctx) => {
           attributes: ["id"],
           raw: true,
         });
-        if (lists !== undefined) {
-          // mapEvent.push(lists[0]);
-          return lists;
-        }
+        return lists;
       })
     );
+
+    console.log(EventStats);
+    
 
     const listEventDetail = await Promise.all(
       map(EventStats, async (event) => {
         if (event !== null) {
           console.log(event.id);
+<<<<<<< HEAD
+=======
 
+>>>>>>> dev
           const eventStats = await getEventUserPostDetail(userId, event.id);
           return eventStats;
         }
@@ -451,18 +451,18 @@ const getEventUserPostDetail = async (ctx, eventId) => {
     //   return pickFields;
     // });
 
-    // const listRequestor = await UserEvent.findAll({
-    //   where: {
-    //     eventId,
-    //     isRequestor: 1,
-    //   },
-    //   include: [User],
-    //   raw: true,
-    // });
-    // const requestorList = map(listRequestor, (user) => {
-    //   const pickFields = pick(user, ["userId", "User.name", "User.email"]);
-    //   return pickFields;
-    // });
+    const listRequestor = await UserEvent.findAll({
+      where: {
+        eventId,
+        isRequestor: 1,
+      },
+      include: [User],
+      raw: true,
+    });
+    const requestorList = map(listRequestor, (user) => {
+      const pickFields = pick(user, ["userId", "User.name", "User.email"]);
+      return pickFields;
+    });
 
     // const eventPosts = await getPostOfEvent(eventId);
     const postNearDeadline = await getPostNearEndInEvent(eventId);
@@ -476,7 +476,7 @@ const getEventUserPostDetail = async (ctx, eventId) => {
       listPostInEventOfUser: eventUserPosts.length,
       listPostNearDeadline: postNearDeadline.length,
       listNonRegisterPost: postNoRegister.length,
-      // listUserRequestor: requestorList,
+      listUserRequestor: requestorList.length,
       // listPostOfEvent: eventPosts,
       userRoleInEvent: eventRole,
     };

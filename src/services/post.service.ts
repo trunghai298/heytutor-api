@@ -13,7 +13,10 @@ import Ranking from "../models/ranking.model";
 /**
  * To create a new post
  */
-const create = async (payload) => {
+const create = async (ctx, payload) => {
+  const { eventId, title, hashtag, minPrice, content, images } = payload;
+  const userId = ctx?.user?.id || 2;
+
   try {
     if (isEmpty(payload.content)) {
       throw new BadRequestError({
@@ -21,8 +24,26 @@ const create = async (payload) => {
         message: "Failed to create this post.",
       });
     }
-    const post = await Post.create(payload);
-    return post;
+    const post = await Post.create({
+      title: title,
+      hashtag: hashtag,
+      minPrice: minPrice,
+      content: content,
+      images: images,
+    });
+
+    const nbOfPost = Post.count({});
+
+    const userPost = await UserPost.create({
+      userId: userId,
+      postId: nbOfPost,
+      eventId: eventId,
+      isDone: 0,
+      isActive: 0,
+      isPending: 1,
+      isConfirmed: 0,
+    });
+    return "Success!!!";
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
