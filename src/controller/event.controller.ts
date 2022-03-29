@@ -60,6 +60,28 @@ const getEventByDuration = (req, res, next) => {
     .catch(next);
 };
 
+const getEventTitle = (req, res, next) => {
+  EventServices.getEventForCreatePost()
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+// const listActiveUser = (req, res, next) => {
+//   EventServices.listActiveUser(req.params.eventId)
+//     .then((evt) => res.json(evt))
+//     .catch(next);
+// };
+
+const getListEventNotEnroll = (req, res, next) => {
+  EventServices.getListEventNotEnroll(
+    req.ctx,
+    req.query.limit,
+    req.query.offset
+  )
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
@@ -71,4 +93,7 @@ export default {
   getEventUserPostDetail,
   getUserRoleInEvent,
   getEventByDuration,
+  // listActiveUser,
+  getListEventNotEnroll,
+  getEventTitle,
 };
