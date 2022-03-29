@@ -10,6 +10,7 @@ interface EventInstance extends Model {
   updatedAt: Date;
   endAt: Date;
   hashtag: string;
+  content: string;
 }
 
 const Event = MySQLClient.define<EventInstance>("Event", {
@@ -43,6 +44,9 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   hashtag: {
     type: DataTypes.TEXT,
   },
+  content: {
+    type: DataTypes.TEXT,
+  }
 });
 
 export default Event;

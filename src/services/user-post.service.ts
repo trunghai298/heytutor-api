@@ -22,6 +22,27 @@ const list = async (payload) => {
   }
 };
 
+// const create = async (payload) => {
+//   const {eventId, title, hashtag, limit, content, images} = payload;
+//   try {
+//     if (isEmpty(payload.content)) {
+//       throw new BadRequestError({
+//         field: "content",
+//         message: "Failed to create this post.",
+//       });
+//     }
+//     const post = await Post.create({
+//       title: 
+//     });
+//     return post;
+//   } catch (error) {
+//     throw new BadRequestError({
+//       field: "postId",
+//       message: "Failed to create this post.",
+//     });
+//   }
+// };
+
 const getNbOfAllPost = async (userId) => {
   try {
     const res = await UserPost.findAll({
@@ -188,6 +209,7 @@ const getNbOfConfirmedPostRegistered = async (userId) => {
     return count;
   } catch (error) {}
 };
+
 
 const getNbOfActivePost = async (userId) => {
   // const today = new Date(Date.now());
@@ -391,7 +413,7 @@ const getPostStats = async (ctx) => {
       myRegisterStats: {
         nbOfActivePost: nbOfActivePostRegistered,
         nbOfConfirmedPost: nbOfConfirmedPostRegistered,
-        nbOfDonePost: nbOfDonePostRegistered,
+        nbOfDonePostRegistered: nbOfDonePostRegistered,
       },
     };
   } catch (error) {
