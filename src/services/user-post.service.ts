@@ -94,9 +94,10 @@ const getPostStats = async (ctx) => {
       (item) => item.isActive === 1
     ).length;
 
-    const nbOfDonePostRegistered = filter(registeredRequest, (item) => {
-      item.isDone === 1;
-    }).length;
+    const nbOfDonePostRegistered = filter(
+      registeredRequest,
+      (item) => item.isDone === 1
+    ).length;
 
     const nbOfConfirmedPostRegistered = filter(
       registeredRequest,
