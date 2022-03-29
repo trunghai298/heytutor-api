@@ -83,26 +83,19 @@ const getPostStats = async (ctx) => {
       (item) => item.isConfirmed === 1
     ).length;
 
-    const nbOfPendingPostRegistered = filter(
-      registeredRequest,
-      (item) => item.isPending === 1
-    ).length;
-
     return {
       myRequestStats: {
-        nbOfAllPost: myRequests.length,
+        nbOfPostHasRegister,
         nbOfConfirmedPost,
+        nbOfPostHasNoRegister,
         nbOfDonePost,
         nbOfPostOnEvent,
-        nbOfPostHasRegister,
-        nbOfPostHasNoRegister,
       },
       myRegisterStats: {
         nbOfTotalRegisteredPost: totalRegisterPost,
         nbOfActivePost: nbOfActivePostRegistered,
         nbOfConfirmedPost: nbOfConfirmedPostRegistered,
         nbOfDonePost: nbOfDonePostRegistered,
-        nbOfPendingPost: nbOfPendingPostRegistered,
       },
     };
   } catch (error) {
