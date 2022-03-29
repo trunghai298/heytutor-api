@@ -4,7 +4,9 @@ import MySQLClient from "../clients/mysql";
 interface MessageInstance extends Model {
   id: number;
   senderId: number;
+  senderName: number;
   receiverId: number;
+  receiverName: string;
   conversationId: number;
   message: string;
   isSeen: boolean;
@@ -21,8 +23,14 @@ const Message = MySQLClient.define<MessageInstance>("Message", {
   senderId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
+  senderName: {
+    type: DataTypes.STRING,
+  },
   receiverId: {
     type: DataTypes.INTEGER.UNSIGNED,
+  },
+  receiverName: {
+    type: DataTypes.STRING,
   },
   conversationId: {
     type: DataTypes.INTEGER.UNSIGNED,

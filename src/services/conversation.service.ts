@@ -1,39 +1,38 @@
 import Message from "../models/message.model";
 import Conversation from "../models/conversation.model";
+import { Op } from "sequelize";
 
 /**
  * To list all messages of a conversation
  */
-const listConversations = async (params, ctx) => {
-  const { user } = ctx;
-  const { offset, limit } = params;
+const getConversationOfPost = async (params, ctx) => {
+  const myUserId = ctx?.user.id || 2;
+  const { postId, userId } = params;
 
-  const conversations = await Conversation.findAndCountAll({
-    distinct: true,
+  const conversations = await Conversation.findOne({
     where: {
-      $or: [
+      postId: parseInt(postId),
+      [Op.or]: [
         {
-          userId1: user.id,
+          userId1: {
+            [Op.eq]: myUserId,
+          },
+          userId2: {
+            [Op.eq]: parseInt(userId),
+          },
         },
         {
-          userId2: user.id,
+          userId2: { [Op.eq]: myUserId },
+          userId1: { [Op.eq]: parseInt(userId) },
         },
       ],
     },
-    include: [
-      {
-        model: Message,
-        limit: 1,
-        order: [["createdAt", "DESC"]],
-      },
-    ],
-    offset,
-    limit,
+    logging: true,
   });
 
   return conversations;
 };
 
 export default {
-  listConversations,
+  getConversationOfPost,
 };

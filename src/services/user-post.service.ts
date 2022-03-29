@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import { map, countBy, flattenDeep } from "lodash";
+import { map, countBy, flattenDeep, filter } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
@@ -25,322 +25,12 @@ const list = async (payload) => {
 const getNbOfAllPost = async (userId) => {
   try {
     const res = await UserPost.findAll({
-      where: userId,
+      where: { userId },
       raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-
-    return res.length;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const getNbOfAllPostRegistered = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 1,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["registerId"],
-      group: ["registerId"],
-    });
-
-    let tempArray = [];
-    for (const array of res) {
-      if (array.registerId !== null && array.registerId.length !== 0) {
-        if (tempArray.length === 0) {
-          tempArray = array.registerId;
-        } else if (tempArray.length !== 0) {
-          tempArray = tempArray.concat(array.registerId);
-        }
-      }
-    }
-
-    let count = 0;
-    for (let i = 0; i <= tempArray.length; i++) {
-      if (tempArray[i] === userId) {
-        count++;
-      }
-    }
-
-    return count;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const getNbOfPendingPost = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        isPending: {
-          [Op.eq]: 1,
-        },
-        isActive: {
-          [Op.eq]: 0,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-    return res.length;
-  } catch (error) {}
-};
-
-const getNbOfConfirmedPost = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 0,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 1,
-        },
-      },
-      raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-    return res.length;
-  } catch (error) {}
-};
-
-const getNbOfConfirmedPostRegistered = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 0,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 1,
-        },
-      },
-      raw: true,
-      attributes: ["supporterId"],
-      group: ["supporterId"],
       logging: true,
     });
 
-    let tempArray = [];
-    for (const array of res) {
-      if (array.supporterId !== null && array.supporterId.length !== 0) {
-        if (tempArray.length === 0) {
-          tempArray = array.supporterId;
-        } else if (tempArray.length !== 0) {
-          tempArray = tempArray.concat(array.supporterId);
-        }
-      }
-    }
-
-    let count = 0;
-    for (let i = 0; i <= tempArray.length; i++) {
-      if (tempArray[i] === userId) {
-        count++;
-      }
-    }
-
-    return count;
-  } catch (error) {}
-};
-
-const getNbOfActivePost = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 1,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-    return res.length;
-  } catch (error) {}
-};
-
-const getNbOfDonePost = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 0,
-        },
-        isDone: {
-          [Op.eq]: 1,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-    return res.length;
-  } catch (error) {}
-};
-
-const getNbOfPostDone = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 0,
-        },
-        isDone: {
-          [Op.eq]: 1,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["supporterId"],
-      group: ["supporterId"],
-    });
-
-    let tempArray = [];
-    for (const array of res) {
-      if (array.supporterId !== null && array.supporterId.length !== 0) {
-        if (tempArray.length === 0) {
-          tempArray = array.supporterId;
-        } else if (tempArray.length !== 0) {
-          tempArray = tempArray.concat(array.supporterId);
-        }
-      }
-    }
-
-    let count = 0;
-    for (let i = 0; i <= tempArray.length; i++) {
-      if (tempArray[i] === userId) {
-        count++;
-      }
-    }
-
-    return count;
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const getNbOfOnEvent = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        userId,
-        eventId: {
-          [Op.ne]: null,
-        },
-      },
-      raw: true,
-      attributes: ["userId", "postId"],
-      group: ["userId", "postId"],
-    });
-    return res.length;
-  } catch (error) {}
-};
-
-const getNbOfOnEventRegistered = async (userId) => {
-  try {
-    const res = await UserPost.findAll({
-      where: {
-        eventId: {
-          [Op.ne]: null,
-        },
-        isPending: {
-          [Op.eq]: 0,
-        },
-        isActive: {
-          [Op.eq]: 1,
-        },
-        isDone: {
-          [Op.eq]: 0,
-        },
-        isConfirmed: {
-          [Op.eq]: 0,
-        },
-      },
-      raw: true,
-      attributes: ["registerId"],
-      group: ["registerId"],
-      logging: true,
-    });
-
-    let tempArray = [];
-    for (const array of res) {
-      if (array.registerId !== null && array.registerId.length !== 0) {
-        if (tempArray.length === 0) {
-          tempArray = array.registerId;
-        } else if (tempArray.length !== 0) {
-          tempArray = tempArray.concat(array.registerId);
-        }
-      }
-    }
-
-    let count = 0;
-    for (let i = 0; i <= tempArray.length; i++) {
-      if (tempArray[i] === userId) {
-        count++;
-      }
-    }
-
-    return count;
+    return res;
   } catch (error) {
     console.log(error);
   }
@@ -351,38 +41,68 @@ const getPostStats = async (ctx) => {
   const userId = ctx?.user?.id || 2;
 
   try {
-    const nbOfAllPost = await getNbOfAllPost(userId);
+    // my request
+    const myRequests = await getNbOfAllPost(userId);
+    const nbOfConfirmedPost = filter(
+      myRequests,
+      (item) => item.isConfirmed === 1 && item.isDone !== 1
+    ).length;
+    const nbOfDonePost = filter(myRequests, (item) => item.isDone === 1).length;
+    const nbOfPostOnEvent = filter(
+      myRequests,
+      (item) => item.eventId !== null
+    ).length;
+    const nbOfPostHasRegister = filter(
+      myRequests,
+      (item) => item.supporterId === null && item.registerId !== null
+    ).length;
+    const nbOfPostHasNoRegister = filter(
+      myRequests,
+      (item) => item.supporterId === null && item.registerId === null
+    ).length;
+    //
 
-    const nbOfPendingPost = await getNbOfPendingPost(userId);
-
-    const nbOfConfirmedPost = await getNbOfConfirmedPost(userId);
-    const nbOfConfirmedPostRegistered = await getNbOfConfirmedPostRegistered(
-      userId
+    // request di dang ki lam support
+    const registeredRequest = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
+      { type: "SELECT" }
     );
 
-    const nbOfActivePost = await getNbOfActivePost(userId);
-    const nbOfActivePostRegistered = await getNbOfAllPostRegistered(userId);
+    const totalRegisterPost = registeredRequest.length;
+    const nbOfActivePostRegistered = filter(
+      registeredRequest,
+      (item) => item.isActive === 1
+    ).length;
 
-    const nbOfDonePost = await getNbOfDonePost(userId);
-    const nbOfDonePostRegistered = await getNbOfPostDone(userId);
+    const nbOfDonePostRegistered = filter(registeredRequest, (item) => {
+      item.isDone === 1;
+    }).length;
 
-    const nbOfPostOnEvent = await getNbOfOnEvent(userId);
-    const nbOfPostRegisteredOnEvent = await getNbOfOnEventRegistered(userId);
+    const nbOfConfirmedPostRegistered = filter(
+      registeredRequest,
+      (item) => item.isConfirmed === 1
+    ).length;
+
+    const nbOfPendingPostRegistered = filter(
+      registeredRequest,
+      (item) => item.isPending === 1
+    ).length;
 
     return {
       myRequestStats: {
-        nbOfAllPost,
-        nbOfPendingPost,
+        nbOfAllPost: myRequests.length,
         nbOfConfirmedPost,
-        nbOfActivePost,
         nbOfDonePost,
         nbOfPostOnEvent,
+        nbOfPostHasRegister,
+        nbOfPostHasNoRegister,
       },
       myRegisterStats: {
+        nbOfTotalRegisteredPost: totalRegisterPost,
         nbOfActivePost: nbOfActivePostRegistered,
         nbOfConfirmedPost: nbOfConfirmedPostRegistered,
         nbOfDonePost: nbOfDonePostRegistered,
-        nbOfPostOnEvent: nbOfPostRegisteredOnEvent,
+        nbOfPendingPost: nbOfPendingPostRegistered,
       },
     };
   } catch (error) {
@@ -562,6 +282,9 @@ const listPostHasRegister = async (userId, limit, offset) => {
         registerId: {
           [Op.ne]: null,
         },
+        isDone: {
+          [Op.ne]: 1,
+        },
       },
       raw: true,
       limit,
@@ -632,6 +355,9 @@ const listPostHasSupporter = async (userId, limit, offset) => {
         supporterId: {
           [Op.ne]: null,
         },
+        isDone: {
+          [Op.ne]: 1,
+        },
       },
       raw: true,
       limit,
@@ -644,7 +370,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
           raw: true,
         });
         const supporterUsers = await Promise.all(
-          map(post.registerId, async (id) => {
+          map(post.supporterId, async (id) => {
             const userData = await getUserData(id);
             return {
               id: userData.id,
@@ -675,6 +401,39 @@ const listPostOnEvent = async (userId, limit, offset) => {
         userId,
         eventId: {
           [Op.ne]: null,
+        },
+        isDone: {
+          [Op.ne]: 1,
+        },
+      },
+      raw: true,
+      limit,
+      offset,
+    });
+
+    const res = await Promise.all(
+      map(postHasRegister, async (post) => {
+        const postData = await getPost(post.postId);
+        return { ...post, postData };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const listPostDone = async (userId, limit, offset) => {
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        isDone: {
+          [Op.eq]: 1,
         },
       },
       raw: true,
@@ -720,12 +479,14 @@ const getListMyRequests = async (ctx, limit, offset) => {
       offsetValue
     );
     const postOnEvent = await listPostOnEvent(userId, limitValue, offsetValue);
+    const postDone = await listPostDone(userId, limitValue, offsetValue);
 
     return {
       postHasRegister,
       postHasNoRegister,
       postHasSupporter,
       postOnEvent,
+      postDone,
     };
   } catch (error) {
     throw new BadRequestError({
