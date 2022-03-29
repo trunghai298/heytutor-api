@@ -703,6 +703,25 @@ const getPostDoneInEvent = async (eventId) => {
   }
 };
 
+const getEventForCreatePost = async () => {
+  const today = new Date(Date.now());
+
+  try {
+    const res = await Event.findAll({
+      where: {
+        endAt: {
+          [Op.gt]: today,
+        },
+      },
+      attributes: ["id", "title", "hashtag"],
+      raw: true,
+    })
+    return res;
+  } catch (error) {
+    return error;
+  }
+}
+
 export default {
   create,
   edit,
@@ -716,4 +735,5 @@ export default {
   getEventByDuration,
   // listActiveUser,
   getListEventNotEnroll,
+  getEventForCreatePost,
 };

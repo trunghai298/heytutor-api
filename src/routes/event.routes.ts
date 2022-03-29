@@ -13,4 +13,5 @@ export default (app) => {
     .get("/get-event-by-duration", EventController.getEventByDuration)
     // .get("/listActiveUser/:eventId", EventController.listActiveUser)
     .get("/getListEventNotEnroll", EventController.getListEventNotEnroll)
+    .get("/get-event-title", EventController.getEventTitle)
   };
