@@ -90,7 +90,12 @@ const getPostStats = async (ctx) => {
 
     return {
       myRequestStats: {
+<<<<<<< Updated upstream
         nbOfAllPost: myRequests.length,
+=======
+        nbTotalRequest: myRequests.length,
+        nbOfPostHasRegister,
+>>>>>>> Stashed changes
         nbOfConfirmedPost,
         nbOfDonePost,
         nbOfPostOnEvent,
