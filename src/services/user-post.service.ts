@@ -122,6 +122,7 @@ const getPostStats = async (ctx) => {
         nbOfTotalRegisteredPost: totalRegisterPost,
         nbOfActivePost: nbOfActivePostRegistered,
         nbOfConfirmedPost: nbOfConfirmedPostRegistered,
+        nbOfDonePostRegistered: nbOfDonePostRegistered,
         nbOfDonePost: nbOfDonePostRegistered,
         nbOfPendingPost: nbOfPendingPostRegistered,
       },
@@ -137,6 +138,8 @@ const updatePostStatus = async (payload) => {
   try {
     const listRegister = await UserPost.findOne({
       where: { postId },
+      attributes: ["registerId"],
+      raw: true,
     });
 
     let mapRegister = listRegister.registerId;
@@ -144,6 +147,7 @@ const updatePostStatus = async (payload) => {
     const listSupporter = await UserPost.findOne({
       where: { postId },
       attributes: ["supporterId"],
+      raw: true,
     });
     let mapSupporter = listSupporter.supporterId;
 
@@ -220,6 +224,102 @@ const updatePostStatus = async (payload) => {
       field: "postId",
       message: "Post is not found",
     });
+  }
+};
+
+const removeRegister = async (payload) => {
+  const { postId, userId } = payload;
+
+  try {
+    const listUsers = await UserPost.findOne({
+      where: { postId },
+      attributes: ["registerId"],
+      raw: true,
+    });
+
+    let arrayRegister = [];
+
+    if (listUsers.registerId !== null) {
+      arrayRegister = listUsers.registerId;
+    }
+
+    if (arrayRegister.includes(userId)) {
+      for (var i = 0; i < arrayRegister.length; i++) {
+        if (arrayRegister[i] === userId) {
+          arrayRegister.splice(i, 1);
+        }
+      }
+
+      const remove = await UserPost.update(
+        {
+          registerId: arrayRegister,
+        },
+        {
+          where: { postId },
+        }
+      );
+
+      return "Success!";
+    } else {
+      return "User did not in register list!";
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
+const addSupporter = async (payload) => {
+  const { postId, userId } = payload;
+
+  try {
+    const listUsers = await UserPost.findOne({
+      where: { postId },
+      attributes: ["registerId", "supporterId"],
+      raw: true,
+    });
+
+    let arrayRegister = [];
+    let arraySupporter = [];
+
+    if (listUsers.registerId !== null) {
+      arrayRegister = listUsers.registerId;
+    }
+
+    if (listUsers.supporterId !== null) {
+      arraySupporter = listUsers.supporterId;
+    }
+
+    console.log(
+      arrayRegister.includes(userId),
+      "testttest",
+      !arraySupporter.includes(userId)
+    );
+
+    if (arrayRegister.includes(userId) && !arraySupporter.includes(userId)) {
+      for (var i = 0; i < arrayRegister.length; i++) {
+        if (arrayRegister[i] === userId) {
+          arrayRegister.splice(i, 1);
+        }
+      }
+
+      arraySupporter.push(userId);
+
+      const add = await UserPost.update(
+        {
+          registerId: arrayRegister,
+          supporterId: arraySupporter,
+        },
+        {
+          where: { postId },
+        }
+      );
+
+      return "Success!";
+    } else {
+      return "Wrong input!";
+    }
+  } catch (error) {
+    return error;
   }
 };
 
@@ -523,4 +623,6 @@ export default {
   updatePostStatus,
   getListMyRequests,
   listRegistedRequests,
+  removeRegister,
+  addSupporter,
 };
