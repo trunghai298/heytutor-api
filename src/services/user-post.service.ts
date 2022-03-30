@@ -241,15 +241,11 @@ const removeRegister = async (payload) => {
     }
 
     if (arrayRegister.includes(userId)) {
-      for (var i = 0; i < arrayRegister.length; i++) {
-        if (arrayRegister[i] === userId) {
-          arrayRegister.splice(i, 1);
-        }
-      }
+      let arRegister = arrayRegister.filter(item => item !== userId);
 
       const remove = await UserPost.update(
         {
-          registerId: arrayRegister,
+          registerId: arRegister,
         },
         {
           where: { postId },
@@ -293,17 +289,13 @@ const addSupporter = async (payload) => {
     );
 
     if (arrayRegister.includes(userId) && !arraySupporter.includes(userId)) {
-      for (var i = 0; i < arrayRegister.length; i++) {
-        if (arrayRegister[i] === userId) {
-          arrayRegister.splice(i, 1);
-        }
-      }
+      let arRegister = arrayRegister.filter(item => item !== userId);
 
       arraySupporter.push(userId);
 
       const add = await UserPost.update(
         {
-          registerId: arrayRegister,
+          registerId: arRegister,
           supporterId: arraySupporter,
         },
         {
