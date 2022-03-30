@@ -224,10 +224,6 @@ const listEventByUser = async (ctx) => {
       map(EventStats, async (event) => {
         if (event !== null) {
           console.log(event.id);
-<<<<<<< HEAD
-=======
-
->>>>>>> dev
           const eventStats = await getEventUserPostDetail(userId, event.id);
           return eventStats;
         }

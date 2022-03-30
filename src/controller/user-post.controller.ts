@@ -28,9 +28,23 @@ const listRegistedRequests = (req, res, next) => {
     .catch(next);
 };
 
+const removeRegister = (req, res, next) => {
+  UserPostServices.removeRegister(req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const addSupporter = (req, res, next) => {
+  UserPostServices.addSupporter(req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   getPostStats,
   updatePostStatus,
   getListMyRequests,
   listRegistedRequests,
+  removeRegister,
+  addSupporter,
 };

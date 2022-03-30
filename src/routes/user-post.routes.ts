@@ -5,5 +5,7 @@ export default (app) => {
     .get("/user-post/stats", UserPostController.getPostStats)
     .put("/update-user-status", UserPostController.updatePostStatus)
     .get("/user-post/registered", UserPostController.listRegistedRequests)
-    .get("/user-post/my-request", UserPostController.getListMyRequests);
-};
+    .get("/user-post/my-request", UserPostController.getListMyRequests)
+    .get("/remove-register", UserPostController.removeRegister)
+    .get("/add-supporter", UserPostController.addSupporter)
+  };
