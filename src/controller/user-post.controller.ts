@@ -19,23 +19,25 @@ const getListMyRequests = (req, res, next) => {
 };
 
 const listRegistedRequests = (req, res, next) => {
-  UserPostServices.listRegistedRequests(
-    req.ctx,
-    req.query.limit,
-    req.query.offset
-  )
+  UserPostServices.listRegistedRequests(req.ctx, req.query)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 const removeRegister = (req, res, next) => {
-  UserPostServices.removeRegister(req.body)
+  UserPostServices.removeRegister(req.ctx, req.body)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 const addSupporter = (req, res, next) => {
-  UserPostServices.addSupporter(req.body)
+  UserPostServices.addSupporter(req.ctx, req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const unregister = (req, res, next) => {
+  UserPostServices.unregister(req.ctx, req.body)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -47,4 +49,5 @@ export default {
   listRegistedRequests,
   removeRegister,
   addSupporter,
+  unregister,
 };

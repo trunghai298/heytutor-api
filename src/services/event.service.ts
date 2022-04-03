@@ -226,8 +226,6 @@ const listEventByUser = async (ctx) => {
       })
     );
 
-    console.log(listEventDetail);
-
     // map(EventStats, async (event) => {
     //   console.log(event, "event", event.id);
 
@@ -494,7 +492,6 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
         [Sequelize.fn("DISTINCT", Sequelize.col("eventId")), "eventId"],
       ],
       raw: true,
-      logging: true,
       limit: parseInt(limit) || 3,
       offset: parseInt(offset) || 0,
     });

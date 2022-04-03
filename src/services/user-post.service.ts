@@ -2,7 +2,7 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import { map, countBy, flattenDeep, filter } from "lodash";
+import { map, countBy, flattenDeep, filter, isEmpty } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
@@ -227,99 +227,98 @@ const updatePostStatus = async (payload) => {
   }
 };
 
-const removeRegister = async (payload) => {
-  const { postId, userId } = payload;
+const removeRegister = async (ctx, payload) => {
+  const userId = ctx?.user?.id || 2;
+  const { postId, registerId } = payload;
 
   try {
-    const listUsers = await UserPost.findOne({
-      where: { postId },
-      attributes: ["registerId"],
+    const post = await UserPost.findOne({
+      where: { postId, userId },
       raw: true,
     });
 
-    let arrayRegister = [];
+    const removeRegisterFromRegisterList = post.registerId.filter(
+      (o) => o !== registerId
+    );
 
-    if (listUsers.registerId !== null) {
-      arrayRegister = listUsers.registerId;
-    }
+    await UserPost.update(
+      { registerId: removeRegisterFromRegisterList },
+      { where: { postId, userId } }
+    );
 
-    if (arrayRegister.includes(userId)) {
-      for (var i = 0; i < arrayRegister.length; i++) {
-        if (arrayRegister[i] === userId) {
-          arrayRegister.splice(i, 1);
-        }
-      }
-
-      const remove = await UserPost.update(
-        {
-          registerId: arrayRegister,
-        },
-        {
-          where: { postId },
-        }
-      );
-
-      return "Success!";
-    } else {
-      return "User did not in register list!";
-    }
+    return { status: "success" };
   } catch (error) {
-    return error;
+    throw new BadRequestError({
+      field: "postId",
+      message: error,
+    });
   }
 };
 
-const addSupporter = async (payload) => {
-  const { postId, userId } = payload;
+const addSupporter = async (ctx, payload) => {
+  const userId = ctx?.user?.id || 2;
+  const { postId, registerId } = payload;
 
   try {
-    const listUsers = await UserPost.findOne({
-      where: { postId },
+    const post = await UserPost.findOne({
+      where: { postId, userId },
       attributes: ["registerId", "supporterId"],
       raw: true,
     });
 
-    let arrayRegister = [];
-    let arraySupporter = [];
+    if (
+      post.registerId?.includes(registerId) &&
+      !post.supporterId?.includes(registerId)
+    ) {
+      const newSupportIds = !isEmpty(post.supporterId)
+        ? [...post.supporterId, registerId]
+        : [registerId];
 
-    if (listUsers.registerId !== null) {
-      arrayRegister = listUsers.registerId;
-    }
+      const newRegisterIds = post.registerId.filter((o) => o !== registerId);
 
-    if (listUsers.supporterId !== null) {
-      arraySupporter = listUsers.supporterId;
-    }
-
-    console.log(
-      arrayRegister.includes(userId),
-      "testttest",
-      !arraySupporter.includes(userId)
-    );
-
-    if (arrayRegister.includes(userId) && !arraySupporter.includes(userId)) {
-      for (var i = 0; i < arrayRegister.length; i++) {
-        if (arrayRegister[i] === userId) {
-          arrayRegister.splice(i, 1);
-        }
-      }
-
-      arraySupporter.push(userId);
-
-      const add = await UserPost.update(
+      await UserPost.update(
         {
-          registerId: arrayRegister,
-          supporterId: arraySupporter,
+          supporterId: newSupportIds,
+          registerId: newRegisterIds,
+          isConfirmed: 1,
+          isPending: 0,
         },
-        {
-          where: { postId },
-        }
+        { where: { postId, userId } }
       );
-
-      return "Success!";
+      return { status: 200 };
     } else {
-      return "Wrong input!";
+      return { status: "fail" };
     }
   } catch (error) {
-    return error;
+    throw new BadRequestError({
+      field: "id",
+      message: error,
+    });
+  }
+};
+
+const unregister = async (ctx, payload) => {
+  const userId = ctx?.user?.id || 2;
+  const { postId } = payload;
+
+  try {
+    const post = await UserPost.findOne({
+      where: { postId },
+      raw: true,
+    });
+
+    const currentRegisterIds = post.registerId;
+    const newRegisterIds = currentRegisterIds.filter((o) => o !== userId);
+    await UserPost.update(
+      { registerId: newRegisterIds },
+      { where: { postId } }
+    );
+    return { status: 200 };
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: error,
+    });
   }
 };
 
@@ -352,14 +351,29 @@ const getUserData = async (id) => {
   };
 };
 
-const listRegistedRequests = async (ctx, limit, offset) => {
+const listRegistedRequests = async (ctx, params) => {
   const userId = ctx?.user?.id || 2;
-  const limitValue = limit || 100;
-  const offsetValue = offset || 0;
+  const { limit, offset, filters } = params;
+
+  const filterParams = JSON.parse(filters);
+  const { time } = filterParams;
+  let timeFilter;
+
+  if (time === "week") {
+    timeFilter = "AND createdAt > date_sub(now(), interval 1 week)";
+  }
+
+  if (time === "month") {
+    timeFilter = "AND createdAt > date_sub(now(), interval 1 month)";
+  }
+
+  if (time.includes("BETWEEN")) {
+    timeFilter = `AND createdAt ${filterParams.time}`;
+  }
 
   try {
     const res = await MySQLClient.query(
-      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$') ${timeFilter}`,
       { type: "SELECT" }
     );
 
@@ -370,17 +384,20 @@ const listRegistedRequests = async (ctx, limit, offset) => {
           getUserData(post.userId),
         ]);
 
+        delete postData.id;
+        delete postData.createdAt;
+        delete postData.updatedAt;
+        delete userData.id;
+
         return {
           ...post,
-          postData,
-          userData,
+          ...postData,
+          ...userData,
         };
       })
     );
 
-    const allHashtag = map(attachPostData, (item) =>
-      JSON.parse(item.postData.hashtag)
-    );
+    const allHashtag = map(attachPostData, (item) => JSON.parse(item.hashtag));
     const hashTagGroup = countBy(flattenDeep(allHashtag || []));
 
     return {
@@ -625,4 +642,5 @@ export default {
   listRegistedRequests,
   removeRegister,
   addSupporter,
+  unregister,
 };
