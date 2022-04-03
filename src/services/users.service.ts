@@ -4,11 +4,17 @@ import { NotFoundError } from "../utils/errors";
 import Ranking from "../models/ranking.model";
 import UserPost from "../models/user-post.model";
 import { filter } from "lodash";
+import Admin from "../models/admin.model";
+import Event from "../models/event.model";
+import { Op } from "sequelize";
+import { map } from "lodash";
+import UserEvent from "../models/user-event.model";
+
 
 /**
  * To information of a user
  */
-const getUserInfo = async (userId: number) => {
+const getUserInfoById = async (userId: number) => {
   try {
     const user = await User.findOne({
       where: {
@@ -328,8 +334,63 @@ const getSupporterStats = async (_userId: number) => {
   }
 };
 
+const getUserManageStats = async(ctx) => {
+  const userId = ctx?.user?.id || 2;
+  const today = new Date(Date.now());
+  
+  try {
+    const roleOfUser = await Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role"],
+      raw: true,
+    })
+
+    if(roleOfUser.role === "evtCollaborator") {
+      const eventList = await Event.findAll({
+        where: {
+          createId: userId,
+          endAt: {
+            [Op.gt]: today,
+          }
+        },
+        attributes: ["id"],
+        raw: true,
+      });
+
+      const listUserInEvent = await Promise.all(
+        map(eventList, async (event) => {
+          const userInEvent = await UserEvent.findAll({
+            where: {
+              eventId: event.id,
+            },
+            attributes: ["eventId", "userId"],
+            raw: true,
+          })
+          return userInEvent;
+        })
+      );
+
+      // const listUsersDetail = await Promise.all(
+      //   map(listUserInEvent, async (user) => {
+
+      //   })
+      // )
+
+      return listUserInEvent;
+    } 
+    // else if(roleOfUser.role === "admin") {
+
+    // }
+    
+  } catch (error) {
+    return error;
+  }
+}
+
 export default {
-  getUserInfo,
+  getUserInfoById,
   fetchByEmail,
   getUserPostStats,
   getSupporterStats,
