@@ -16,6 +16,7 @@ import { setupFakeData } from "./utils/setupDb";
 import MySQLClient from "./clients/mysql";
 import { sign } from "./utils/jwt";
 import { fetchFapData } from "./scripts/getStudentsInfo";
+import Notification from "./models/notification.model";
 const app = express();
 
 // Third party middlewares
@@ -32,7 +33,7 @@ app.post("/auth/login", AuthController.login);
 
 const resetDb = async () => {
   try {
-    await MySQLClient.sync({ force: true });
+    // await Notification.sync({ force: true });
   } catch (error) {
     console.log(error);
   }
@@ -45,6 +46,7 @@ app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
 
 app.get("/mysql", async (req, res) => {
   await resetDb();
+  res.send({ message: "sync database successful" });
   // await setupFakeData(req, res);
 });
 

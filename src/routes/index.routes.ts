@@ -17,6 +17,7 @@ import Ranking from "./ranking.routes";
 import Admin from "./admin.routes";
 import Activity from "./activity.routes";
 import Ban from "./ban.routes";
+import Notification from "./notification.routes";
 
 export default (app: any) => {
   Auth(app);
@@ -38,4 +39,5 @@ export default (app: any) => {
   Admin(app);
   Activity(app);
   Ban(app);
+  Notification(app);
 };
