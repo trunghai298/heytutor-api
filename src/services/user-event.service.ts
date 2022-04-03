@@ -16,12 +16,18 @@ const list = async (payload) => {
   }
 };
 
-const registerEvent = async (payload) => {
-  const { userId, eventId, isSupporter, isRequestor } = payload;
+const joinEvent = async (ctx, payload) => {
+  const userId = ctx?.user?.id || 2;
+  const { eventId, isSupporter, isRequestor } = payload;
 
   try {
     const res = await UserEvent.findOne({
-      where: { userId, eventId },
+      where: {
+        userId,
+        eventId,
+      },
+      attributes: ["isSupporter", "isRequestor"],
+      raw: true,
     });
 
     if (res === null) {
@@ -50,7 +56,28 @@ const registerEvent = async (payload) => {
   }
 };
 
+const unJoinEvent = async (ctx, event) => {
+  const userId = ctx?.user?.id || 2;
+  const eventId = event.eventId;
+  try {
+    const res = await UserEvent.destroy({
+      where: {
+        userId,
+        eventId,
+      }
+    });
+
+    return "UnJoin Success!!!";
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId-eventId",
+      message: "Failed to create this item.",
+    });
+  }
+}
+
 export default {
   list,
-  registerEvent,
+  joinEvent,
+  unJoinEvent,
 };
