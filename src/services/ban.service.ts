@@ -41,7 +41,7 @@ const createBan = async (ctx, payload) => {
       banBy: adminId,
     });
 
-    return "Success!!!";
+    return "Create Ban Success!!!";
   } catch (error) {
     throw new BadRequestError({
       field: "id",
@@ -115,7 +115,7 @@ const updateBan = async (ctx, payload) => {
           },
         }
       );
-      return "Success!!!";
+      return "Update Ban Success!!!";
     } else {
       return "Ban expired!!!"
     }
