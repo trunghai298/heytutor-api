@@ -1,5 +1,6 @@
 import { BadRequestError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
+import UserPermissionService from "./user-permission.service";
 
 /**
  * To create a new term
@@ -37,6 +38,7 @@ const joinEvent = async (ctx, payload) => {
         isSupporter: isSupporter,
         isRequestor: isRequestor,
       });
+      await UserPermissionService.createPermission({userId: userId, eventId: eventId});
     } else {
       await UserEvent.update(
         {

@@ -9,6 +9,7 @@ interface IBanInstance extends Model {
   unbanDate: string;
   banBy: number;
   updateBy: number;
+  eventId: number;
 }
 
 const Ban = MySQLClient.define<IBanInstance>("Ban", {
@@ -44,6 +45,9 @@ const Ban = MySQLClient.define<IBanInstance>("Ban", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   updateBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  eventId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
 });

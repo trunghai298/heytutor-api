@@ -9,12 +9,13 @@ import { Op } from "sequelize";
 import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
 import Ranking from "../models/ranking.model";
+import userPermissionService from "./user-permission.service";
 
 /**
  * To create a new post
  */
 const create = async (ctx, payload) => {
-  const { eventId, title, hashtag, minPrice, content, images } = payload;
+  let { eventId, title, hashtag, minPrice, content, images } = payload;
   const userId = ctx?.user?.id || 2;
 
   try {
@@ -23,27 +24,36 @@ const create = async (ctx, payload) => {
         field: "content",
         message: "Failed to create this post.",
       });
+    } else if (
+      userPermissionService.checkUserCreatePostPermission(userId, eventId)
+    ) {
+      const post = await Post.create({
+        title: title,
+        hashtag: hashtag,
+        minPrice: minPrice,
+        content: content,
+        images: images,
+      });
+
+      const nbOfPost = Post.count({});
+
+      const userPost = await UserPost.create({
+        userId: userId,
+        postId: nbOfPost,
+        eventId: eventId,
+        isDone: 0,
+        isActive: 0,
+        isPending: 1,
+        isConfirmed: 0,
+      });
+
+      return "Success!!!";
+    } else {
+      throw new BadRequestError({
+        field: "Ban continues!!!",
+        message: "User do not have permission to create this post.",
+      });
     }
-    const post = await Post.create({
-      title: title,
-      hashtag: hashtag,
-      minPrice: minPrice,
-      content: content,
-      images: images,
-    });
-
-    const nbOfPost = Post.count({});
-
-    const userPost = await UserPost.create({
-      userId: userId,
-      postId: nbOfPost,
-      eventId: eventId,
-      isDone: 0,
-      isActive: 0,
-      isPending: 1,
-      isConfirmed: 0,
-    });
-    return "Success!!!";
   } catch (error) {
     throw new BadRequestError({
       field: "postId",

@@ -7,6 +7,7 @@ interface IUserPermissionsInstance extends Model {
   canPost: boolean;
   canRegister: boolean;
   canComment: boolean;
+  eventId: number;
 }
 
 const UserPermission = MySQLClient.define<IUserPermissionsInstance>(
@@ -32,6 +33,9 @@ const UserPermission = MySQLClient.define<IUserPermissionsInstance>(
     canComment: {
       type: DataTypes.INTEGER.UNSIGNED,
       defaultValue: 1,
+    },
+    eventId: {
+      type: DataTypes.INTEGER.UNSIGNED,
     },
   }
 );

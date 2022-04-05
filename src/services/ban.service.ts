@@ -20,7 +20,7 @@ const list = async (ctx) => {
 
 const createBan = async (ctx, payload) => {
   const adminId = ctx?.admin?.id || 2;
-  const { userId, type, banDate } = payload;
+  const { userId, type, banDate, eventId } = payload;
   // const banDate = new Date(Date.now());
   let unBanDate;
   try {
@@ -39,6 +39,7 @@ const createBan = async (ctx, payload) => {
       banDate: banDate,
       unbanDate: unBanDate,
       banBy: adminId,
+      eventId: eventId,
     });
 
     return "Create Ban Success!!!";
@@ -79,7 +80,7 @@ const createBan = async (ctx, payload) => {
 
 const updateBan = async (ctx, payload) => {
   const adminId = ctx?.admin?.id || 2;
-  const { userId, type } = payload;
+  const { userId, type, eventId } = payload;
   const today = new Date(Date.now());
   // const banDate = new Date(Date.now());
   try {
@@ -108,6 +109,7 @@ const updateBan = async (ctx, payload) => {
         {
           unbanDate: tempUnBanDate,
           updateBy: adminId,
+          eventId: eventId,
         },
         {
           where: {
