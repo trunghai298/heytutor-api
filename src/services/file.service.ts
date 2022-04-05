@@ -42,4 +42,4 @@ const upload = (files: any, fileType: any) =>
     )
   );
 
-export default { upload };
+export default { upload, resizeAndUploadSingle };

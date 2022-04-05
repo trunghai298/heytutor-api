@@ -10,11 +10,10 @@ const listNotification = async (ctx) => {
   try {
     const res = await Notification.findAll({
       where: { userId },
+      order: [["createdAt", "DESC"]],
     });
-    const unread = res.filter((item) => item.status !== "read");
-    const read = res.filter((item) => item.status === "read");
 
-    return { unread, read };
+    return res;
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
