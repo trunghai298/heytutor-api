@@ -6,6 +6,7 @@ import { map, countBy, flattenDeep, filter, isEmpty } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
+import userPermissionService from "./user-permission.service";
 
 /**
  * To create a new term
@@ -132,28 +133,94 @@ const getPostStats = async (ctx) => {
   }
 };
 
-const updatePostStatus = async (payload) => {
-  const { postId, status, userId } = payload;
+// const updatePostStatus = async (payload) => {
+//   const { postId, status, userId } = payload;
 
+//   try {
+//     const listRegister = await UserPost.findOne({
+//       where: { postId },
+//       attributes: ["registerId"],
+//       raw: true,
+//     });
+
+//     let mapRegister = listRegister.registerId;
+
+//     const listSupporter = await UserPost.findOne({
+//       where: { postId },
+//       attributes: ["supporterId"],
+//       raw: true,
+//     });
+//     let mapSupporter = listSupporter.supporterId;
+
+//     if (status === "isActive") {
+      
+//     } else if (status == "isConfirmed") {
+//       if (mapSupporter === null) {
+//         mapSupporter = [userId];
+//         await UserPost.update(
+//           {
+//             isDone: 0,
+//             isActive: 0,
+//             isPending: 0,
+//             isConfirmed: 1,
+//             supporterId: mapSupporter,
+//           },
+//           { where: { postId } }
+//         );
+//       } else {
+//         mapSupporter.push(userId);
+//         await UserPost.update(
+//           {
+//             supporterId: mapSupporter,
+//           },
+//           { where: { postId } }
+//         );
+//       }
+//     } else if (status === "isDone") {
+//       await UserPost.update(
+//         {
+//           isDone: 1,
+//           isActive: 0,
+//           isPending: 0,
+//           isConfirmed: 0,
+//         },
+//         { where: { postId } }
+//       );
+//     } else if (status === "isPending") {
+//       await UserPost.update(
+//         {
+//           isDone: 0,
+//           isActive: 0,
+//           isPending: 1,
+//           isConfirmed: 0,
+//         },
+//         { where: { postId } }
+//       );
+//     }
+
+//     return { postId, status, userId };
+//   } catch (error) {
+//     console.log(error);
+//     throw new NotFoundError({
+//       field: "postId",
+//       message: "Post is not found",
+//     });
+//   }
+// };
+
+const addRegister = async (ctx, postId) => {
+  const userId = ctx?.user?.id || 2;
   try {
-    const listRegister = await UserPost.findOne({
-      where: { postId },
-      attributes: ["registerId"],
+    const userPost = UserPost.findOne({
+      where: {
+        postId,
+      },
+      attributes: ["eventId", "registerId"],
       raw: true,
     });
-
-    let mapRegister = listRegister.registerId;
-
-    const listSupporter = await UserPost.findOne({
-      where: { postId },
-      attributes: ["supporterId"],
-      raw: true,
-    });
-    let mapSupporter = listSupporter.supporterId;
-
-    if (status === "isActive") {
-      if (mapRegister === null) {
-        mapRegister = [userId];
+    if(userPermissionService.checkUserRegisterPermission(userId, userPost.eventId)) {
+      if (userPost.registerId === null) {
+        const mapRegister = [userId];
         await UserPost.update(
           {
             isDone: 0,
@@ -165,6 +232,7 @@ const updatePostStatus = async (payload) => {
           { where: { postId } }
         );
       } else {
+        let mapRegister = userPost.registerId;
         mapRegister.push(userId);
         await UserPost.update(
           {
@@ -173,59 +241,11 @@ const updatePostStatus = async (payload) => {
           { where: { postId } }
         );
       }
-    } else if (status == "isConfirmed") {
-      if (mapSupporter === null) {
-        mapSupporter = [userId];
-        await UserPost.update(
-          {
-            isDone: 0,
-            isActive: 0,
-            isPending: 0,
-            isConfirmed: 1,
-            supporterId: mapSupporter,
-          },
-          { where: { postId } }
-        );
-      } else {
-        mapSupporter.push(userId);
-        await UserPost.update(
-          {
-            supporterId: mapSupporter,
-          },
-          { where: { postId } }
-        );
-      }
-    } else if (status === "isDone") {
-      await UserPost.update(
-        {
-          isDone: 1,
-          isActive: 0,
-          isPending: 0,
-          isConfirmed: 0,
-        },
-        { where: { postId } }
-      );
-    } else if (status === "isPending") {
-      await UserPost.update(
-        {
-          isDone: 0,
-          isActive: 0,
-          isPending: 1,
-          isConfirmed: 0,
-        },
-        { where: { postId } }
-      );
     }
-
-    return { postId, status, userId };
   } catch (error) {
-    console.log(error);
-    throw new NotFoundError({
-      field: "postId",
-      message: "Post is not found",
-    });
+    return error;
   }
-};
+}
 
 const removeRegister = async (ctx, payload) => {
   const userId = ctx?.user?.id || 2;
@@ -637,10 +657,10 @@ const getListMyRequests = async (ctx, limit, offset) => {
 export default {
   list,
   getPostStats,
-  updatePostStatus,
   getListMyRequests,
   listRegistedRequests,
   removeRegister,
   addSupporter,
   unregister,
+  addRegister
 };

@@ -22,6 +22,24 @@ const listNotification = async (ctx) => {
   }
 };
 
+const updateStatus = async (notiId) => {
+  try {
+    const res = await Notification.update(
+    {
+      status: "read",
+    },
+    {
+      where: {
+        notiId,
+      }
+    })
+
+    return "Success!";
+  } catch (error) {
+    return error;
+  }
+}
+
 export default {
   listNotification,
 };
