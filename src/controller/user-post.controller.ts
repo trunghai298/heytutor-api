@@ -6,12 +6,6 @@ const getPostStats = (req, res, next) => {
     .catch(next);
 };
 
-const updatePostStatus = (req, res, next) => {
-  UserPostServices.updatePostStatus(req.body)
-    .then((result) => res.json(result))
-    .catch(next);
-};
-
 const getListMyRequests = (req, res, next) => {
   UserPostServices.getListMyRequests(req.ctx, req.query.limit, req.query.offset)
     .then((result) => res.json(result))
@@ -36,6 +30,12 @@ const addSupporter = (req, res, next) => {
     .catch(next);
 };
 
+const addRegister = (req, res, next) => {
+  UserPostServices.addRegister(req.ctx, req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 const unregister = (req, res, next) => {
   UserPostServices.unregister(req.ctx, req.body)
     .then((result) => res.json(result))
@@ -44,10 +44,10 @@ const unregister = (req, res, next) => {
 
 export default {
   getPostStats,
-  updatePostStatus,
   getListMyRequests,
   listRegistedRequests,
   removeRegister,
   addSupporter,
   unregister,
+  addRegister,
 };

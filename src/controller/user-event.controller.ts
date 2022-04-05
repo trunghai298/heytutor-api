@@ -6,13 +6,20 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
-const registerEvent = (req, res, next) => {
-  UserEventServices.registerEvent(req.body)
+const joinEvent = (req, res, next) => {
+  UserEventServices.joinEvent(req.ctx, req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const unJoinEvent = (req, res, next) => {  
+  UserEventServices.unJoinEvent(req.ctx, req.body)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 export default {
   list,
-  registerEvent,
+  joinEvent,
+  unJoinEvent,
 };

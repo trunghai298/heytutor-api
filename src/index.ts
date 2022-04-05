@@ -2,6 +2,9 @@ import app from "./app";
 import { LogClient } from "./clients/logger";
 import { NodeEnv, SERVER_PORT, APP_NAME_DEFAULT } from "./constants/server";
 
+import jobController from "./controller/job.controller"
+jobController.checkBan(); 
+
 const PORT = process.env.SERVER_PORT || SERVER_PORT;
 
 (async () => {
