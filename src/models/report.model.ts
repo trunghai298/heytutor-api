@@ -8,6 +8,8 @@ interface ReportInstance extends Model {
   reason: string;
   content: string;
   createdAt: Date;
+  isResolved: boolean;
+  reportedBy: number;
 }
 
 const Report = MySQLClient.define<ReportInstance>("Report", {
@@ -33,6 +35,13 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  isResolved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  reportedBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
 });
 

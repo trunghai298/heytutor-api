@@ -41,6 +41,9 @@ const updateStatus = async (notiId) => {
   }
 }
 
+
+
 export default {
   listNotification,
+  updateStatus,
 };
