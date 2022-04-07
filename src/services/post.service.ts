@@ -316,7 +316,11 @@ const postDetailByPostId = async (postId) => {
       logging: true,
       attributes: { exclude: ["Post.id", "Post.userId", "userId"] },
     });
-    console.log(postDetail);
+    const user = await User.findOne({
+      where: { id: postDetail["Post.userId"] },
+      raw: true,
+    });
+
     const res = omit(postDetail, [
       "id",
       "postId",
@@ -324,7 +328,8 @@ const postDetailByPostId = async (postId) => {
       "supporterId",
       "registerId",
     ]);
-    return res;
+
+    return { ...res, user };
   } catch (error) {
     console.log(error);
     throw new BadRequestError({
