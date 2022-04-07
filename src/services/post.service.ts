@@ -16,7 +16,7 @@ import userPermissionService from "./user-permission.service";
  */
 const create = async (ctx, payload) => {
   let { eventId, title, hashtag, minPrice, content, images } = payload;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     if (isEmpty(payload.content)) {
@@ -172,7 +172,7 @@ const listAllPost = async (limit, offset) => {
 
 const listPostByUserId = async (ctx, limit, offset) => {
   try {
-    const userId = ctx?.user?.id || 2;
+    const userId = ctx?.user?.id;
 
     const listPost = await Post.findAndCountAll({
       limit: parseInt(limit, 10) || 100,
@@ -359,7 +359,7 @@ const createFilters = (userId, filters) => {
 
 const getListPostByFilter = async (filters, ctx) => {
   const filterObj = JSON.parse(filters)?.filters;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     const listPost = await UserPost.findAndCountAll({
@@ -445,21 +445,23 @@ const registerDetailOfPost = async (postId) => {
       attributes: ["registerId"],
       raw: true,
     });
-    const attachPostData = await Promise.all(
-      map(listRegister, async (registerId) => {
-        const userData = await User.findAll({
-          where: { id: registerId },
-          raw: true,
-        });
-        const userRank = await Ranking.findAll({
-          where: { userId: registerId },
-          attributes: ["userId", "rankPoint"],
-          raw: true,
-        });
-        return { registerId, userData, userRank };
-      })
-    );
-    return attachPostData;
+    if (listRegister.registerId !== null) {
+      const listUserRegister = await Promise.all(
+        map(listRegister.registerId, async (registerId) => {
+          const userData = await User.findOne({
+            where: { id: registerId },
+            raw: true,
+          });
+          const userRank = await Ranking.findOne({
+            where: { userId: registerId },
+            attributes: ["voteCount", "rankPoint"],
+            raw: true,
+          });
+          return { ...userData, ...userRank };
+        })
+      );
+      return listUserRegister;
+    } else return null;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -475,21 +477,25 @@ const supporterDetailOfPost = async (postId) => {
       attributes: ["supporterId"],
       raw: true,
     });
-    const attachPostData = await Promise.all(
-      map(listSupporter, async (supporterId) => {
-        const userData = await User.findAll({
-          where: { id: supporterId },
-          raw: true,
-        });
-        const userRank = await Ranking.findAll({
-          where: { userId: supporterId },
-          attributes: ["userId", "rankPoint"],
-          raw: true,
-        });
-        return { supporterId, userData, userRank };
-      })
-    );
-    return attachPostData;
+
+    if (listSupporter.supporterId !== null) {
+      const attachPostData = await Promise.all(
+        map(listSupporter.supporterId, async (supporterId) => {
+          const userData = await User.findOne({
+            where: { id: supporterId },
+            raw: true,
+          });
+          const userRank = await Ranking.findOne({
+            where: { userId: supporterId },
+            attributes: ["voteCount", "rankPoint"],
+            raw: true,
+          });
+
+          return { ...userData, ...userRank };
+        })
+      );
+      return attachPostData;
+    } else return null;
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -524,7 +530,7 @@ const getAllDetailsByPostId = async (postId) => {
 };
 
 const getListHashtag = async (ctx) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     const listHashtag = UserPost.findAndCountAll({
@@ -544,7 +550,7 @@ const getListHashtag = async (ctx) => {
 
 // const getListPostByFilterSupporter = async (params, ctx) => {
 //   const { filters, limit, offset } = params;
-//   const userId = ctx?.user?.id || 2;
+//   const userId = ctx?.user?.id;
 //   const where = {};
 //   where["isSupporter"] = userId;
 //   map(filters, (filter) => {

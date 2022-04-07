@@ -12,7 +12,7 @@ import { Op } from "sequelize";
  * To create a new message
  */
 const create = async (body, ctx) => {
-  const userId = ctx?.user.id || 2;
+  const { user } = ctx;
   const { message, receiverId, receiverName, postId } = body;
   try {
     let conversation = await Conversation.findOne({
@@ -21,11 +21,11 @@ const create = async (body, ctx) => {
         [Op.or]: [
           {
             userId1: {
-              [Op.eq]: userId,
+              [Op.eq]: user.id,
             },
           },
           {
-            userId2: { [Op.eq]: userId },
+            userId2: { [Op.eq]: user.id },
           },
         ],
       },
@@ -35,7 +35,7 @@ const create = async (body, ctx) => {
 
     if (!conversation) {
       conversation = await Conversation.create({
-        userId1: userId,
+        userId1: user.id,
         userId2: receiverId,
         postId,
         status: "open",
@@ -45,7 +45,8 @@ const create = async (body, ctx) => {
     const messageResult = await Message.create({
       receiverId,
       receiverName,
-      senderId: userId,
+      senderId: user.id,
+      senderName: user.name,
       message,
       isSeen: 0,
       seenAt: null,

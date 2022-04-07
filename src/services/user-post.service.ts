@@ -7,6 +7,8 @@ import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
+import NotificationService from "./notification.service";
+import { NOTI_TYPE } from "../constants/notification";
 
 /**
  * To create a new term
@@ -59,7 +61,7 @@ const getNbOfAllPost = async (userId) => {
 
 const getPostStats = async (ctx) => {
   // const { user } = ctx;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     // my request
@@ -153,7 +155,7 @@ const getPostStats = async (ctx) => {
 //     let mapSupporter = listSupporter.supporterId;
 
 //     if (status === "isActive") {
-      
+
 //     } else if (status == "isConfirmed") {
 //       if (mapSupporter === null) {
 //         mapSupporter = [userId];
@@ -209,7 +211,7 @@ const getPostStats = async (ctx) => {
 // };
 
 const addRegister = async (ctx, postId) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   try {
     const userPost = UserPost.findOne({
       where: {
@@ -218,7 +220,12 @@ const addRegister = async (ctx, postId) => {
       attributes: ["eventId", "registerId"],
       raw: true,
     });
-    if(userPermissionService.checkUserRegisterPermission(userId, userPost.eventId)) {
+    if (
+      userPermissionService.checkUserRegisterPermission(
+        userId,
+        userPost.eventId
+      )
+    ) {
       if (userPost.registerId === null) {
         const mapRegister = [userId];
         await UserPost.update(
@@ -245,10 +252,10 @@ const addRegister = async (ctx, postId) => {
   } catch (error) {
     return error;
   }
-}
+};
 
 const removeRegister = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { postId, registerId } = payload;
 
   try {
@@ -276,12 +283,12 @@ const removeRegister = async (ctx, payload) => {
 };
 
 const addSupporter = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const { user } = ctx;
   const { postId, registerId } = payload;
-
+  console.log(user);
   try {
     const post = await UserPost.findOne({
-      where: { postId, userId },
+      where: { postId, userId: user.id },
       attributes: ["registerId", "supporterId"],
       raw: true,
     });
@@ -303,8 +310,15 @@ const addSupporter = async (ctx, payload) => {
           isConfirmed: 1,
           isPending: 0,
         },
-        { where: { postId, userId } }
+        { where: { postId, userId: user.id } }
       );
+      await NotificationService.create({
+        userId: registerId,
+        postId,
+        notificationType: NOTI_TYPE.AcceptRegister,
+        fromUserId: user.id,
+        fromUsername: user.name,
+      });
       return { status: 200 };
     } else {
       return { status: "fail" };
@@ -318,7 +332,7 @@ const addSupporter = async (ctx, payload) => {
 };
 
 const unregister = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { postId } = payload;
 
   try {
@@ -372,7 +386,7 @@ const getUserData = async (id) => {
 };
 
 const listRegistedRequests = async (ctx, params) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { limit, offset, filters } = params;
 
   const filterParams = JSON.parse(filters);
@@ -392,13 +406,18 @@ const listRegistedRequests = async (ctx, params) => {
   }
 
   try {
-    const res = await MySQLClient.query(
+    const registering = await MySQLClient.query(
       `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$') ${timeFilter}`,
       { type: "SELECT" }
     );
 
-    const attachPostData = await Promise.all(
-      map(res, async (post) => {
+    const supporting = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.supporterId, '$[*]'), '${userId}' , '$') ${timeFilter}`,
+      { type: "SELECT" }
+    );
+
+    const registerData = await Promise.all(
+      map(registering, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
           getUserData(post.userId),
@@ -417,12 +436,29 @@ const listRegistedRequests = async (ctx, params) => {
       })
     );
 
-    const allHashtag = map(attachPostData, (item) => JSON.parse(item.hashtag));
-    const hashTagGroup = countBy(flattenDeep(allHashtag || []));
+    const supportData = await Promise.all(
+      map(supporting, async (post) => {
+        const [postData, userData] = await Promise.all([
+          getPost(post.postId),
+          getUserData(post.userId),
+        ]);
+
+        delete postData.id;
+        delete postData.createdAt;
+        delete postData.updatedAt;
+        delete userData.id;
+
+        return {
+          ...post,
+          ...postData,
+          ...userData,
+        };
+      })
+    );
 
     return {
-      attachPostData,
-      hashTagGroup,
+      registerData,
+      supportData,
     };
   } catch (error) {
     throw new BadRequestError({
@@ -440,6 +476,9 @@ const listPostHasRegister = async (userId, limit, offset) => {
         registerId: {
           [Op.ne]: null,
         },
+        supporterId: {
+          [Op.eq]: null,
+        },
         isDone: {
           [Op.ne]: 1,
         },
@@ -455,7 +494,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
           map(post.registerId, async (id) => {
             const registerUser = await getUserData(id);
             return {
-              id: registerUser.id,
+              id,
               username: registerUser.name,
               email: registerUser.email,
               rankPoint: registerUser.rankPoint || 0,
@@ -616,7 +655,7 @@ const listPostDone = async (userId, limit, offset) => {
 };
 
 const getListMyRequests = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 
@@ -662,5 +701,5 @@ export default {
   removeRegister,
   addSupporter,
   unregister,
-  addRegister
+  addRegister,
 };

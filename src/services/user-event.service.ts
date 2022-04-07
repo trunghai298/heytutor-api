@@ -18,7 +18,7 @@ const list = async (payload) => {
 };
 
 const joinEvent = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { eventId, isSupporter, isRequestor } = payload;
 
   try {
@@ -38,7 +38,10 @@ const joinEvent = async (ctx, payload) => {
         isSupporter: isSupporter,
         isRequestor: isRequestor,
       });
-      await UserPermissionService.createPermission({userId: userId, eventId: eventId});
+      await UserPermissionService.createPermission({
+        userId: userId,
+        eventId: eventId,
+      });
     } else {
       await UserEvent.update(
         {
@@ -59,14 +62,14 @@ const joinEvent = async (ctx, payload) => {
 };
 
 const unJoinEvent = async (ctx, event) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const eventId = event.eventId;
   try {
     const res = await UserEvent.destroy({
       where: {
         userId,
         eventId,
-      }
+      },
     });
 
     return "UnJoin Success!!!";
@@ -76,7 +79,7 @@ const unJoinEvent = async (ctx, event) => {
       message: "Failed to create this item.",
     });
   }
-}
+};
 
 export default {
   list,

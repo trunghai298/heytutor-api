@@ -1,13 +1,13 @@
 import { Op } from "sequelize";
 import Admin from "../models/admin.model";
-import Event from '../models/event.model';
+import Event from "../models/event.model";
 import Activity from "../models/activity.model";
-import Post from '../models/post.model';
-import UserPost from '../models/user-post.model';
+import Post from "../models/post.model";
+import UserPost from "../models/user-post.model";
 
 const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission } = payload;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   try {
     const user = await Admin.findOne({
       where: { email },
@@ -49,7 +49,7 @@ const addCollaborator = async (ctx, payload) => {
 
 const updateCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission } = payload;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   try {
     const admin = await Admin.findAll({
       where: { email },
@@ -102,58 +102,58 @@ const listAllCollaborator = async () => {
     console.log(error);
     return error;
   }
-}
+};
 
 const listEventInXDays = async (nbFromDays, nbToDays) => {
-  const currentDate = new Date(Date.now() - nbFromDays*24*60*60*1000);
-  const XDaysBefore = new Date(Date.now() - nbToDays*24*60*60*1000);
+  const currentDate = new Date(Date.now() - nbFromDays * 24 * 60 * 60 * 1000);
+  const XDaysBefore = new Date(Date.now() - nbToDays * 24 * 60 * 60 * 1000);
   try {
     const list = await Event.findAll({
       where: {
         createdAt: {
           [Op.lt]: currentDate,
           [Op.gt]: XDaysBefore,
-        }
+        },
       },
       raw: true,
     });
     return list;
   } catch (error) {
-    return(error);
+    return error;
   }
-}
+};
 
 const listPostInXDays = async (nbFromDays, nbToDays) => {
-  const currentDate = new Date(Date.now() - nbFromDays*24*60*60*1000);
-  const XDaysBefore = new Date(Date.now() - nbToDays*24*60*60*1000);
-  
+  const currentDate = new Date(Date.now() - nbFromDays * 24 * 60 * 60 * 1000);
+  const XDaysBefore = new Date(Date.now() - nbToDays * 24 * 60 * 60 * 1000);
+
   try {
     const list = await Post.findAll({
       where: {
         createdAt: {
           [Op.lt]: currentDate,
           [Op.gt]: XDaysBefore,
-        }
+        },
       },
       raw: true,
     });
-    
+
     return list;
   } catch (error) {
-    return(error);
+    return error;
   }
-}
+};
 
 const listNewRegisterInXDays = async (nbFromDays, nbToDays) => {
-  const currentDate = new Date(Date.now() - nbFromDays*24*60*60*1000);
-  const XDaysBefore = new Date(Date.now() - nbToDays*24*60*60*1000);
+  const currentDate = new Date(Date.now() - nbFromDays * 24 * 60 * 60 * 1000);
+  const XDaysBefore = new Date(Date.now() - nbToDays * 24 * 60 * 60 * 1000);
   try {
     const list = await UserPost.findAll({
       where: {
         createdAt: {
           [Op.lt]: currentDate,
           [Op.gt]: XDaysBefore,
-        }
+        },
       },
       raw: true,
     });
@@ -173,41 +173,59 @@ const listNewRegisterInXDays = async (nbFromDays, nbToDays) => {
 
     return listNewRegisterInXDays;
   } catch (error) {
-    return(error);
+    return error;
   }
-}
+};
 
 const systemDetailsInXDays = async (nbOfDays) => {
   const twoTimeNbOfDays = nbOfDays * 2;
-  
+
   try {
     const listEventsInXDays = await listEventInXDays(0, nbOfDays);
     const nbEventInXDays = listEventsInXDays.length;
-    const listPostsInXDays = await listPostInXDays(0,nbOfDays);
+    const listPostsInXDays = await listPostInXDays(0, nbOfDays);
     const nbOfNewPostInXDays = listPostsInXDays.length;
-    const listAllNewRegisterInXDays = await listNewRegisterInXDays(0,nbOfDays);
+    const listAllNewRegisterInXDays = await listNewRegisterInXDays(0, nbOfDays);
     const nbOfNewRegisterInXDays = listAllNewRegisterInXDays.length;
 
-    const listEventInPreviousXDays = await listEventInXDays(nbOfDays, twoTimeNbOfDays);
+    const listEventInPreviousXDays = await listEventInXDays(
+      nbOfDays,
+      twoTimeNbOfDays
+    );
     const nbEventInPreviousXDays = listEventInPreviousXDays.length;
-    const listPostsInPreviousXDays = await listPostInXDays(nbOfDays, twoTimeNbOfDays);
+    const listPostsInPreviousXDays = await listPostInXDays(
+      nbOfDays,
+      twoTimeNbOfDays
+    );
     const nbOfNewPostInPreviousXDays = listPostsInPreviousXDays.length;
-    const listAllNewRegisterInPreviousXDays = await listNewRegisterInXDays(nbOfDays, twoTimeNbOfDays);
-    const nbOfNewRegisterInPreviousXDays = listAllNewRegisterInPreviousXDays.length;
+    const listAllNewRegisterInPreviousXDays = await listNewRegisterInXDays(
+      nbOfDays,
+      twoTimeNbOfDays
+    );
+    const nbOfNewRegisterInPreviousXDays =
+      listAllNewRegisterInPreviousXDays.length;
 
-    let percentXdaysEventChange = nbEventInXDays*100;
-    if(nbEventInPreviousXDays !== 0) {
-      percentXdaysEventChange = (nbEventInXDays-nbEventInPreviousXDays)/nbEventInPreviousXDays*100;
+    let percentXdaysEventChange = nbEventInXDays * 100;
+    if (nbEventInPreviousXDays !== 0) {
+      percentXdaysEventChange =
+        ((nbEventInXDays - nbEventInPreviousXDays) / nbEventInPreviousXDays) *
+        100;
     }
 
-    let percentXdaysPostChange = nbOfNewPostInXDays*100;
-    if(nbOfNewPostInPreviousXDays !== 0 ) {
-    percentXdaysPostChange = (nbOfNewPostInXDays-nbOfNewPostInPreviousXDays)/nbEventInPreviousXDays*100;
+    let percentXdaysPostChange = nbOfNewPostInXDays * 100;
+    if (nbOfNewPostInPreviousXDays !== 0) {
+      percentXdaysPostChange =
+        ((nbOfNewPostInXDays - nbOfNewPostInPreviousXDays) /
+          nbEventInPreviousXDays) *
+        100;
     }
 
-    let percentXdaysRegisterChange = nbOfNewRegisterInXDays*100;
-    if(nbOfNewRegisterInPreviousXDays !== 0) {
-      percentXdaysRegisterChange = (nbOfNewRegisterInXDays-nbOfNewRegisterInPreviousXDays)/nbOfNewRegisterInPreviousXDays*100;
+    let percentXdaysRegisterChange = nbOfNewRegisterInXDays * 100;
+    if (nbOfNewRegisterInPreviousXDays !== 0) {
+      percentXdaysRegisterChange =
+        ((nbOfNewRegisterInXDays - nbOfNewRegisterInPreviousXDays) /
+          nbOfNewRegisterInPreviousXDays) *
+        100;
     }
 
     return {
@@ -217,11 +235,11 @@ const systemDetailsInXDays = async (nbOfDays) => {
       percentXdaysPostChange,
       nbOfNewRegisterInXDays,
       percentXdaysRegisterChange,
-    }
+    };
   } catch (error) {
-    return (error)
+    return error;
   }
-}
+};
 
 export default {
   addCollaborator,

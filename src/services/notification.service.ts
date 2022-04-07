@@ -5,7 +5,7 @@ import Notification from "../models/notification.model";
  * To get user's notification
  */
 const listNotification = async (ctx) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     const res = await Notification.findAll({
@@ -22,24 +22,41 @@ const listNotification = async (ctx) => {
   }
 };
 
-const updateStatus = async (notiId) => {
+const readNoti = async (notiId) => {
   try {
-    const res = await Notification.update(
-    {
-      status: "read",
-    },
-    {
-      where: {
-        notiId,
+    await Notification.update(
+      {
+        status: "read",
+      },
+      {
+        where: {
+          id: notiId,
+        },
       }
-    })
+    );
 
-    return "Success!";
+    return { status: 200 };
   } catch (error) {
     return error;
   }
-}
+};
+
+const create = async (payload) => {
+  try {
+    const res = await Notification.create({
+      ...payload,
+    });
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: error,
+    });
+  }
+};
 
 export default {
+  create,
+  readNoti,
   listNotification,
 };
