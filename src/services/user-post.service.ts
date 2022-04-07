@@ -7,6 +7,7 @@ import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
+import Notification from "../models/notification.model";
 
 /**
  * To create a new term
@@ -153,7 +154,7 @@ const getPostStats = async (ctx) => {
 //     let mapSupporter = listSupporter.supporterId;
 
 //     if (status === "isActive") {
-      
+
 //     } else if (status == "isConfirmed") {
 //       if (mapSupporter === null) {
 //         mapSupporter = [userId];
@@ -215,12 +216,20 @@ const addRegister = async (ctx, postId) => {
       where: {
         postId,
       },
-      attributes: ["eventId", "registerId"],
+      attributes: ["userId", "eventId", "registerId", "isConfirmed"],
       raw: true,
     });
-    if(userPermissionService.checkUserRegisterPermission(userId, userPost.eventId)) {
-      if (userPost.registerId === null) {
-        const mapRegister = [userId];
+    if (
+      userPermissionService.checkUserRegisterPermission(
+        userId,
+        userPost.eventId
+      )
+    ) {
+      const mapRegister = !isEmpty(userPost.registerId)
+        ? [...userPost.registerId, userId]
+        : [userId];
+
+      if (userPost.isConfirmed === 0) {
         await UserPost.update(
           {
             isDone: 0,
@@ -232,8 +241,6 @@ const addRegister = async (ctx, postId) => {
           { where: { postId } }
         );
       } else {
-        let mapRegister = userPost.registerId;
-        mapRegister.push(userId);
         await UserPost.update(
           {
             registerId: mapRegister,
@@ -241,11 +248,26 @@ const addRegister = async (ctx, postId) => {
           { where: { postId } }
         );
       }
+      const payload = {
+        userId: userPost.userId,
+        postId: userPost.postId,
+        eventId: userPost.eventId,
+        notificationType: "request_register",
+      };
+      await Notification.newNotification(payload);
+    } else {
+      throw new BadRequestError({
+        field: "id",
+        message: "Bạn đang bị cấm đăng kí bài!!!",
+      });
     }
   } catch (error) {
-    return error;
+    throw new BadRequestError({
+      field: "id",
+      message: error,
+    });
   }
-}
+};
 
 const removeRegister = async (ctx, payload) => {
   const userId = ctx?.user?.id || 2;
@@ -662,5 +684,5 @@ export default {
   removeRegister,
   addSupporter,
   unregister,
-  addRegister
+  addRegister,
 };
