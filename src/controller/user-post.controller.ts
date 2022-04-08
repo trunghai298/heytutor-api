@@ -37,7 +37,7 @@ const addRegister = (req, res, next) => {
 };
 
 const unregister = (req, res, next) => {
-  UserPostServices.unregister(req.ctx, req.body)
+  UserPostServices.cancelRegister(req.ctx, req.body)
     .then((result) => res.json(result))
     .catch(next);
 };

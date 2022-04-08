@@ -1,6 +1,8 @@
 import { BadRequestError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
 import UserPermissionService from "./user-permission.service";
+import { NOTI_TYPE } from "../constants/notification";
+import NotificationService from "./notification.service";
 
 /**
  * To create a new term
@@ -53,6 +55,13 @@ const joinEvent = async (ctx, payload) => {
         }
       );
     }
+    const payload = {
+      userId: userId,
+      eventId: eventId,
+      notificationType: NOTI_TYPE.JoinEvent,
+    };
+    await NotificationService.create(payload);
+    return "Join Success!!!"
   } catch (error) {
     throw new BadRequestError({
       field: "userId-eventId",
@@ -71,7 +80,12 @@ const unJoinEvent = async (ctx, event) => {
         eventId,
       },
     });
-
+    const payload = {
+      userId: userId,
+      eventId: eventId,
+      notificationType: NOTI_TYPE.UnJoinEvent,
+    };
+    await NotificationService.create(payload);
     return "UnJoin Success!!!";
   } catch (error) {
     throw new BadRequestError({

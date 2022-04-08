@@ -8,6 +8,8 @@ interface ReportInstance extends Model {
   reason: string;
   content: string;
   createdAt: Date;
+  eventId: number;
+  commentId: number;
 }
 
 const Report = MySQLClient.define<ReportInstance>("Report", {
@@ -19,6 +21,7 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
   },
   userId: {
     type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
   },
   postId: {
     type: DataTypes.INTEGER.UNSIGNED,
@@ -33,6 +36,12 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  eventId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  commentId: {
+    type: DataTypes.INTEGER.UNSIGNED,
   },
 });
 
