@@ -1,3 +1,4 @@
+import { create } from "./comment.service";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
@@ -7,7 +8,8 @@ import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
-import Notification from "../models/notification.model";
+import NotificationService from "./notification.service";
+import { NOTI_TYPE } from "../constants/notification";
 
 /**
  * To create a new term
@@ -60,7 +62,7 @@ const getNbOfAllPost = async (userId) => {
 
 const getPostStats = async (ctx) => {
   // const { user } = ctx;
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
 
   try {
     // my request
@@ -210,7 +212,7 @@ const getPostStats = async (ctx) => {
 // };
 
 const addRegister = async (ctx, postId) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   try {
     const userPost = UserPost.findOne({
       where: {
@@ -248,13 +250,21 @@ const addRegister = async (ctx, postId) => {
           { where: { postId } }
         );
       }
+      const user = await User.findOne({
+        where: { userId },
+        attributes: ["name"],
+        raw: true,
+      });
       const payload = {
         userId: userPost.userId,
         postId: userPost.postId,
         eventId: userPost.eventId,
-        notificationType: "request_register",
+        notificationType: NOTI_TYPE.RequestRegister,
+        fromUserId: userId,
+        fromUsername: user.name,
       };
-      await Notification.newNotification(payload);
+      await NotificationService.create(payload);
+      return "Register Success!!!";
     } else {
       throw new BadRequestError({
         field: "id",
@@ -270,7 +280,7 @@ const addRegister = async (ctx, postId) => {
 };
 
 const removeRegister = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { postId, registerId } = payload;
 
   try {
@@ -288,7 +298,62 @@ const removeRegister = async (ctx, payload) => {
       { where: { postId, userId } }
     );
 
-    return { status: "success" };
+    const user = await User.findOne({
+      where: { userId },
+      attributes: ["name"],
+      raw: true,
+    });
+    const payload = {
+      userId: registerId,
+      postId: postId,
+      eventId: post.eventId,
+      notificationType: NOTI_TYPE.RemoveRegister,
+      fromUserId: userId,
+      fromUsername: user.name,
+    };
+    await NotificationService.create(payload);
+    return "Remove Register Success!!!";
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: error,
+    });
+  }
+};
+
+const cancelRegister = async (ctx, payload) => {
+  const userId = ctx?.user?.id;
+  const { postId, ownerId } = payload;
+  try {
+    const post = await UserPost.findOne({
+      where: { postId, ownerId },
+      raw: true,
+    });
+
+    const removeRegisterFromRegisterList = post.registerId.filter(
+      (o) => o !== userId
+    );
+
+    await UserPost.update(
+      { registerId: removeRegisterFromRegisterList },
+      { where: { postId, ownerId } }
+    );
+
+    const user = await User.findOne({
+      where: { userId },
+      attributes: ["name"],
+      raw: true,
+    });
+    const payload = {
+      userId: ownerId,
+      postId: postId,
+      eventId: post.eventId,
+      notificationType: NOTI_TYPE.CancelRegister,
+      fromUserId: userId,
+      fromUsername: user.name,
+    };
+    await NotificationService.create(payload);
+    return "Cancel Register Success!!!";
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -298,12 +363,11 @@ const removeRegister = async (ctx, payload) => {
 };
 
 const addSupporter = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { postId, registerId } = payload;
-
   try {
     const post = await UserPost.findOne({
-      where: { postId, userId },
+      where: { postId, userId},
       attributes: ["registerId", "supporterId"],
       raw: true,
     });
@@ -325,9 +389,21 @@ const addSupporter = async (ctx, payload) => {
           isConfirmed: 1,
           isPending: 0,
         },
-        { where: { postId, userId } }
+        { where: { postId, userId} }
       );
-      return { status: 200 };
+      const user = await User.findOne({
+        where: { userId },
+        attributes: ["name"],
+        raw: true,
+      });
+      await NotificationService.create({
+        userId: registerId,
+        postId,
+        notificationType: NOTI_TYPE.AcceptSupporter,
+        fromUserId: userId,
+        fromUsername: user.name,
+      });
+      return "Accept Supporter Success!!!";
     } else {
       return { status: "fail" };
     }
@@ -339,30 +415,30 @@ const addSupporter = async (ctx, payload) => {
   }
 };
 
-const unregister = async (ctx, payload) => {
-  const userId = ctx?.user?.id || 2;
-  const { postId } = payload;
+// const unregister = async (ctx, payload) => {
+//   const userId = ctx?.user?.id;
+//   const { postId } = payload;
 
-  try {
-    const post = await UserPost.findOne({
-      where: { postId },
-      raw: true,
-    });
+//   try {
+//     const post = await UserPost.findOne({
+//       where: { postId },
+//       raw: true,
+//     });
 
-    const currentRegisterIds = post.registerId;
-    const newRegisterIds = currentRegisterIds.filter((o) => o !== userId);
-    await UserPost.update(
-      { registerId: newRegisterIds },
-      { where: { postId } }
-    );
-    return { status: 200 };
-  } catch (error) {
-    throw new BadRequestError({
-      field: "postId",
-      message: error,
-    });
-  }
-};
+//     const currentRegisterIds = post.registerId;
+//     const newRegisterIds = currentRegisterIds.filter((o) => o !== userId);
+//     await UserPost.update(
+//       { registerId: newRegisterIds },
+//       { where: { postId } }
+//     );
+//     return { status: 200 };
+//   } catch (error) {
+//     throw new BadRequestError({
+//       field: "postId",
+//       message: error,
+//     });
+//   }
+// };
 
 const getUser = async (id) => {
   return User.findOne({
@@ -394,7 +470,7 @@ const getUserData = async (id) => {
 };
 
 const listRegistedRequests = async (ctx, params) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const { limit, offset, filters } = params;
 
   const filterParams = JSON.parse(filters);
@@ -414,13 +490,18 @@ const listRegistedRequests = async (ctx, params) => {
   }
 
   try {
-    const res = await MySQLClient.query(
+    const registering = await MySQLClient.query(
       `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$') ${timeFilter}`,
       { type: "SELECT" }
     );
 
-    const attachPostData = await Promise.all(
-      map(res, async (post) => {
+    const supporting = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.supporterId, '$[*]'), '${userId}' , '$') ${timeFilter}`,
+      { type: "SELECT" }
+    );
+
+    const registerData = await Promise.all(
+      map(registering, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
           getUserData(post.userId),
@@ -439,12 +520,29 @@ const listRegistedRequests = async (ctx, params) => {
       })
     );
 
-    const allHashtag = map(attachPostData, (item) => JSON.parse(item.hashtag));
-    const hashTagGroup = countBy(flattenDeep(allHashtag || []));
+    const supportData = await Promise.all(
+      map(supporting, async (post) => {
+        const [postData, userData] = await Promise.all([
+          getPost(post.postId),
+          getUserData(post.userId),
+        ]);
+
+        delete postData.id;
+        delete postData.createdAt;
+        delete postData.updatedAt;
+        delete userData.id;
+
+        return {
+          ...post,
+          ...postData,
+          ...userData,
+        };
+      })
+    );
 
     return {
-      attachPostData,
-      hashTagGroup,
+      registerData,
+      supportData,
     };
   } catch (error) {
     throw new BadRequestError({
@@ -462,6 +560,9 @@ const listPostHasRegister = async (userId, limit, offset) => {
         registerId: {
           [Op.ne]: null,
         },
+        supporterId: {
+          [Op.eq]: null,
+        },
         isDone: {
           [Op.ne]: 1,
         },
@@ -477,7 +578,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
           map(post.registerId, async (id) => {
             const registerUser = await getUserData(id);
             return {
-              id: registerUser.id,
+              id,
               username: registerUser.name,
               email: registerUser.email,
               rankPoint: registerUser.rankPoint || 0,
@@ -638,7 +739,7 @@ const listPostDone = async (userId, limit, offset) => {
 };
 
 const getListMyRequests = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 
@@ -683,6 +784,6 @@ export default {
   listRegistedRequests,
   removeRegister,
   addSupporter,
-  unregister,
+  cancelRegister,
   addRegister,
 };

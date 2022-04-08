@@ -10,7 +10,6 @@ import { Op } from "sequelize";
 import { map } from "lodash";
 import UserEvent from "../models/user-event.model";
 
-
 /**
  * To information of a user
  */
@@ -334,10 +333,10 @@ const getSupporterStats = async (_userId: number) => {
   }
 };
 
-const getUserManageStats = async(ctx) => {
-  const userId = ctx?.user?.id || 2;
+const getUserManageStats = async (ctx) => {
+  const userId = ctx?.user?.id;
   const today = new Date(Date.now());
-  
+
   try {
     const roleOfUser = await Admin.findOne({
       where: {
@@ -345,15 +344,15 @@ const getUserManageStats = async(ctx) => {
       },
       attributes: ["role"],
       raw: true,
-    })
+    });
 
-    if(roleOfUser.role === "evtCollaborator") {
+    if (roleOfUser.role === "evtCollaborator") {
       const eventList = await Event.findAll({
         where: {
           createId: userId,
           endAt: {
             [Op.gt]: today,
-          }
+          },
         },
         attributes: ["id"],
         raw: true,
@@ -367,25 +366,20 @@ const getUserManageStats = async(ctx) => {
             },
             attributes: ["eventId", "userId"],
             raw: true,
-          })
+          });
           return userInEvent;
         })
       );
 
       const listUsersDetail = await Promise.all(
-        map(listUserInEvent, async (user) => {
-          
-        })
-      )
-
-    } else if(roleOfUser.role === "admin") {
-
+        map(listUserInEvent, async (user) => {})
+      );
+    } else if (roleOfUser.role === "admin") {
     }
-
   } catch (error) {
     return error;
   }
-}
+};
 
 export default {
   getUserInfoById,

@@ -6,7 +6,7 @@ import { Op } from "sequelize";
  * To list all messages of a conversation
  */
 const getConversationOfPost = async (params, ctx) => {
-  const myUserId = ctx?.user.id || 2;
+  const myUserId = ctx?.user.id;
   const { postId, userId } = params;
 
   const conversations = await Conversation.findOne({

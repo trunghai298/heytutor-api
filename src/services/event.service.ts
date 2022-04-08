@@ -190,7 +190,7 @@ const getPostOfEvent = async (eventId) => {
 };
 
 const listEventByUser = async (ctx) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const today = new Date(Date.now());
   try {
     const listEvent = await UserEvent.findAll({
@@ -243,7 +243,7 @@ const listEventByUser = async (ctx) => {
 
 const getUserRoleInEvent = async (ctx, eventId) => {
   try {
-    const userId = ctx?.user?.id || 2;
+    const userId = ctx?.user?.id;
 
     const userRole = await UserEvent.findAll({
       where: {
@@ -262,7 +262,7 @@ const getUserRoleInEvent = async (ctx, eventId) => {
 };
 
 const getPostOfUserInEvent = async (ctx, eventId) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   try {
     const listPostsOfUser = await UserPost.findAll({
       where: {
@@ -479,7 +479,7 @@ const getEventUserPostDetail = async (ctx, eventId) => {
 };
 
 const getListEventNotEnroll = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id || 2;
+  const userId = ctx?.user?.id;
   const today = new Date(Date.now());
   try {
     const eventNotEnroll = await UserEvent.findAll({

@@ -6,6 +6,7 @@ interface NotificationInstance extends Model {
   userId: number;
   postId: number;
   eventId: number;
+  commentId: number;
   notificationType: string;
   fromUserId: number;
   fromUsername: number;
@@ -27,6 +28,9 @@ const Notification = MySQLClient.define<NotificationInstance>("Notification", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  commentId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   notificationType: {

@@ -2,8 +2,10 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import { Op } from "sequelize";
 import { map } from "lodash";
 import Report from "../models/report.model";
-import BanService from "./ban.service";
 import Ban from "../models/ban.model";
+import NotificationService from "./notification.service";
+import { NOTI_TYPE } from "../constants/notification";
+import User from "../models/user.model";
 
 const checkReportInDay = async () => {
   const lastMidnight = new Date();
@@ -85,19 +87,54 @@ const checkReportInDay = async () => {
 
 const createReport = async (ctx, payload) => {
   const reporterId = ctx?.user?.id;
-  const { userId, postId, reason, content } = payload;
+  const { userId, postId, eventId, reason, content, commentId } = payload;
 
   try {
     if (reporterId !== userId) {
       const res = await Report.create({
         userId: userId,
         postId: postId,
+        eventId: eventId,
+        commentId: commentId,
         reason: reason,
         content: content,
         reporterId: reporterId,
       });
     }
+    const user = await User.findOne({
+      where: { userId },
+      attributes: ["name"],
+      raw: true,
+    });
 
+    const payload = {
+      userId: userId,
+      postId: postId,
+      eventId: eventId,
+      commentId: commentId,
+      fromUserId: reporterId,
+      fromUsername: user.name,
+    };
+
+    let results;
+    if (postId === null && commentId === null) {
+      results = {
+        ...payload,
+        notificationType: NOTI_TYPE.ReportUser,
+      };
+    } else if (postId !== null && commentId === null) {
+      results = {
+        ...payload,
+        notificationType: NOTI_TYPE.ReportPost,
+      };
+    } else if (postId !== null && commentId !== null) {
+      results = {
+        ...payload,
+        notificationType: NOTI_TYPE.ReportComment,
+      };
+    }
+
+    await NotificationService.create(payload);
     return "Success!!!";
   } catch (error) {
     return error;
@@ -121,20 +158,20 @@ const listReportNotResolvedByUser = async (userId) => {
 };
 
 const listReportResolvedByUser = async (userId) => {
-    try {
-      const res = Report.findAll({
-        where: {
-          userId,
-          isResolved: 1,
-        },
-        raw: true,
-      });
-  
-      return res;
-    } catch (error) {
-      return error;
-    }
-  };
+  try {
+    const res = Report.findAll({
+      where: {
+        userId,
+        isResolved: 1,
+      },
+      raw: true,
+    });
+
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
 
 export default {
   checkReportInDay,

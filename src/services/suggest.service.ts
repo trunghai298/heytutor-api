@@ -1,6 +1,3 @@
-
 const suggestHome = async (ctx) => {
-    const userId = ctx?.user?.id || 2;
-
-    
-}
+  const userId = ctx?.user?.id;
+};

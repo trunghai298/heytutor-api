@@ -17,6 +17,7 @@ import MySQLClient from "./clients/mysql";
 import { sign } from "./utils/jwt";
 import { fetchFapData } from "./scripts/getStudentsInfo";
 import Notification from "./models/notification.model";
+import Message from "./models/message.model";
 const app = express();
 
 // Third party middlewares
@@ -33,7 +34,7 @@ app.post("/auth/login", AuthController.login);
 
 const resetDb = async () => {
   try {
-    // await Notification.sync({ force: true });
+    // await Message.sync({ force: true });
   } catch (error) {
     console.log(error);
   }
@@ -61,7 +62,7 @@ process.env.NODE_ENV !== NodeEnv.Test && app.use(initLogger());
 app.use(initSecurity());
 
 // JWT verification
-// app.use(authenticateJWT());
+app.use(authenticateJWT());
 
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
