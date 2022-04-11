@@ -10,4 +10,5 @@ export default (app) => {
     .put("/add-supporter", UserPostController.addSupporter)
     .put("/unregister", UserPostController.unregister)
     .get("/get-registered-near-deadline", UserPostController.getRegisteredNearDeadline)
+    .get("/post-done-of-user", UserPostController.postDoneOfUser)
 };

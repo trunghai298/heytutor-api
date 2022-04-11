@@ -818,6 +818,56 @@ const getRegisteredNearDeadline = async (ctx) => {
   }
 };
 
+const postDoneOfUser = async (ctx) => {
+  const userId = ctx?.user?.id;
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        isDone: {
+          [Op.eq]: 1,
+        },
+      },
+      logging: true,
+      raw: true,
+    });
+
+    console.log("postHasRegister", postHasRegister.length);
+
+    const totalPosted = await UserPost.findAll({
+      where: {
+        userId,
+      },
+      logging: true,
+      raw: true,
+    });
+
+    console.log("totalPosted", totalPosted.length);
+
+    const supporterRequest = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.supporterId, '$[*]'), '${userId}' , '$')`,
+      { type: "SELECT" }
+    );
+
+    const nbOfDonePostRegistered = filter(
+      supporterRequest,
+      (item) => item.isDone === 1
+    );
+
+    return {
+      nbOfPostedDone: postHasRegister.length,
+      nbOfPosted: totalPosted.length,
+      nbOfPostSupportedDone: nbOfDonePostRegistered.length,
+      nbOfPostSupported: supporterRequest.length,
+    };
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
 export default {
   list,
   getPostStats,
@@ -828,4 +878,5 @@ export default {
   cancelRegister,
   addRegister,
   getRegisteredNearDeadline,
+  postDoneOfUser,
 };
