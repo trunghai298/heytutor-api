@@ -12,7 +12,14 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
+const checkUnreadMessage = (req, res, next) => {
+  MessageServices.checkUnreadMessage(req.ctx, req.query)
+  .then((msg) => res.json(msg))
+  .catch(next);
+}
+
 export default {
   create,
   list,
+  checkUnreadMessage,
 };

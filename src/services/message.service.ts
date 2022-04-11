@@ -7,6 +7,7 @@ import moment from "moment";
 import { map } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
+import ConversationService from "./conversation.service";
 
 /**
  * To create a new message
@@ -91,7 +92,35 @@ const listMessages = async (params) => {
   }
 };
 
+const checkUnreadMessage = async (ctx, params) => {
+  const myUserId = ctx?.user.id;
+  try {
+    const conversationId = ConversationService.getConversationOfPost(params, ctx);
+
+    const res = Message.findAll({
+      where: {
+        conversationId: conversationId,
+        receiverId: myUserId,
+        isSeen: 0,
+      },
+      raw: true,
+      order: ["createdAt", "DESC"],
+    });
+    if (res.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
 export default {
   create,
   listMessages,
+  checkUnreadMessage,
 };
