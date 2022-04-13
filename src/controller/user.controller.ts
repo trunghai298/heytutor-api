@@ -7,7 +7,7 @@ const fetchByEmail = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  UserServices.getUserInfo(req.params.userId)
+  UserServices.getUserInfoById(req.params.userId)
     .then((user) => res.json(user))
     .catch(next);
 };

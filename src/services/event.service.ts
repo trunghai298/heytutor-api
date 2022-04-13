@@ -10,7 +10,7 @@ import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
 import PostService from "./post.service";
 import RankingService from "./ranking.service";
-import BanService from "./ban.service"
+import BanService from "./ban.service";
 import ReportService from "./report.service";
 
 /**
@@ -752,20 +752,20 @@ const approveEvent = async (ctx, eventId) => {
 };
 
 const countActiveEventOfCollaborator = async (userId) => {
-   try {
+  try {
     const activeEvent = await MySQLClient.query(
       `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}' , '$') AND endAt > date_sub(now() AND isApproved = 1`,
       { type: "SELECT" }
     );
 
     return activeEvent.length;
-   } catch (error) {
+  } catch (error) {
     throw new NotFoundError({
       field: "userId",
       message: "Collaborator is not found",
     });
-   }
-}
+  }
+};
 
 const countPendingEventOfCollaborator = async (userId) => {
   try {
@@ -775,13 +775,13 @@ const countPendingEventOfCollaborator = async (userId) => {
     );
 
     return pendingEvent.length;
-   } catch (error) {
+  } catch (error) {
     throw new NotFoundError({
       field: "userId",
       message: "Collaborator is not found",
     });
-   }
-=======
+  }
+};
 const getListUserEventsManageByCollaborator = async (ctx) => {
   const userId = ctx?.user?.id;
   try {
@@ -791,7 +791,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
     );
 
     const userEventData = await Promise.all(
-      map(manageUserEventId, async(userEvent) => {
+      map(manageUserEventId, async (userEvent) => {
         const getUserRank = await RankingService.getUserRank(userEvent.userId);
         const getEvent = await getEventDetail(userEvent.eventId);
         const getUserDetail = await User.findOne({
@@ -800,10 +800,16 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           },
           attributes: ["email", "name"],
           raw: true,
-        })
-        const getBanDetail = await BanService.getUserStatusInEvent(userEvent.userId, userEvent.eventId);
-        const listReportNotResolved = await ReportService.listReportNotResolvedByUser(userEvent.userId);
-        const listReported = await ReportService.listAllReportOfUser(userEvent.userId);
+        });
+        const getBanDetail = await BanService.getUserStatusInEvent(
+          userEvent.userId,
+          userEvent.eventId
+        );
+        const listReportNotResolved =
+          await ReportService.listReportNotResolvedByUser(userEvent.userId);
+        const listReported = await ReportService.listAllReportOfUser(
+          userEvent.userId
+        );
 
         return {
           rankInfo: getUserRank,
@@ -812,9 +818,9 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userBanInfo: getBanDetail,
           nbOfNotResolvedReport: listReportNotResolved.length,
           nbOfReport: listReported.length,
-        }
+        };
       })
-    )
+    );
 
     return userEventData;
   } catch (error) {
@@ -823,7 +829,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
       message: "User is not found",
     });
   }
-}
+};
 
 export default {
   create,

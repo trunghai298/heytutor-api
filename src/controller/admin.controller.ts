@@ -38,7 +38,7 @@ const listCollaborator = async (req, res, next) => {
 };
 
 const getListUserEventInfo = (req, res, next) => {
-  EventServices.getListUserEventsManageByCollaborator(req.ctx)
+  EventService.getListUserEventsManageByCollaborator(req.ctx)
   .then((result) => res.json(result))
   .catch(next); 
 }
@@ -50,4 +50,5 @@ export default {
   systemDetailsInXDays,
   approveEvent,
   getListUserEventInfo,
+  listCollaborator,
 };
