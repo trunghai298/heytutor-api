@@ -1,6 +1,7 @@
 import Message from "../models/message.model";
 import Conversation from "../models/conversation.model";
 import { Op } from "sequelize";
+import { BadRequestError, NotFoundError } from "../utils/errors";
 
 /**
  * To list all messages of a conversation
@@ -27,12 +28,41 @@ const getConversationOfPost = async (params, ctx) => {
         },
       ],
     },
+    raw: true,
     logging: true,
   });
 
   return conversations;
 };
 
+const checkUnreadMessage = async (ctx, params) => {
+  const myUserId = ctx?.user.id;
+  try {
+    const conversationId = getConversationOfPost(params, ctx);
+
+    const res = Message.findAll({
+      where: {
+        conversationId: conversationId,
+        receiverId: myUserId,
+        isSeen: 0,
+      },
+      raw: true,
+      order: ["createdAt", "DESC"],
+    });
+    if (res.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
 export default {
   getConversationOfPost,
+  checkUnreadMessage,
 };
