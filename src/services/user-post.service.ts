@@ -3,7 +3,7 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import { map, countBy, flattenDeep, filter, isEmpty } from "lodash";
+import { map, countBy, flattenDeep, filter, isEmpty, compact } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import Ranking from "../models/ranking.model";
@@ -115,7 +115,7 @@ const getPostStats = async (ctx) => {
 
     return {
       myRequestStats: {
-        nbOfAllPost: myRequests.length,
+        nbOfAllPost: myRequests,
         nbOfConfirmedPost,
         nbOfDonePost,
         nbOfPostOnEvent,
@@ -367,7 +367,7 @@ const addSupporter = async (ctx, payload) => {
   const { postId, registerId } = payload;
   try {
     const post = await UserPost.findOne({
-      where: { postId, userId},
+      where: { postId, userId },
       attributes: ["registerId", "supporterId"],
       raw: true,
     });
@@ -389,7 +389,7 @@ const addSupporter = async (ctx, payload) => {
           isConfirmed: 1,
           isPending: 0,
         },
-        { where: { postId, userId} }
+        { where: { postId, userId } }
       );
       const user = await User.findOne({
         where: { userId },
@@ -777,6 +777,97 @@ const getListMyRequests = async (ctx, limit, offset) => {
   }
 };
 
+const getRegisteredNearDeadline = async (ctx) => {
+  const userId = ctx?.user?.id;
+  const today = new Date(Date.now());
+  const twoDayAfter = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000);
+  try {
+    const registeredRequest = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
+      { type: "SELECT" }
+    );
+
+    const activePostRegistered = filter(
+      registeredRequest,
+      (item) => item.isActive === 1
+    );
+
+    const res = await Promise.all(
+      map(activePostRegistered, async (userPost) => {
+        const postData = Post.findOne({
+          where: {
+            id: userPost.postId,
+            deadline: {
+              [Op.lt]: twoDayAfter,
+              [Op.gt]: today,
+            },
+          },
+          attributes: ["id", "userId", "title", "deadline"],
+          raw: true,
+        });
+        return postData;
+      })
+    );
+
+    return compact(res);
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
+const postDoneOfUser = async (ctx) => {
+  const userId = ctx?.user?.id;
+  try {
+    const postHasRegister = await UserPost.findAll({
+      where: {
+        userId,
+        isDone: {
+          [Op.eq]: 1,
+        },
+      },
+      logging: true,
+      raw: true,
+    });
+
+    console.log("postHasRegister", postHasRegister.length);
+
+    const totalPosted = await UserPost.findAll({
+      where: {
+        userId,
+      },
+      logging: true,
+      raw: true,
+    });
+
+    console.log("totalPosted", totalPosted.length);
+
+    const supporterRequest = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.supporterId, '$[*]'), '${userId}' , '$')`,
+      { type: "SELECT" }
+    );
+
+    const nbOfDonePostRegistered = filter(
+      supporterRequest,
+      (item) => item.isDone === 1
+    );
+
+    return {
+      nbOfPostedDone: postHasRegister.length,
+      nbOfPosted: totalPosted.length,
+      nbOfPostSupportedDone: nbOfDonePostRegistered.length,
+      nbOfPostSupported: supporterRequest.length,
+    };
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "User not found.",
+    });
+  }
+};
+
 export default {
   list,
   getPostStats,
@@ -786,4 +877,6 @@ export default {
   addSupporter,
   cancelRegister,
   addRegister,
+  getRegisteredNearDeadline,
+  postDoneOfUser,
 };

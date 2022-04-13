@@ -9,6 +9,9 @@ import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
 import PostService from "./post.service";
+import RankingService from "./ranking.service";
+import BanService from "./ban.service"
+import ReportService from "./report.service";
 
 /**
  * To create a new event
@@ -149,6 +152,7 @@ const getEventDetail = async (eventId) => {
       where: {
         id: eventId,
       },
+      raw: true,
     });
     return eventDetail;
   } catch (error) {
@@ -251,6 +255,7 @@ const getUserRoleInEvent = async (ctx, eventId) => {
         eventId,
       },
       attributes: ["isSupporter", "isRequestor"],
+      raw: true,
     });
     return userRole;
   } catch (error) {
@@ -776,6 +781,48 @@ const countPendingEventOfCollaborator = async (userId) => {
       message: "Collaborator is not found",
     });
    }
+=======
+const getListUserEventsManageByCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
+  try {
+    const manageUserEventId = await MySQLClient.query(
+      `SELECT * FROM UserEvents WHERE JSON_CONTAINS(JSON_EXTRACT(UserEvents.adminId, '$[*]'), '${userId}')`,
+      { type: "SELECT" }
+    );
+
+    const userEventData = await Promise.all(
+      map(manageUserEventId, async(userEvent) => {
+        const getUserRank = await RankingService.getUserRank(userEvent.userId);
+        const getEvent = await getEventDetail(userEvent.eventId);
+        const getUserDetail = await User.findOne({
+          where: {
+            id: userEvent.userId,
+          },
+          attributes: ["email", "name"],
+          raw: true,
+        })
+        const getBanDetail = await BanService.getUserStatusInEvent(userEvent.userId, userEvent.eventId);
+        const listReportNotResolved = await ReportService.listReportNotResolvedByUser(userEvent.userId);
+        const listReported = await ReportService.listAllReportOfUser(userEvent.userId);
+
+        return {
+          rankInfo: getUserRank,
+          eventInfo: getEvent,
+          userInfo: getUserDetail,
+          userBanInfo: getBanDetail,
+          nbOfNotResolvedReport: listReportNotResolved.length,
+          nbOfReport: listReported.length,
+        }
+      })
+    )
+
+    return userEventData;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
 }
 
 export default {
@@ -795,4 +842,5 @@ export default {
   approveEvent,
   countActiveEventOfCollaborator,
   countPendingEventOfCollaborator,
+  getListUserEventsManageByCollaborator,
 };

@@ -129,8 +129,28 @@ const updateBan = async (ctx, payload) => {
   }
 };
 
+const getUserStatusInEvent = async (userId, eventId) => {
+  try {
+    const banUserInEvent = Ban.findAll({
+      where: {
+        userId,
+        eventId,
+      },
+      attributes: ["type", "unbanDate"],
+      raw: true,
+    });
+    return banUserInEvent;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Can not find user",
+    });
+  }
+};
+
 export default {
   list,
   createBan,
   updateBan,
+  getUserStatusInEvent,
 };

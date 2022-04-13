@@ -1,6 +1,7 @@
 import Message from "../models/message.model";
 import Conversation from "../models/conversation.model";
 import { Op } from "sequelize";
+import { BadRequestError, NotFoundError } from "../utils/errors";
 
 /**
  * To list all messages of a conversation
@@ -27,6 +28,7 @@ const getConversationOfPost = async (params, ctx) => {
         },
       ],
     },
+    raw: true,
     logging: true,
   });
 

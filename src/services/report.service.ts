@@ -173,9 +173,25 @@ const listReportResolvedByUser = async (userId) => {
   }
 };
 
+const listAllReportOfUser = async (userId) => {
+  try {
+    const res = Report.findAll({
+      where: {
+        userId,
+      },
+      raw: true,
+    });
+
+    return res;
+  } catch (error) {
+    return error;
+  }
+};
+
 export default {
   checkReportInDay,
   createReport,
   listReportNotResolvedByUser,
   listReportResolvedByUser,
+  listAllReportOfUser,
 };

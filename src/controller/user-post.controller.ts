@@ -42,6 +42,18 @@ const unregister = (req, res, next) => {
     .catch(next);
 };
 
+const getRegisteredNearDeadline = async (req, res, next) => {
+  UserPostServices.getRegisteredNearDeadline(req.ctx)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const postDoneOfUser = async (req, res, next) => {
+  UserPostServices.postDoneOfUser(req.ctx)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   getPostStats,
   getListMyRequests,
@@ -50,4 +62,6 @@ export default {
   addSupporter,
   unregister,
   addRegister,
+  getRegisteredNearDeadline,
+  postDoneOfUser,
 };

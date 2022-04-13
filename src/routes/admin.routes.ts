@@ -8,4 +8,5 @@ export default (app: Application) => {
     .get("/get-system-detail", AdminController.systemDetailsInXDays)
     .put("/approve-event", AdminController.approveEvent)
     .get("/list-collaborators", AdminController.listCollaborator)
+    .get("/manage-user-event", AdminController.getListUserEventInfo)
 };
