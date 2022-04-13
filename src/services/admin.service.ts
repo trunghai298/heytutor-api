@@ -4,6 +4,9 @@ import Event from "../models/event.model";
 import Activity from "../models/activity.model";
 import Post from "../models/post.model";
 import UserPost from "../models/user-post.model";
+import { BadRequestError, NotFoundError } from "../utils/errors";
+import { map } from "lodash";
+import EventService from "./event.service";
 
 const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission } = payload;
@@ -241,9 +244,46 @@ const systemDetailsInXDays = async (nbOfDays) => {
   }
 };
 
+const listCollaborator = async () => {
+  try {
+    const listCollaborators = Admin.findAll({
+      where: {
+        [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
+      },
+    });
+
+    const res = await Promise.all(
+      map(listCollaborators, async (user) => {
+        const nbOfPendingEvents = EventService.countPendingEventOfCollaborator(
+          user.id
+        );
+        const nbOfActiveEvents = EventService.countActiveEventOfCollaborator(
+          user.id
+        );
+
+        const collaboratorInfo = {
+          userInfo: user,
+          nbOfPendingEvents: nbOfPendingEvents,
+          nbOfActiveEvents: nbOfActiveEvents,
+        };
+
+        return collaboratorInfo;
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "Collaborator is not found",
+    });
+  }
+};
+
 export default {
   addCollaborator,
   updateCollaborator,
   listAllCollaborator,
   systemDetailsInXDays,
+  listCollaborator,
 };

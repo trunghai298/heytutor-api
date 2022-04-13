@@ -12,6 +12,8 @@ interface EventInstance extends Model {
   endAt: Date;
   hashtag: string;
   content: string;
+  isApproved: boolean;
+  approveBy: number;
 }
 
 const Event = MySQLClient.define<EventInstance>("Event", {
@@ -51,7 +53,15 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   },
   content: {
     type: DataTypes.TEXT,
-  }
+  },
+  isApproved: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  approveBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: true,
+  },
 });
 
 export default Event;
