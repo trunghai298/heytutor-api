@@ -9,7 +9,6 @@ interface UserEventInstance extends Model {
   isSupporter: boolean;
   isRequestor: boolean;
   adminId: any;
-
 }
 
 const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
@@ -45,6 +44,10 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  adminId: {
+    type: DataTypes.JSON,
+    defaultValue: null,
   },
 });
 

@@ -1,4 +1,4 @@
-import EventServices from "../services/event.service";
+import EventService from "../services/event.service";
 import AdminServices from "../services/admin.service";
 
 const addCollaborator = (req, res, next) => {
@@ -15,15 +15,27 @@ const updateCollaborator = (req, res, next) => {
 
 const listAllCollaborator = (req, res, next) => {
   AdminServices.listAllCollaborator()
-  .then((result) => res.json(result))
-  .catch(next);
-}
+    .then((result) => res.json(result))
+    .catch(next);
+};
 
 const systemDetailsInXDays = (req, res, next) => {
   AdminServices.systemDetailsInXDays(req.query.nbOfDays)
-  .then((result) => res.json(result))
-  .catch(next);
-}
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const approveEvent = async (req, res, next) => {
+  EventService.approveEvent(req.ctx, req.body.eventId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const listCollaborator = async (req, res, next) => {
+  AdminServices.listCollaborator()
+    .then((result) => res.json(result))
+    .catch(next);
+};
 
 const getListUserEventInfo = (req, res, next) => {
   EventServices.getListUserEventsManageByCollaborator(req.ctx)
@@ -36,5 +48,6 @@ export default {
   updateCollaborator,
   listAllCollaborator,
   systemDetailsInXDays,
+  approveEvent,
   getListUserEventInfo,
 };

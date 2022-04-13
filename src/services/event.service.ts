@@ -726,6 +726,62 @@ const getEventForCreatePost = async () => {
   }
 };
 
+const approveEvent = async (ctx, eventId) => {
+  const adminId = ctx?.user?.id;
+
+  try {
+    const res = Event.update(
+      {
+        isApproved: 1,
+        approveBy: adminId,
+      },
+      {
+        where: {
+          eventId,
+        },
+      }
+    );
+
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
+const countActiveEventOfCollaborator = async (userId) => {
+   try {
+    const activeEvent = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}' , '$') AND endAt > date_sub(now() AND isApproved = 1`,
+      { type: "SELECT" }
+    );
+
+    return activeEvent.length;
+   } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "Collaborator is not found",
+    });
+   }
+}
+
+const countPendingEventOfCollaborator = async (userId) => {
+  try {
+    const pendingEvent = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.createId, '$[*]'), '${userId}' , '$') AND isApproved = 0`,
+      { type: "SELECT" }
+    );
+
+    return pendingEvent.length;
+   } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "Collaborator is not found",
+    });
+   }
+=======
 const getListUserEventsManageByCollaborator = async (ctx) => {
   const userId = ctx?.user?.id;
   try {
@@ -783,5 +839,8 @@ export default {
   // listActiveUser,
   getListEventNotEnroll,
   getEventForCreatePost,
+  approveEvent,
+  countActiveEventOfCollaborator,
+  countPendingEventOfCollaborator,
   getListUserEventsManageByCollaborator,
 };
