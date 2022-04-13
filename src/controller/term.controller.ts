@@ -6,6 +6,13 @@ const addTerm = (req, res, next) => {
     .catch(next);
 };
 
+const updateTerm = (req, res, next) => {
+  TermServices.updateTerm(req.body.id, req.body.payload)
+  .then((term) => res.json(term))
+  .catch(next);
+}
+
 export default {
   addTerm,
+  updateTerm,
 };

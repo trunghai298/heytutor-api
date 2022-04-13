@@ -124,6 +124,7 @@ const getNumberOfRequestResolved = async (_userId: number) => {
   try {
     const listStatus = await Post.count({
       where: { userId: _userId, isResolved: 1 },
+      raw: true,
       // logging: true,
     });
 
@@ -143,6 +144,7 @@ const getNumberOfRequestPending = async (_userId: number) => {
   try {
     const listStatus = await Post.count({
       where: { userId: _userId, isPending: 1 },
+      raw: true,
       // logging: true,
     });
 
@@ -303,6 +305,11 @@ const totalNumberConfirmedOfSupporter = async (_userId: number) => {
 //   }
 // };
 
+/**
+ * 
+ * @param _userId 
+ * @returns total confirmed post number of one supporter
+ */
 const getSupporterStats = async (_userId: number) => {
   try {
     const [
@@ -332,6 +339,7 @@ const getSupporterStats = async (_userId: number) => {
     });
   }
 };
+
 
 const getUserManageStats = async (ctx) => {
   const userId = ctx?.user?.id;

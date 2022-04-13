@@ -115,7 +115,7 @@ const getPostStats = async (ctx) => {
 
     return {
       myRequestStats: {
-        nbOfAllPost: myRequests.length,
+        nbOfAllPost: myRequests,
         nbOfConfirmedPost,
         nbOfDonePost,
         nbOfPostOnEvent,
