@@ -5,6 +5,8 @@ interface TermInstance extends Model {
   id: number;
   termId: number;
   termName: string;
+  startDate: Date;
+  endDate: Date;
 }
 
 const Term = MySQLClient.define<TermInstance>("Term", {
@@ -20,6 +22,14 @@ const Term = MySQLClient.define<TermInstance>("Term", {
   },
   termName: {
     type: DataTypes.STRING,
+  },
+  startDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
+  },
+  endDate: {
+    type: DataTypes.DATE,
+    allowNull: false,
   },
   createdAt: {
     type: DataTypes.DATE,

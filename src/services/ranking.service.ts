@@ -4,9 +4,18 @@ import Ranking from "../models/ranking.model";
 /**
  * To get user's ranking
  */
-const getUserRank = async (payload) => {
+const getUserRank = async (userId) => {
   try {
-    const res = await Ranking.findOne({ where: { userId: payload.userId } });
+    const res = await Ranking.findOne({
+      where: { userId: userId },
+      attributes: [
+        "rankPoint",
+        "voteCount",
+        "requestPoint",
+        "requestVoteCount",
+      ],
+      raw: true,
+    });
     return res;
   } catch (error) {
     throw new BadRequestError({
