@@ -15,18 +15,23 @@ const initPermission = async () => {
       raw: true,
     });
 
+    console.log("123");
+
     const userPermission = await Promise.all(
       map(listUser, async (user) => {
-        let payload = {
+        const payload = {
           userId: user.id,
           canPost: 1,
           canRegister: 1,
           canComment: 1,
           eventId: null,
         };
+
         await createPermission(payload);
       })
     );
+
+    console.log("456");
 
     const listUserEvent = await UserEvent.findAll({
       attributes: ["userId", "eventId"],
@@ -35,13 +40,14 @@ const initPermission = async () => {
 
     const eventPermission = await Promise.all(
       map(listUserEvent, async (userEvent) => {
-        let payload = {
-          userId: userEvent.id,
+        const payload = {
+          userId: userEvent.userId,
           canPost: 1,
           canRegister: 1,
           canComment: 1,
           eventId: userEvent.eventId,
         };
+
         await createPermission(payload);
       })
     );
@@ -131,19 +137,20 @@ const checkEventPermission = async () => {
 };
 
 const createPermission = async (payload) => {
-  const { userId, eventId } = payload;
+  const { userId, canPost, canRegister, canComment, eventId } = payload;
   try {
-    const permission = await UserPermission.create({
-      userId,
-      canPost: 1,
-      canRegister: 1,
-      canComment: 1,
-      eventId,
+    await UserPermission.create({
+      userId: userId,
+      canPost: canPost,
+      canRegister: canRegister,
+      canComment: canComment,
+      eventId: eventId,
     });
 
     return "Success!!!";
   } catch (error) {
-    return error;
+    console.log(error);
+    
   }
 };
 
@@ -219,7 +226,7 @@ const checkBan = async () => {
     return "Success!!!";
   } catch (error) {
     console.log(error);
-    
+
     throw new BadRequestError({
       field: "id",
       message: "Failed to create this item.",
@@ -228,7 +235,7 @@ const checkBan = async () => {
 };
 
 const checkUnBan = async () => {
-  const thirtyMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
   try {
     const listBan = await Ban.findAll({
       where: {

@@ -188,10 +188,28 @@ const listAllReportOfUser = async (userId) => {
   }
 };
 
+const listReportInEvent = async (eventId) => {
+  try {
+    const listReport = Report.findAll({
+      where: {
+        eventId,
+      },
+    });
+
+    return listReport;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
 export default {
   checkReportInDay,
   createReport,
   listReportNotResolvedByUser,
   listReportResolvedByUser,
   listAllReportOfUser,
+  listReportInEvent,
 };

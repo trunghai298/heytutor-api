@@ -18,6 +18,7 @@ import Admin from "./admin.routes";
 import Activity from "./activity.routes";
 import Ban from "./ban.routes";
 import Notification from "./notification.routes";
+import UserPermission from "./user-permission.routes";
 
 export default (app: any) => {
   Auth(app);
@@ -40,4 +41,5 @@ export default (app: any) => {
   Activity(app);
   Ban(app);
   Notification(app);
+  UserPermission(app);
 };

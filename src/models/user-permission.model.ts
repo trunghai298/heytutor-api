@@ -8,6 +8,7 @@ interface IUserPermissionsInstance extends Model {
   canRegister: boolean;
   canComment: boolean;
   eventId: number;
+  
 }
 
 const UserPermission = MySQLClient.define<IUserPermissionsInstance>(
@@ -36,6 +37,16 @@ const UserPermission = MySQLClient.define<IUserPermissionsInstance>(
     },
     eventId: {
       type: DataTypes.INTEGER.UNSIGNED,
+    },
+    createdAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+    },
+    updatedAt: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
     },
   }
 );
