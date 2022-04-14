@@ -246,25 +246,28 @@ const systemDetailsInXDays = async (nbOfDays) => {
 
 const listCollaborator = async () => {
   try {
-    const listCollaborators = Admin.findAll({
+    const listCollaborators = await Admin.findAll({
       where: {
         [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
       },
+      raw: true,
+      logging: true,
     });
 
     const res = await Promise.all(
-      map(listCollaborators, async (user) => {
-        const nbOfPendingEvents = EventService.countPendingEventOfCollaborator(
+      map(listCollaborators, async (user) => {        
+        const nbOfPendingEvents = await EventService.countPendingEventOfCollaborator(
           user.id
         );
-        const nbOfActiveEvents = EventService.countActiveEventOfCollaborator(
+        
+        const nbOfActiveEvents = await EventService.countActiveEventOfCollaborator(
           user.id
-        );
+        );        
 
         const collaboratorInfo = {
           userInfo: user,
-          nbOfPendingEvents: nbOfPendingEvents,
-          nbOfActiveEvents: nbOfActiveEvents,
+          nbOfPendingEvents: nbOfPendingEvents.length,
+          nbOfActiveEvents: nbOfActiveEvents.length,
         };
 
         return collaboratorInfo;

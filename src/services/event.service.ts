@@ -3,7 +3,7 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { map } from "lodash";
+import { map, filter } from "lodash";
 import { isEmpty, omit, pick } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
@@ -752,13 +752,28 @@ const approveEvent = async (ctx, eventId) => {
 };
 
 const countActiveEventOfCollaborator = async (userId) => {
+  const today = new Date(Date.now());
   try {
-    const activeEvent = await MySQLClient.query(
-      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}' , '$') AND endAt > date_sub(now() AND isApproved = 1`,
+    // const activeEvent = await Event.findAll({
+    //   where: {
+    //     adminId: {
+    //       $contains: [userId],
+    //     },
+    //     endAt: {
+    //       [Op.gt]: today,
+    //     },
+    //     isApproved: 1,
+    //   },
+    //   raw: true,
+    //   logging: true,
+    // });
+
+    const listActiveEvent = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND endAt > now() AND isApproved = 1`,
       { type: "SELECT" }
     );
 
-    return activeEvent.length;
+    return listActiveEvent;
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
@@ -769,12 +784,15 @@ const countActiveEventOfCollaborator = async (userId) => {
 
 const countPendingEventOfCollaborator = async (userId) => {
   try {
-    const pendingEvent = await MySQLClient.query(
-      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.createId, '$[*]'), '${userId}' , '$') AND isApproved = 0`,
-      { type: "SELECT" }
-    );
+    const pendingEvent = await Event.findAll({
+      where: {
+        createId: userId,
+        isApproved: 0,
+      },
+      raw: true,
+    });
 
-    return pendingEvent.length;
+    return pendingEvent;
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
@@ -824,6 +842,8 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
 
     return userEventData;
   } catch (error) {
+    console.log(error);
+    
     throw new NotFoundError({
       field: "userId",
       message: "User is not found",
