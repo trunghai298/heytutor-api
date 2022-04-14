@@ -218,6 +218,8 @@ const checkBan = async () => {
 
     return "Success!!!";
   } catch (error) {
+    console.log(error);
+    
     throw new BadRequestError({
       field: "id",
       message: "Failed to create this item.",

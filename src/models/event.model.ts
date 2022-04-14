@@ -14,6 +14,7 @@ interface EventInstance extends Model {
   content: string;
   isApproved: boolean;
   approveBy: number;
+  adminId: any;
 }
 
 const Event = MySQLClient.define<EventInstance>("Event", {
@@ -61,6 +62,10 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   approveBy: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: true,
+  },
+  adminId: {
+    type: DataTypes.JSONB,
+    defaultValue: null,
   },
 });
 
