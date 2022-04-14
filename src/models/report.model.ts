@@ -37,6 +37,11 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
   eventId: {
     type: DataTypes.INTEGER.UNSIGNED,
   },

@@ -1,4 +1,4 @@
-import { BadRequestError } from "../utils/errors";
+import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
 import UserPermissionService from "./user-permission.service";
 import { NOTI_TYPE } from "../constants/notification";
@@ -61,7 +61,7 @@ const joinEvent = async (ctx, payload) => {
       notificationType: NOTI_TYPE.JoinEvent,
     };
     await NotificationService.create(payload);
-    return "Join Success!!!"
+    return "Join Success!!!";
   } catch (error) {
     throw new BadRequestError({
       field: "userId-eventId",
@@ -95,8 +95,27 @@ const unJoinEvent = async (ctx, event) => {
   }
 };
 
+const listUserOfEvent = async (eventId) => {
+  try {
+    const listUsers = await UserEvent.findAll({
+      where: {
+        eventId,
+      },
+      raw: true,
+    });
+
+    return listUsers;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
 export default {
   list,
   joinEvent,
   unJoinEvent,
+  listUserOfEvent,
 };
