@@ -26,6 +26,27 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(initPassport());
 
+const compare = require("tsscmp");
+const auth = require("basic-auth");
+
+function check(name: any, pass: any) {
+  var valid = true;
+
+  valid = compare(name, "root") && valid;
+  valid = compare(pass, "root") && valid;
+  return valid;
+}
+const basicAuth = (req: any, res: any, next: any) => {
+  const user = auth(req);
+  if (!user || !check(user.name, user.pass)) {
+    res.statusCode = 401;
+    res.setHeader("WWW-Authenticate", 'Basic realm="example"');
+    res.end("Access denied");
+  } else {
+    next();
+  }
+};
+
 app.use(initCORS());
 
 app.get("/auth/google", authenticateGoogle());
@@ -62,7 +83,7 @@ process.env.NODE_ENV !== NodeEnv.Test && app.use(initLogger());
 app.use(initSecurity());
 
 // JWT verification
-// app.use(authenticateJWT());
+app.use(authenticateJWT());
 
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
