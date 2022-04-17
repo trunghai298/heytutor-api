@@ -18,6 +18,11 @@ import { sign } from "./utils/jwt";
 import { fetchFapData } from "./scripts/getStudentsInfo";
 import Notification from "./models/notification.model";
 import Message from "./models/message.model";
+import adminController from "./controller/admin.controller";
+import Student from "./models/student.model";
+import Class from "./models/class.model";
+import Course from "./models/course.model";
+import Department from "./models/department.model";
 const app = express();
 
 // Third party middlewares
@@ -47,11 +52,14 @@ const basicAuth = (req: any, res: any, next: any) => {
   }
 };
 
+app.get("/admin/create", basicAuth, adminController.createAdmin);
+
 app.use(initCORS());
 
 app.get("/auth/google", authenticateGoogle());
 // Allow to generate anonymous JWT for new user
 app.post("/auth/login", AuthController.login);
+app.post("/auth/admin", AuthController.adminLogin);
 
 const resetDb = async () => {
   try {
@@ -67,13 +75,17 @@ app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
 });
 
 app.get("/mysql", async (req, res) => {
-  await resetDb();
   res.send({ message: "sync database successful" });
   // await setupFakeData(req, res);
 });
 
 app.get("/fap-data", async (req, res, next) => {
-  await resetDb();
+  await Promise.all([
+    Student.sync({ force: true }),
+    Class.sync({ force: true }),
+    Course.sync({ force: true }),
+    Department.sync({ force: true }),
+  ]);
   await fetchFapData(req.query.fapCookie as string, req.query.termId as string);
   res.send({ message: "Insert data successfully" });
 });

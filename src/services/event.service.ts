@@ -12,6 +12,7 @@ import PostService from "./post.service";
 import RankingService from "./ranking.service";
 import BanService from "./ban.service";
 import ReportService from "./report.service";
+import usersService from "./users.service";
 
 /**
  * To create a new event
@@ -165,26 +166,64 @@ const getEventDetail = async (eventId) => {
   }
 };
 
-const getPostOfEvent = async (eventId) => {
+const getPostOfEvent = async (params) => {
+  const { eventId, limit, offset } = params;
+
   try {
-    const listUsers = await UserPost.findAll({
+    const res = await UserPost.findAll({
       where: {
         eventId,
         postId: {
           [Op.ne]: null,
         },
+        isDone: {
+          [Op.ne]: 1,
+        },
       },
-      include: [Post],
-      attributes: ["postId"],
-      group: ["postId"],
+      limit: limit || 20,
+      offset: offset || 0,
       raw: true,
+      order: [["createdAt", "DESC"]],
     });
 
-    const res = map(listUsers, (user) => {
-      const pickFields = omit(user, ["postId"]);
-      return pickFields;
-    });
-    return res;
+    const finalRes = await Promise.all(
+      map(res, async (post) => {
+        let registerUsers = null;
+        let supporterUsers = null;
+
+        if (post.registerId) {
+          registerUsers = await Promise.all(
+            map(post.registerId, async (id) => {
+              const registerUser = await usersService.getUserData(id);
+              return {
+                id,
+                username: registerUser.name,
+                email: registerUser.email,
+                rankPoint: registerUser.rankPoint || 0,
+                voteCount: registerUser.voteCount || 0,
+              };
+            })
+          );
+        }
+        if (post.supporterId) {
+          supporterUsers = await Promise.all(
+            map(post.supporterId, async (id) => {
+              const registerUser = await usersService.getUserData(id);
+              return {
+                id,
+                username: registerUser.name,
+                email: registerUser.email,
+                rankPoint: registerUser.rankPoint || 0,
+                voteCount: registerUser.voteCount || 0,
+              };
+            })
+          );
+        }
+        return { ...post, registerUsers, supporterUsers };
+      })
+    );
+
+    return finalRes;
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -843,7 +882,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
     return userEventData;
   } catch (error) {
     console.log(error);
-    
+
     throw new NotFoundError({
       field: "userId",
       message: "User is not found",

@@ -10,6 +10,7 @@ import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
+import usersService from "./users.service";
 
 /**
  * To create a new term
@@ -47,12 +48,14 @@ const list = async (payload) => {
 //   }
 // };
 
-const getNbOfAllPost = async (userId) => {
+const getNbOfAllPost = async (userId, timeFilter) => {
   try {
-    const res = await UserPost.findAll({
-      where: { userId },
-      raw: true,
-    });
+    const res = await MySQLClient.query(
+      `SELECT * FROM UserPosts WHERE userId=${userId} ${timeFilter}`,
+      {
+        type: "SELECT",
+      }
+    );
 
     return res;
   } catch (error) {
@@ -60,13 +63,29 @@ const getNbOfAllPost = async (userId) => {
   }
 };
 
-const getPostStats = async (ctx) => {
-  // const { user } = ctx;
-  const userId = ctx?.user?.id;
+const getPostStats = async (ctx, filters) => {
+  const { user } = ctx;
+
+  const filterParams = JSON.parse(filters);
+  const { time } = filterParams;
+  let timeFilter;
+
+  if (time === "week") {
+    timeFilter = "AND createdAt > date_sub(now(), interval 1 week)";
+  }
+
+  if (time === "month") {
+    timeFilter = "AND createdAt > date_sub(now(), interval 1 month)";
+  }
+
+  if (time.includes("BETWEEN")) {
+    timeFilter = `AND createdAt ${filterParams.time}`;
+  }
 
   try {
     // my request
-    const myRequests = await getNbOfAllPost(userId);
+    const myRequests = await getNbOfAllPost(user.id, timeFilter);
+
     const nbOfConfirmedPost = filter(
       myRequests,
       (item) => item.isConfirmed === 1 && item.isDone !== 1
@@ -88,7 +107,7 @@ const getPostStats = async (ctx) => {
 
     // request di dang ki lam support
     const registeredRequest = await MySQLClient.query(
-      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${userId}' , '$')`,
+      `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.registerId, '$[*]'), '${user.id}' , '$')`,
       { type: "SELECT" }
     );
 
@@ -135,81 +154,6 @@ const getPostStats = async (ctx) => {
     console.log(error);
   }
 };
-
-// const updatePostStatus = async (payload) => {
-//   const { postId, status, userId } = payload;
-
-//   try {
-//     const listRegister = await UserPost.findOne({
-//       where: { postId },
-//       attributes: ["registerId"],
-//       raw: true,
-//     });
-
-//     let mapRegister = listRegister.registerId;
-
-//     const listSupporter = await UserPost.findOne({
-//       where: { postId },
-//       attributes: ["supporterId"],
-//       raw: true,
-//     });
-//     let mapSupporter = listSupporter.supporterId;
-
-//     if (status === "isActive") {
-
-//     } else if (status == "isConfirmed") {
-//       if (mapSupporter === null) {
-//         mapSupporter = [userId];
-//         await UserPost.update(
-//           {
-//             isDone: 0,
-//             isActive: 0,
-//             isPending: 0,
-//             isConfirmed: 1,
-//             supporterId: mapSupporter,
-//           },
-//           { where: { postId } }
-//         );
-//       } else {
-//         mapSupporter.push(userId);
-//         await UserPost.update(
-//           {
-//             supporterId: mapSupporter,
-//           },
-//           { where: { postId } }
-//         );
-//       }
-//     } else if (status === "isDone") {
-//       await UserPost.update(
-//         {
-//           isDone: 1,
-//           isActive: 0,
-//           isPending: 0,
-//           isConfirmed: 0,
-//         },
-//         { where: { postId } }
-//       );
-//     } else if (status === "isPending") {
-//       await UserPost.update(
-//         {
-//           isDone: 0,
-//           isActive: 0,
-//           isPending: 1,
-//           isConfirmed: 0,
-//         },
-//         { where: { postId } }
-//       );
-//     }
-
-//     return { postId, status, userId };
-//   } catch (error) {
-//     console.log(error);
-//     throw new NotFoundError({
-//       field: "postId",
-//       message: "Post is not found",
-//     });
-//   }
-// };
 
 const addRegister = async (ctx, postId) => {
   const userId = ctx?.user?.id;
@@ -440,20 +384,6 @@ const addSupporter = async (ctx, payload) => {
 //   }
 // };
 
-const getUser = async (id) => {
-  return User.findOne({
-    where: { id },
-    raw: true,
-  });
-};
-
-const getUserRank = async (id) => {
-  return Ranking.findOne({
-    where: { userId: id },
-    raw: true,
-  });
-};
-
 const getPost = async (id) => {
   return Post.findOne({
     where: { id },
@@ -461,19 +391,11 @@ const getPost = async (id) => {
   });
 };
 
-const getUserData = async (id) => {
-  const [user, ranking] = await Promise.all([getUser(id), getUserRank(id)]);
-  return {
-    ...user,
-    ...ranking,
-  };
-};
-
 const listRegistedRequests = async (ctx, params) => {
   const userId = ctx?.user?.id;
   const { limit, offset, filters } = params;
-
   const filterParams = JSON.parse(filters);
+
   const { time } = filterParams;
   let timeFilter;
 
@@ -504,7 +426,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(registering, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          getUserData(post.userId),
+          usersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -524,7 +446,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(supporting, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          getUserData(post.userId),
+          usersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -576,7 +498,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
         const postData = await getPost(post.postId);
         const registerUsers = await Promise.all(
           map(post.registerId, async (id) => {
-            const registerUser = await getUserData(id);
+            const registerUser = await usersService.getUserData(id);
             return {
               id,
               username: registerUser.name,
@@ -615,11 +537,13 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
         const postData = await getPost(post.postId);
-        return { ...post, postData };
+        if (postData) {
+          return { ...post, postData };
+        }
       })
     );
 
-    return res;
+    return compact(res);
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
@@ -652,7 +576,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
         });
         const supporterUsers = await Promise.all(
           map(post.supporterId, async (id) => {
-            const userData = await getUserData(id);
+            const userData = await usersService.getUserData(id);
             return {
               id: userData.id,
               username: userData.name,
@@ -695,11 +619,13 @@ const listPostOnEvent = async (userId, limit, offset) => {
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
         const postData = await getPost(post.postId);
-        return { ...post, postData };
+        if (postData) {
+          return { ...post, postData };
+        }
       })
     );
 
-    return res;
+    return compact(res);
   } catch (error) {
     throw new BadRequestError({
       field: "userId",

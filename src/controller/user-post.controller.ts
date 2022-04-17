@@ -1,7 +1,7 @@
 import UserPostServices from "../services/user-post.service";
 
 const getPostStats = (req, res, next) => {
-  UserPostServices.getPostStats(req.ctx)
+  UserPostServices.getPostStats(req.ctx, req.query.filters)
     .then((result) => res.json(result))
     .catch(next);
 };

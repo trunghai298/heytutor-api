@@ -82,6 +82,12 @@ const getListEventNotEnroll = (req, res, next) => {
     .catch(next);
 };
 
+const getListPostOnEvent = (req, res, next) => {
+  EventServices.getPostOfEvent(req.params)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   create,
   edit,
@@ -96,4 +102,5 @@ export default {
   // listActiveUser,
   getListEventNotEnroll,
   getEventTitle,
+  getListPostOnEvent,
 };

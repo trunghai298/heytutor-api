@@ -306,8 +306,8 @@ const totalNumberConfirmedOfSupporter = async (_userId: number) => {
 // };
 
 /**
- * 
- * @param _userId 
+ *
+ * @param _userId
  * @returns total confirmed post number of one supporter
  */
 const getSupporterStats = async (_userId: number) => {
@@ -339,7 +339,6 @@ const getSupporterStats = async (_userId: number) => {
     });
   }
 };
-
 
 const getUserManageStats = async (ctx) => {
   const userId = ctx?.user?.id;
@@ -389,9 +388,32 @@ const getUserManageStats = async (ctx) => {
   }
 };
 
+const getUser = async (id) => {
+  return User.findOne({
+    where: { id },
+    raw: true,
+  });
+};
+
+const getUserRank = async (id) => {
+  return Ranking.findOne({
+    where: { userId: id },
+    raw: true,
+  });
+};
+
+const getUserData = async (id) => {
+  const [user, ranking] = await Promise.all([getUser(id), getUserRank(id)]);
+  return {
+    ...user,
+    ...ranking,
+  };
+};
+
 export default {
   getUserInfoById,
   fetchByEmail,
   getUserPostStats,
   getSupporterStats,
+  getUserData,
 };

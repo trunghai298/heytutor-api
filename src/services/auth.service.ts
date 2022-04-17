@@ -5,6 +5,7 @@ import * as JWTUtils from "../utils/jwt";
 import { compare, encrypt } from "../utils/bcrypt";
 import Student from "../models/student.model";
 import StudentServices from "../services/student.service";
+import Admin from "../models/admin.model";
 
 export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
@@ -58,6 +59,37 @@ export const login = async (params: any, ctx: any) => {
   const token = await JWTUtils.sign({
     ...ctx,
     user: attachStudentData,
+  });
+
+  return { token };
+};
+
+export const adminLogin = async (params: any) => {
+  const { email, password } = params;
+
+  const admin = await Admin.findOne({
+    where: { email },
+    raw: true,
+  });
+
+  if (!admin) {
+    throw new BadRequestError({
+      field: "email",
+      message: "User is not exist",
+    });
+  }
+
+  const isSamePassword = password === admin.password;
+
+  if (!isSamePassword) {
+    throw new BadRequestError({
+      field: "password",
+      message: "Password is not correct",
+    });
+  }
+
+  const token = await JWTUtils.sign({
+    user: admin,
   });
 
   return { token };

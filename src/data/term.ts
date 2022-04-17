@@ -59,4 +59,8 @@ export const TERMS = [
     termId: 32,
     termName: "Spring2022",
   },
+  {
+    termId: 33,
+    termName: "Summer2022",
+  },
 ];

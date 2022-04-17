@@ -1,6 +1,16 @@
 import EventService from "../services/event.service";
 import AdminServices from "../services/admin.service";
 
+const createAdmin = (req, res, next) => {
+  try {
+    AdminServices.createAdmin().then((result) =>
+      res.json({ success: true, username: "root" })
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 const addCollaborator = (req, res, next) => {
   AdminServices.addCollaborator(req.ctx, req.body)
     .then((result) => res.json(result))
@@ -39,11 +49,12 @@ const listCollaborator = async (req, res, next) => {
 
 const getListUserEventInfo = (req, res, next) => {
   EventService.getListUserEventsManageByCollaborator(req.ctx)
-  .then((result) => res.json(result))
-  .catch(next); 
-}
+    .then((result) => res.json(result))
+    .catch(next);
+};
 
 export default {
+  createAdmin,
   addCollaborator,
   updateCollaborator,
   listAllCollaborator,

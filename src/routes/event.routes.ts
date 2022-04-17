@@ -6,6 +6,7 @@ export default (app) => {
     .put("/event/:id", EventController.edit)
     .delete("/event/:id", EventController.deleteEvent)
     .get("/get-event-post/:eventId", EventController.getNumberPostOfEvent)
+    .get("/get-list-post-of-event/:eventId", EventController.getListPostOnEvent)
     .get("/get-event-stats/:eventId", EventController.getEventStats)
     .get("/get-list-event-of-user", EventController.getEventByUser)
     .get("/get-event-detail/:eventId", EventController.getEventUserPostDetail)
@@ -13,5 +14,5 @@ export default (app) => {
     .get("/get-event-by-duration", EventController.getEventByDuration)
     // .get("/listActiveUser/:eventId", EventController.listActiveUser)
     .get("/getListEventNotEnroll", EventController.getListEventNotEnroll)
-    .get("/get-event-title", EventController.getEventTitle)
-  };
+    .get("/get-event-title", EventController.getEventTitle);
+};

@@ -8,6 +8,22 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import { map } from "lodash";
 import EventService from "./event.service";
 
+const createAdmin = async () => {
+  const admin = await Admin.findOne({ where: { name: "root" }, raw: true });
+
+  if (admin) {
+    return admin;
+  }
+
+  return Admin.create({
+    email: "admin@heytutor.com",
+    name: "root",
+    password: "root",
+    role: "superadmin",
+    permissions: "all",
+  });
+};
+
 const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission } = payload;
   const userId = ctx?.user?.id;
@@ -255,14 +271,12 @@ const listCollaborator = async () => {
     });
 
     const res = await Promise.all(
-      map(listCollaborators, async (user) => {        
-        const nbOfPendingEvents = await EventService.countPendingEventOfCollaborator(
-          user.id
-        );
-        
-        const nbOfActiveEvents = await EventService.countActiveEventOfCollaborator(
-          user.id
-        );        
+      map(listCollaborators, async (user) => {
+        const nbOfPendingEvents =
+          await EventService.countPendingEventOfCollaborator(user.id);
+
+        const nbOfActiveEvents =
+          await EventService.countActiveEventOfCollaborator(user.id);
 
         const collaboratorInfo = {
           userInfo: user,
@@ -284,6 +298,7 @@ const listCollaborator = async () => {
 };
 
 export default {
+  createAdmin,
   addCollaborator,
   updateCollaborator,
   listAllCollaborator,

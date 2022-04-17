@@ -27,6 +27,15 @@ const login = async (req: any, res: any, next: any) => {
   }
 };
 
+const adminLogin = async (req: any, res: any, next: any) => {
+  try {
+    const result = await AuthServices.adminLogin(req.body);
+    res.json(result);
+  } catch (e) {
+    next(e);
+  }
+};
+
 // const refreshToken = async (req, res, next) => {
 //   try {
 //     const result = await AuthServices.refreshToken(req.ctx);
@@ -40,4 +49,5 @@ export default {
   login,
   anonymous,
   fetch,
+  adminLogin,
 };
