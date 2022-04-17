@@ -3,15 +3,15 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { map, filter } from "lodash";
-import { isEmpty, omit, pick } from "lodash";
+import { map } from "lodash";
+import { pick } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
-import PostService from "./post.service";
 import RankingService from "./ranking.service";
 import BanService from "./ban.service";
 import ReportService from "./report.service";
+import UserEventService from "./user-event.service";
 import usersService from "./users.service";
 
 /**
@@ -791,22 +791,7 @@ const approveEvent = async (ctx, eventId) => {
 };
 
 const countActiveEventOfCollaborator = async (userId) => {
-  const today = new Date(Date.now());
   try {
-    // const activeEvent = await Event.findAll({
-    //   where: {
-    //     adminId: {
-    //       $contains: [userId],
-    //     },
-    //     endAt: {
-    //       [Op.gt]: today,
-    //     },
-    //     isApproved: 1,
-    //   },
-    //   raw: true,
-    //   logging: true,
-    // });
-
     const listActiveEvent = await MySQLClient.query(
       `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND endAt > now() AND isApproved = 1`,
       { type: "SELECT" }
@@ -839,6 +824,7 @@ const countPendingEventOfCollaborator = async (userId) => {
     });
   }
 };
+
 const getListUserEventsManageByCollaborator = async (ctx) => {
   const userId = ctx?.user?.id;
   try {
@@ -873,16 +859,40 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           eventInfo: getEvent,
           userInfo: getUserDetail,
           userBanInfo: getBanDetail,
-          nbOfNotResolvedReport: listReportNotResolved.length,
-          nbOfReport: listReported.length,
+          nbOfNotResolvedReport: listReportNotResolved,
+          nbOfReport: listReported,
         };
       })
     );
 
     return userEventData;
   } catch (error) {
-    console.log(error);
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
+};
 
+const listEventManageByCollaborator = async (userId) => {
+  try {
+    const listEvent = await countActiveEventOfCollaborator(userId);
+    const res = await Promise.all(
+      map(listEvent, async (event) => {
+        const listUsers = await UserEventService.listUserOfEvent(event.id);
+        const listReport = await ReportService.listReportInEvent(event.id);
+
+        const result = {
+          eventDetail: event,
+          listUserInEvent: listUsers,
+          listReportInEvent: listReport,
+        };
+        return result;
+      })
+    );
+
+    return res;
+  } catch (error) {
     throw new NotFoundError({
       field: "userId",
       message: "User is not found",
@@ -908,4 +918,5 @@ export default {
   countActiveEventOfCollaborator,
   countPendingEventOfCollaborator,
   getListUserEventsManageByCollaborator,
+  listEventManageByCollaborator,
 };

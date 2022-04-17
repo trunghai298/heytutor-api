@@ -53,6 +53,12 @@ const getListUserEventInfo = (req, res, next) => {
     .catch(next);
 };
 
+const getActiveEventOfCollaborator = (req, res, next) => {
+  EventService.listEventManageByCollaborator(req.body.collaboratorId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -62,4 +68,5 @@ export default {
   approveEvent,
   getListUserEventInfo,
   listCollaborator,
+  getActiveEventOfCollaborator,
 };
