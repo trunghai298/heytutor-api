@@ -18,5 +18,7 @@ export enum NOTI_TYPE {
   NewMessage = "new_message",
 
   JoinEvent = "join_event",
-  UnJoinEvent = "unjoined_event"
+  UnJoinEvent = "unjoined_event",
+  UpdateCollab = "update_collaborator",
+  NewCollab = "add_collaborator",
 }

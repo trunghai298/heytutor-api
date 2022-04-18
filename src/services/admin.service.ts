@@ -7,6 +7,8 @@ import UserPost from "../models/user-post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { map } from "lodash";
 import EventService from "./event.service";
+import { NOTI_TYPE } from "../constants/notification";
+import NotificationService from "./notification.service";
 
 const createAdmin = async () => {
   const admin = await Admin.findOne({ where: { name: "root" }, raw: true });
@@ -52,6 +54,16 @@ const addCollaborator = async (ctx, payload) => {
         action: "add",
         content: `new collaborator ${name}`,
       });
+
+      const id = await Admin.count();
+      const payload = {
+        userId: id,
+        notificationType: NOTI_TYPE.NewCollab,
+        fromUserId: userId,
+        fromUsername: username,
+      };
+      await NotificationService.create(payload);
+
       return {
         log,
       };
@@ -67,46 +79,46 @@ const addCollaborator = async (ctx, payload) => {
 };
 
 const updateCollaborator = async (ctx, payload) => {
-  const { email, password, name, role, permission } = payload;
+  const { id, email, name, role, permission } = payload;
   const userId = ctx?.user?.id;
   try {
-    const admin = await Admin.findAll({
-      where: { email },
-    });
-    if (admin.length !== 0) {
-      const res = await Admin.update(
-        {
-          name,
-          role,
-          permission,
+    const res = await Admin.update(
+      {
+        name,
+        role,
+        permission,
+      },
+      {
+        where: {
+          email,
         },
-        {
-          where: {
-            email,
-          },
-        }
-      );
-      const username = await (
-        await Admin.findOne({
-          where: {
-            id: userId,
-          },
-        })
-      ).name;
-      const log = await Activity.create({
-        userId,
-        username,
-        action: "update",
-        content: `collaborator ${name}`,
-      });
-      return {
-        log,
-      };
-    } else {
-      return {
-        message: "User did not existed",
-      };
-    }
+      }
+    );
+    const username = await (
+      await Admin.findOne({
+        where: {
+          id: userId,
+        },
+        raw: true,
+      })
+    ).name;
+    const log = await Activity.create({
+      userId,
+      username,
+      action: "update",
+      content: `collaborator ${name}`,
+    });
+
+    const payload = {
+      userId: id,
+      notificationType: NOTI_TYPE.UpdateCollab,
+      fromUserId: userId,
+      fromUsername: username,
+    };
+    await NotificationService.create(payload);
+    return {
+      log,
+    };
   } catch (error) {
     console.log(error);
     return error;
@@ -115,7 +127,7 @@ const updateCollaborator = async (ctx, payload) => {
 
 const listAllCollaborator = async () => {
   try {
-    const listCollaborator = await Admin.findAll();
+    const listCollaborator = await Admin.findAll({ raw: true });
     return listCollaborator;
   } catch (error) {
     console.log(error);
