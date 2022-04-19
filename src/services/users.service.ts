@@ -410,10 +410,65 @@ const getUserData = async (id) => {
   };
 };
 
+const searchSuggest = async (key) => {
+  const today = new Date(Date.now());
+  try {
+    const eventSimilar = await Event.findAll({
+      where: {
+        [Op.or]: [
+          {
+            title: {
+              [Op.like]: `%${key}%`,
+            },
+          },
+          {
+            hashtag: {
+              [Op.like]: `%${key}%`,
+            },
+          },
+        ],
+        endAt: {
+          [Op.gt]: today,
+        },
+      },
+      attributes: ["id", "title", "createdAt", "endAt", "hashtag"],
+      raw: true,
+      limit: 5,
+    });
+
+    const postSimilar = await Post.findAll({
+      where: {
+        title: {
+          [Op.like]: `%${key}%`,
+        },
+        deadline: {
+          [Op.gt]: today,
+        },
+      },
+      attributes: [
+        "id",
+        "userId",
+        "title",
+        "minPrice",
+        "hashtag",
+        "createdAt",
+        "deadline",
+      ],
+      raw: true,
+      limit: 2,
+    });
+
+    return await eventSimilar.concat(postSimilar);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 export default {
   getUserInfoById,
   fetchByEmail,
   getUserPostStats,
   getSupporterStats,
   getUserData,
+  searchSuggest,
 };

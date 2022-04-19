@@ -24,9 +24,16 @@ const getSupporterStats = (req, res, next) => {
     .catch(next);
 };
 
+const searchSuggest = (req, res, next) => {
+  UserServices.searchSuggest(req.body.key)
+    .then((data) => res.json(data))
+    .catch(next);
+};
+
 export default {
   fetchByEmail,
   getUser,
   getUserPostStats,
   getSupporterStats,
+  searchSuggest,
 };
