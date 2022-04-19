@@ -52,8 +52,46 @@ const getListSubjects = async (stdId: string) => {
   return map(studentSubject, "subject");
 };
 
+const subjectGroupByMajor = async () => {
+  try {
+    const listMajors = await Student.findAll({
+      attributes: ["major"],
+      group: ["major"],
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listMajors, async (major) => {
+        const listSubject = await Student.findAll({
+          where: {
+            major: major.major,
+          },
+          attributes: ["subject"],
+          group: ["subject"],
+          raw: true,
+        });
+
+        return {
+          major: major.major,
+          listSubjects: listSubject,
+        };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    console.log(error);
+
+    throw new BadRequestError({
+      field: "error",
+      message: "Something went wrong!.",
+    });
+  }
+};
+
 export default {
   getListSubjects,
   fetchById,
   list,
+  subjectGroupByMajor,
 };
