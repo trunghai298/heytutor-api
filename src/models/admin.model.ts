@@ -8,6 +8,8 @@ interface IAdminInstance extends Model {
   password: string;
   role: string;
   permissions: string;
+  isActive: boolean;
+  updatedBy: number;
 }
 
 const Admin = MySQLClient.define<IAdminInstance>("Admin", {
@@ -41,6 +43,15 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  isActive: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    defaultValue: true,
+  },
+  updatedBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
   },
 });
 
