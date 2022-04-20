@@ -852,7 +852,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           where: {
             id: userEvent.userId,
           },
-          attributes: ["email", "name"],
+          attributes: ["id","email", "name"],
           raw: true,
         });
         const getBanDetail = await BanService.getUserStatusInEvent(
@@ -917,7 +917,7 @@ const collaboratorInfo = async () => {
       where: {
         role: "ctv1",
       },
-      attributes: ["id", "name"],
+      attributes: ["id", "name", "isActive", "updatedBy"],
       raw: true,
     });
 
