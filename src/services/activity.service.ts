@@ -18,3 +18,22 @@ export const list = async (limit, offset) => {
     });
   }
 };
+
+const create = async (payload) => {
+  try {
+    const res = await Activity.create({
+      ...payload,
+    });
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: error,
+    });
+  }
+};
+
+export default {
+  list,
+  create,
+}

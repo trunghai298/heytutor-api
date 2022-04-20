@@ -8,6 +8,7 @@ interface ReportInstance extends Model {
   reason: string;
   content: string;
   createdAt: Date;
+  updatedAt: Date;
   eventId: number;
   commentId: number;
 }
