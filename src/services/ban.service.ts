@@ -172,7 +172,7 @@ const updateBan = async (ctx, payload) => {
 
 const getUserStatusInEvent = async (userId, eventId) => {
   try {
-    const banUserInEvent = Ban.findAll({
+    const banUserInEvent = await Ban.findAll({
       where: {
         userId,
         eventId,
