@@ -78,8 +78,10 @@ const joinEvent = async (ctx, payload) => {
       content: `${username} join event ${eventId}`,
     });
 
-    return "Join Success!!!";
+    return { status: 200 };
+
   } catch (error) {
+    console.log(error);
     throw new BadRequestError({
       field: "userId-eventId",
       message: "Failed to create this item.",
@@ -97,6 +99,7 @@ const unJoinEvent = async (ctx, event) => {
         eventId,
       },
     });
+
     // const payload = {
     //   userId: userId,
     //   eventId: eventId,
@@ -116,8 +119,7 @@ const unJoinEvent = async (ctx, event) => {
       action: "unJoin Event",
       content: `${username} un join event ${eventId}`,
     });
-
-    return "UnJoin Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "userId-eventId",

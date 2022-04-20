@@ -3,8 +3,7 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { map } from "lodash";
-import { pick } from "lodash";
+import { pick, compact, map } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
@@ -277,9 +276,7 @@ const listEventByUser = async (ctx) => {
     //   mapEvent.push(eventStats);
     // });
 
-    return {
-      listEvent: listEventDetail,
-    };
+    return compact(listEventDetail);
   } catch (error) {
     return error;
   }

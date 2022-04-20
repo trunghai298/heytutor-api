@@ -1,8 +1,11 @@
 import Event from "../models/event.model";
 import { NotFoundError, BadRequestError } from "../utils/errors";
-import { Op } from "sequelize";
+import { Op, Sequelize } from "sequelize";
 import { map, compact, flattenDeep } from "lodash";
 import Post from "../models/post.model";
+import UserEvent from "../models/user-event.model";
+import UserPost from "../models/user-post.model";
+import Course from "../models/course.model";
 
 const getTop3EventByMajor = async (major) => {
   return Event.findAll({
@@ -18,11 +21,11 @@ const getTop3EventByMajor = async (major) => {
   });
 };
 
-const getTop3EventBySubjects = async (subjects) => {
+const getTop3EventBySubjects = async (userId, subjects) => {
   const subjectData = JSON.parse(subjects);
   const listEvents = await Promise.all(
     map(subjectData, async (subject) => {
-      const event = await Event.findAll({
+      const events = await Event.findAll({
         where: {
           hashtag: {
             [Op.like]: `%${subject}%`,
@@ -33,7 +36,31 @@ const getTop3EventBySubjects = async (subjects) => {
         limit: 3,
         offset: 0,
       });
-      return event;
+
+      const eventWithDetail = await Promise.all(
+        map(events, async (eventItem) => {
+          const nbPosts = await UserPost.findAll({
+            where: { eventId: eventItem.id },
+            raw: true,
+          });
+
+          const nbUserJoint = await UserEvent.findAll({
+            where: { eventId: eventItem.id },
+            attributes: [
+              [Sequelize.fn("DISTINCT", Sequelize.col("userId")), "userId"],
+            ],
+            raw: true,
+          });
+
+          return {
+            ...eventItem,
+            nbPosts: nbPosts.length,
+            nbUserJoint: nbUserJoint.length,
+          };
+        })
+      );
+
+      return eventWithDetail;
     })
   );
 
@@ -69,7 +96,7 @@ const suggestHome = async (ctx) => {
 
   const [top3EventByMajor, top3EventBySubjects, top3Post] = await Promise.all([
     getTop3EventByMajor(major),
-    getTop3EventBySubjects(subjects),
+    getTop3EventBySubjects(user.id, subjects),
     getTop3PostsBySubjects(subjects),
   ]);
 
@@ -80,6 +107,16 @@ const suggestHome = async (ctx) => {
   };
 };
 
+const getListCourse = async () => {
+  const listCourse = await Course.findAll({
+    raw: true,
+    attributes: ["courseId", "courseName", "courseCode"],
+  });
+
+  return listCourse;
+};
+
 export default {
   suggestHome,
+  getListCourse,
 };

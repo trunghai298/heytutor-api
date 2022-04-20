@@ -1,7 +1,7 @@
 import PostServices from "../services/post.service";
 
 const create = (req, res, next) => {
-  PostServices.create(req.body)
+  PostServices.create(req.ctx, req.body)
     .then((post) => res.json(post))
     .catch(next);
 };
