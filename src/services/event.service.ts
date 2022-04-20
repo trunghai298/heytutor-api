@@ -12,6 +12,7 @@ import BanService from "./ban.service";
 import ReportService from "./report.service";
 import UserEventService from "./user-event.service";
 import usersService from "./users.service";
+import Admin from "../models/admin.model";
 
 /**
  * To create a new event
@@ -838,11 +839,11 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           attributes: ["userId", "eventId"],
           raw: true,
         });
-        
+
         await a.push(...listUserEvent);
       })
     );
-    
+
     const userEventData = await Promise.all(
       map(a, async (userEvent) => {
         const getUserRank = await RankingService.getUserRank(userEvent.userId);
@@ -884,8 +885,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
   }
 };
 
-const listEventManageByCollaborator = async (ctx) => {
-  const userId = ctx?.user?.id;
+const listEventManageByCollaborator = async (userId) => {
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
     const res = await Promise.all(
@@ -911,6 +911,37 @@ const listEventManageByCollaborator = async (ctx) => {
   }
 };
 
+const collaboratorInfo = async () => {
+  try {
+    const listCollaborator = await Admin.findAll({
+      where: {
+        role: "ctv1",
+      },
+      attributes: ["id", "name"],
+      raw: true,
+    });
+
+    console.log(listCollaborator);
+    
+
+    const res = await Promise.all(
+      map(listCollaborator, async (collaborator) => {
+        const info = await listEventManageByCollaborator(collaborator.id);
+        return { ...collaborator, info};
+      })
+    );
+
+    return res;
+  } catch (error) {
+    console.log(error);
+    
+    throw new NotFoundError({
+      field: "listCollaborator",
+      message: "Collaborator is not found",
+    });
+  }
+};
+
 export default {
   create,
   edit,
@@ -930,4 +961,5 @@ export default {
   countPendingEventOfCollaborator,
   getListUserEventsManageByCollaborator,
   listEventManageByCollaborator,
+  collaboratorInfo,
 };

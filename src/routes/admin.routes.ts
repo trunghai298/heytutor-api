@@ -10,4 +10,5 @@ export default (app: Application) => {
     .get("/list-collaborators", AdminController.listCollaborator)
     .get("/manage-user-event", AdminController.getListUserEventInfo)
     .get("/get-active-event-of-collaborator", AdminController.getActiveEventOfCollaborator)
+    .get("/collaborator-information", AdminController.collaboratorInfo)
 };

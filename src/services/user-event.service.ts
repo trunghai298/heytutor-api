@@ -3,11 +3,13 @@ import UserEvent from "../models/user-event.model";
 import UserPermissionService from "./user-permission.service";
 import { NOTI_TYPE } from "../constants/notification";
 import NotificationService from "./notification.service";
+import ActivityServices from "./activity.service";
+import User from "../models/user.model";
 
 /**
  * To create a new term
  */
-const list = async (payload) => {
+const list = async () => {
   try {
     const res = await UserEvent.findAll({});
     return res;
@@ -55,8 +57,29 @@ const joinEvent = async (ctx, payload) => {
         }
       );
     }
+    // const payload = {
+    //   userId: userId,
+    //   eventId: eventId,
+    //   notificationType: NOTI_TYPE.JoinEvent,
+    // };
+    // await NotificationService.create(payload);
+
+    const username = await (
+      await User.findOne({
+        where: {
+          id: userId,
+        },
+      })
+    ).name;
+    const log = await ActivityServices.create({
+      userId,
+      username,
+      action: "Join Event",
+      content: `${username} join event ${eventId}`,
+    });
 
     return { status: 200 };
+
   } catch (error) {
     console.log(error);
     throw new BadRequestError({
@@ -77,6 +100,25 @@ const unJoinEvent = async (ctx, event) => {
       },
     });
 
+    // const payload = {
+    //   userId: userId,
+    //   eventId: eventId,
+    //   notificationType: NOTI_TYPE.UnJoinEvent,
+    // };
+    // await NotificationService.create(payload);
+    const username = await (
+      await User.findOne({
+        where: {
+          id: userId,
+        },
+      })
+    ).name;
+    const log = await ActivityServices.create({
+      userId,
+      username,
+      action: "unJoin Event",
+      content: `${username} un join event ${eventId}`,
+    });
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
@@ -95,7 +137,7 @@ const listUserOfEvent = async (eventId) => {
       raw: true,
     });
 
-    return listUsers;
+    return { ...listUsers };
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",

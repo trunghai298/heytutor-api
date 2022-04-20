@@ -143,7 +143,7 @@ const createReport = async (ctx, payload) => {
 
 const listReportNotResolvedByUser = async (userId) => {
   try {
-    const res = Report.findAll({
+    const res = await Report.findAll({
       where: {
         userId,
         isResolved: 0,
@@ -159,7 +159,7 @@ const listReportNotResolvedByUser = async (userId) => {
 
 const listReportResolvedByUser = async (userId) => {
   try {
-    const res = Report.findAll({
+    const res = await Report.findAll({
       where: {
         userId,
         isResolved: 1,
@@ -175,7 +175,7 @@ const listReportResolvedByUser = async (userId) => {
 
 const listAllReportOfUser = async (userId) => {
   try {
-    const res = Report.findAll({
+    const res = await Report.findAll({
       where: {
         userId,
       },
@@ -190,13 +190,13 @@ const listAllReportOfUser = async (userId) => {
 
 const listReportInEvent = async (eventId) => {
   try {
-    const listReport = Report.findAll({
+    const listReport = await Report.findAll({
       where: {
         eventId,
       },
     });
 
-    return listReport;
+    return {...listReport};
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
