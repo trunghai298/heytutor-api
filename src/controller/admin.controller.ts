@@ -54,7 +54,7 @@ const getListUserEventInfo = (req, res, next) => {
 };
 
 const getActiveEventOfCollaborator = (req, res, next) => {
-  EventService.listEventManageByCollaborator(req.body.collaboratorId)
+  EventService.listEventManageByCollaborator(req.ctx)
     .then((evt) => res.json(evt))
     .catch(next);
 };

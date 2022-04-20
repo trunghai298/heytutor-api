@@ -2,6 +2,10 @@ import { BadRequestError } from "../utils/errors";
 import Ban from "../models/ban.model";
 const { Op } = require("sequelize");
 import { map } from "lodash";
+import { NOTI_TYPE } from "../constants/notification";
+import NotificationService from "./notification.service";
+import Admin from "../models/admin.model";
+import ActivityServices from "./activity.service";
 
 /**
  * To create a new class
@@ -20,7 +24,7 @@ const list = async (ctx) => {
 
 const createBan = async (ctx, payload) => {
   const adminId = ctx?.admin?.id;
-  const { userId, type, banDate, eventId } = payload;
+  const { userId, type, banDate, eventId, postId, commentId } = payload;
   // const banDate = new Date(Date.now());
   let unBanDate;
   try {
@@ -41,6 +45,43 @@ const createBan = async (ctx, payload) => {
       banBy: adminId,
       eventId: eventId,
     });
+
+    let notiType;
+    if(type.includes("1-")) {
+      notiType = NOTI_TYPE.BanPost;
+    } else if(type.includes("2-")) {
+      notiType = NOTI_TYPE.BanRegister;
+    } else if(type.includes("3-")) {
+      notiType = NOTI_TYPE.BanComment;
+    }
+
+    const adminName = await Admin.findOne({
+      where: {
+        id: adminId,
+      },
+      attributes: ["name"],
+      raw: true,
+    })
+
+    const log = await ActivityServices.create({
+      userId: adminId,
+      userName: adminName,
+      action: notiType,
+      content: `ban user ${userId}`,
+    })
+
+    const notification = {
+      userId: userId,
+      postId: postId,
+      commentId: commentId,
+      eventId: eventId,
+      notificationType: notiType,
+      fromUserId: adminId,
+      fromUserName: adminName,
+    } 
+    await NotificationService.create(notification);
+
+
 
     return "Create Ban Success!!!";
   } catch (error) {

@@ -1,7 +1,7 @@
 import { Op } from "sequelize";
 import Admin from "../models/admin.model";
 import Event from "../models/event.model";
-import Activity from "../models/activity.model";
+import ActivityServices from "./activity.service";
 import Post from "../models/post.model";
 import UserPost from "../models/user-post.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
@@ -48,7 +48,7 @@ const addCollaborator = async (ctx, payload) => {
           },
         })
       ).name;
-      const log = await Activity.create({
+      const log = await ActivityServices.create({
         userId,
         username,
         action: "add",
