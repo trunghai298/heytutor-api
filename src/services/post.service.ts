@@ -10,14 +10,14 @@ import Student from "../models/student.model";
 import UserPost from "../models/user-post.model";
 import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
-
+import activityService from "./activity.service";
 /**
  * To create a new post
  */
 const create = async (ctx, payload) => {
-  let { eventId, title, hashtag, minPrice, content, images, deadline } =
+  const { eventId, title, hashtag, minPrice, content, images, deadline } =
     payload;
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
 
   try {
     if (isEmpty(payload.content)) {
@@ -26,26 +26,33 @@ const create = async (ctx, payload) => {
         message: "Failed to create this post.",
       });
     } else if (
-      userPermissionService.checkUserCreatePostPermission(userId, eventId)
+      userPermissionService.checkUserCreatePostPermission(user.id, eventId)
     ) {
-      await Post.create({
+      const post = await Post.create({
+        userId: user.id,
         title: title,
         hashtag: hashtag,
         minPrice: minPrice,
         content: content,
         images: images,
+        deadline,
       });
 
-      const nbOfPost = Post.count({});
-
-      const userPost = await UserPost.create({
-        userId: userId,
-        postId: nbOfPost,
+      await UserPost.create({
+        userId: user.id,
+        postId: post.id,
         eventId: eventId,
         isDone: 0,
         isActive: 0,
         isPending: 1,
         isConfirmed: 0,
+      });
+
+      await activityService.create({
+        userId: user.id,
+        username: user.name,
+        action: "create_post",
+        content: `tạo post ${post.id}`,
       });
 
       return { status: 200 };
