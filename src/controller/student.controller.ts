@@ -12,7 +12,14 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
+const subjectGroupByMajor = (req, res, next) => {
+  StudentServices.subjectGroupByMajor()
+  .then((student) => res.json(student))
+  .catch(next);
+}
+
 export default {
   fetch,
   list,
+  subjectGroupByMajor,
 };
