@@ -14,6 +14,10 @@ export enum NOTI_TYPE {
   BanPost = "ban_post",
   BanComment = "ban_comment",
 
+  UnBanRegister = "un_ban_register",
+  UnBanPost = "un_ban_post",
+  UnBanComment = "un_ban_comment",
+
   NewFeedback = "new_feedback",
   NewMessage = "new_message",
 

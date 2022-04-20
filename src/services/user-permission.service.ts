@@ -6,6 +6,8 @@ import Event from "../models/event.model";
 import UserPermission from "../models/user-permission.model";
 import { BadRequestError } from "../utils/errors";
 const { Op } = require("sequelize");
+import { NOTI_TYPE } from "../constants/notification";
+import NotificationService from "./notification.service";
 
 //Run first time to get all permission.
 const initPermission = async () => {
@@ -130,7 +132,7 @@ const checkEventPermission = async () => {
       })
     );
 
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
     return error;
   }
@@ -147,10 +149,9 @@ const createPermission = async (payload) => {
       eventId: eventId,
     });
 
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
     console.log(error);
-    
   }
 };
 
@@ -185,6 +186,14 @@ const checkBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.BanPost,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         } else if (
           ban.type === "2-1" ||
           ban.type === "2-2" ||
@@ -202,6 +211,14 @@ const checkBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.BanRegister,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         } else if (
           ban.type === "3-1" ||
           ban.type === "3-2" ||
@@ -219,11 +236,19 @@ const checkBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.BanComment,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         }
       })
     );
 
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
     console.log(error);
 
@@ -265,6 +290,14 @@ const checkUnBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.UnBanPost,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         } else if (
           ban.type === "2-1" ||
           ban.type === "2-2" ||
@@ -282,6 +315,14 @@ const checkUnBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.UnBanRegister,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         } else if (
           ban.type === "3-1" ||
           ban.type === "3-2" ||
@@ -299,11 +340,19 @@ const checkUnBan = async () => {
               },
             }
           );
+
+          const payload = {
+            userId: ban.userId,
+            notificationType: NOTI_TYPE.UnBanComment,
+            fromUser: 5,
+            fromUserName: "Trung Hai",
+          };
+          await NotificationService.create(payload);
         }
       })
     );
 
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "id",

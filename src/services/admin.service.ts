@@ -40,6 +40,7 @@ const addCollaborator = async (ctx, payload) => {
         name,
         role,
         permission,
+        updatedBy: userId,
       });
       const username = await (
         await Admin.findOne({
@@ -102,7 +103,7 @@ const updateCollaborator = async (ctx, payload) => {
         raw: true,
       })
     ).name;
-    const log = await Activity.create({
+    const log = await ActivityServices.create({
       userId,
       username,
       action: "update",
