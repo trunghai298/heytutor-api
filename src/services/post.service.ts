@@ -15,7 +15,8 @@ import userPermissionService from "./user-permission.service";
  * To create a new post
  */
 const create = async (ctx, payload) => {
-  let { eventId, title, hashtag, minPrice, content, images } = payload;
+  let { eventId, title, hashtag, minPrice, content, images, deadline } =
+    payload;
   const userId = ctx?.user?.id;
 
   try {
@@ -27,7 +28,7 @@ const create = async (ctx, payload) => {
     } else if (
       userPermissionService.checkUserCreatePostPermission(userId, eventId)
     ) {
-      const post = await Post.create({
+      await Post.create({
         title: title,
         hashtag: hashtag,
         minPrice: minPrice,
@@ -47,7 +48,7 @@ const create = async (ctx, payload) => {
         isConfirmed: 0,
       });
 
-      return "Success!!!";
+      return { status: 200 };
     } else {
       throw new BadRequestError({
         field: "Ban continues!!!",

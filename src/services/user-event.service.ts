@@ -55,14 +55,10 @@ const joinEvent = async (ctx, payload) => {
         }
       );
     }
-    const payload = {
-      userId: userId,
-      eventId: eventId,
-      notificationType: NOTI_TYPE.JoinEvent,
-    };
-    await NotificationService.create(payload);
-    return "Join Success!!!";
+
+    return { status: 200 };
   } catch (error) {
+    console.log(error);
     throw new BadRequestError({
       field: "userId-eventId",
       message: "Failed to create this item.",
@@ -80,13 +76,8 @@ const unJoinEvent = async (ctx, event) => {
         eventId,
       },
     });
-    const payload = {
-      userId: userId,
-      eventId: eventId,
-      notificationType: NOTI_TYPE.UnJoinEvent,
-    };
-    await NotificationService.create(payload);
-    return "UnJoin Success!!!";
+
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "userId-eventId",
