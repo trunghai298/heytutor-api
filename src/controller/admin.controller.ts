@@ -54,8 +54,14 @@ const getListUserEventInfo = (req, res, next) => {
 };
 
 const getActiveEventOfCollaborator = (req, res, next) => {
-  EventService.listEventManageByCollaborator(req.ctx)
+  EventService.listEventManageByCollaborator(req.ctx?.user?.id)
     .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+const collaboratorInfo = (req, res, next) => {
+  EventService.collaboratorInfo()
+    .then((result) => res.json(result))
     .catch(next);
 };
 
@@ -69,4 +75,5 @@ export default {
   getListUserEventInfo,
   listCollaborator,
   getActiveEventOfCollaborator,
+  collaboratorInfo,
 };
