@@ -825,13 +825,26 @@ const countPendingEventOfCollaborator = async (userId) => {
 const getListUserEventsManageByCollaborator = async (ctx) => {
   const userId = ctx?.user?.id;
   try {
-    const manageUserEventId = await MySQLClient.query(
-      `SELECT * FROM UserEvents WHERE JSON_CONTAINS(JSON_EXTRACT(UserEvents.adminId, '$[*]'), '${userId}')`,
-      { type: "SELECT" }
-    );
+    const listEvent = await countActiveEventOfCollaborator(userId);
 
+    let a = [];
+
+    const manageUserEventId = await Promise.all(
+      map(listEvent, async (event) => {
+        const listUserEvent = await UserEvent.findAll({
+          where: {
+            eventId: event.id,
+          },
+          attributes: ["userId", "eventId"],
+          raw: true,
+        });
+        
+        await a.push(...listUserEvent);
+      })
+    );
+    
     const userEventData = await Promise.all(
-      map(manageUserEventId, async (userEvent) => {
+      map(a, async (userEvent) => {
         const getUserRank = await RankingService.getUserRank(userEvent.userId);
         const getEvent = await getEventDetail(userEvent.eventId);
         const getUserDetail = await User.findOne({
@@ -871,7 +884,8 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
   }
 };
 
-const listEventManageByCollaborator = async (userId) => {
+const listEventManageByCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
     const res = await Promise.all(
