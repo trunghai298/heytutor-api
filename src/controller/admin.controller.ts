@@ -78,6 +78,12 @@ const deleteEventPin = async (req, res, next) => {
     .catch(next);
 };
 
+const listPostManage = async (req, res, next) => {
+  AdminServices.listPostManage()
+    .then((results) => res.json(results))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -91,4 +97,5 @@ export default {
   collaboratorInfo,
   addEventPin,
   deleteEventPin,
+  listPostManage,
 };
