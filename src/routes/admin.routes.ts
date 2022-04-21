@@ -9,6 +9,10 @@ export default (app: Application) => {
     .put("/approve-event", AdminController.approveEvent)
     .get("/list-collaborators", AdminController.listCollaborator)
     .get("/manage-user-event", AdminController.getListUserEventInfo)
-    .get("/get-active-event-of-collaborator", AdminController.getActiveEventOfCollaborator)
+    .get(
+      "/get-active-event-of-collaborator",
+      AdminController.getActiveEventOfCollaborator
+    )
     .get("/collaborator-information", AdminController.collaboratorInfo)
+    .get("/get-list-post-manage", AdminController.listPostManage);
 };

@@ -6,6 +6,7 @@ import Ban from "../models/ban.model";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import User from "../models/user.model";
+import Post from "../models/post.model";
 
 const checkReportInDay = async () => {
   const lastMidnight = new Date();
@@ -196,11 +197,45 @@ const listReportInEvent = async (eventId) => {
       },
     });
 
-    return {...listReport};
+    return { ...listReport };
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
       message: "Event is not found",
+    });
+  }
+};
+
+const listReportedPost = async () => {
+  try {
+    const listReportedPost = await Report.findAll({
+      where: {
+        postId: {
+          [Op.ne]: null,
+        },
+        isResolved: 0,
+      },
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listReportedPost, async (report) => {
+        const postDetail = await Post.findOne({
+          where: {
+            id: report.postId,
+          },
+          raw: true,
+        });
+
+        return { ...report, ...postDetail };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "id",
+      message: "Post is not found",
     });
   }
 };
@@ -212,4 +247,5 @@ export default {
   listReportResolvedByUser,
   listAllReportOfUser,
   listReportInEvent,
+  listReportedPost,
 };

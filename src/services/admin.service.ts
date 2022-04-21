@@ -9,6 +9,9 @@ import { map } from "lodash";
 import EventService from "./event.service";
 import { NOTI_TYPE } from "../constants/notification";
 import NotificationService from "./notification.service";
+import PinServices from "./pin.services";
+import ReportService from "./report.service";
+import UserPostService from "./user-post.service";
 
 const createAdmin = async () => {
   const admin = await Admin.findOne({ where: { name: "root" }, raw: true });
@@ -310,6 +313,25 @@ const listCollaborator = async () => {
   }
 };
 
+const listPostManage = async () => {
+  try {
+    const listPinPost = await PinServices.getListPinPost();
+    const listReportedPost = await ReportService.listReportedPost();
+    const listNoRegisterPost = await UserPostService.getListPostNoRegister();
+
+    return {
+      listPinPost,
+      listReportedPost,
+      listNoRegisterPost,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Post is not found",
+    });
+  }
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -317,4 +339,5 @@ export default {
   listAllCollaborator,
   systemDetailsInXDays,
   listCollaborator,
+  listPostManage,
 };

@@ -7,6 +7,7 @@ import { NOTI_TYPE } from "../constants/notification";
 import Admin from "../models/admin.model";
 import { pick, compact, map } from "lodash";
 import ActivityServices from "./activity.service";
+import Post from "../models/post.model";
 
 const createPostPin = async (ctx, postId) => {
   const userId = ctx?.user?.id;
@@ -252,10 +253,44 @@ const deleteEventPin = async (ctx, eventId) => {
   }
 };
 
+const getListPinPost = async () => {
+  try {
+    const listPinPost = await Pin.findAll({
+      where: {
+        postId: {
+          [Op.ne]: null,
+        },
+      },
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listPinPost, async (pin) => {
+        const postDetail = await Post.findOne({
+          where: {
+            id: pin.postId,
+          },
+          raw: true,
+        });
+
+        return { ...pin, ...postDetail };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Cannot find post pined!!!",
+    });
+  }
+};
+
 export default {
   createPostPin,
   checkPin,
   addEventPin,
   deleteEventPin,
   userUnPinPost,
+  getListPinPost,
 };

@@ -794,6 +794,40 @@ const postDoneOfUser = async (ctx) => {
   }
 };
 
+const getListPostNoRegister = async () => {
+  try {
+    const listNoRegisterPost = await UserPost.findAll({
+      where: {
+        registerId: {
+          [Op.eq]: null,
+        },
+        isDone: 0,
+      },
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listNoRegisterPost, async (noRegister) => {
+        const postDetail = await Post.findOne({
+          where: {
+            id: noRegister.postId,
+          },
+          raw: true,
+        });
+
+        return { ...noRegister, ...postDetail };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "id",
+      message: "Post is not found",
+    });
+  }
+};
+
 export default {
   list,
   getPostStats,
@@ -805,4 +839,5 @@ export default {
   addRegister,
   getRegisteredNearDeadline,
   postDoneOfUser,
+  getListPostNoRegister,
 };
