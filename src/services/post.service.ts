@@ -55,7 +55,7 @@ const create = async (ctx, payload) => {
         content: `tạo post ${post.id}`,
       });
 
-      return { status: 200 };
+      return post;
     } else {
       throw new BadRequestError({
         field: "Ban continues!!!",
