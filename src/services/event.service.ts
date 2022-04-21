@@ -852,7 +852,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           where: {
             id: userEvent.userId,
           },
-          attributes: ["id","email", "name"],
+          attributes: ["id", "email", "name"],
           raw: true,
         });
         const getBanDetail = await BanService.getUserStatusInEvent(
@@ -865,14 +865,16 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userEvent.userId
         );
 
-        return {
-          rankInfo: getUserRank,
-          eventInfo: getEvent,
-          userInfo: getUserDetail,
-          userBanInfo: getBanDetail,
-          nbOfNotResolvedReport: listReportNotResolved,
-          nbOfReport: listReported,
-        };
+        if (getBanDetail.length !== 0) {
+          return {
+            rankInfo: getUserRank,
+            eventInfo: getEvent,
+            userInfo: getUserDetail,
+            userBanInfo: getBanDetail,
+            nbOfNotResolvedReport: listReportNotResolved,
+            nbOfReport: listReported,
+          };
+        }
       })
     );
 
@@ -922,19 +924,18 @@ const collaboratorInfo = async () => {
     });
 
     console.log(listCollaborator);
-    
 
     const res = await Promise.all(
       map(listCollaborator, async (collaborator) => {
         const info = await listEventManageByCollaborator(collaborator.id);
-        return { ...collaborator, info};
+        return { ...collaborator, info };
       })
     );
 
     return res;
   } catch (error) {
     console.log(error);
-    
+
     throw new NotFoundError({
       field: "listCollaborator",
       message: "Collaborator is not found",
