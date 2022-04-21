@@ -1,4 +1,5 @@
 import EventService from "../services/event.service";
+import PinServices from "../services/pin.services";
 import AdminServices from "../services/admin.service";
 
 const createAdmin = (req, res, next) => {
@@ -65,6 +66,18 @@ const collaboratorInfo = (req, res, next) => {
     .catch(next);
 };
 
+const addEventPin = async (req, res, next) => {
+  PinServices.addEventPin(req.ctx, req.body.eventId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const deleteEventPin = async (req, res, next) => {
+  PinServices.deleteEventPin(req.ctx, req.body.eventId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -76,4 +89,6 @@ export default {
   listCollaborator,
   getActiveEventOfCollaborator,
   collaboratorInfo,
+  addEventPin,
+  deleteEventPin,
 };

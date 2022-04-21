@@ -18,6 +18,15 @@ export enum NOTI_TYPE {
   UnBanPost = "un_ban_post",
   UnBanComment = "un_ban_comment",
 
+  UpdateBanRegister = "update_ban_register",
+  UpdateBanPost = "update_ban_post",
+  UpdateBanComment = "update_ban_comment",
+
+  UserPinPost = "user_pin_post",
+  UserUnPinPost = "user_un_pin_post",
+  OverNumberPostPined = "over_number_posts_pined",
+  SysUnPinPost = "system_un_pin_post",
+
   NewFeedback = "new_feedback",
   NewMessage = "new_message",
 
@@ -25,4 +34,6 @@ export enum NOTI_TYPE {
   UnJoinEvent = "unjoined_event",
   UpdateCollab = "update_collaborator",
   NewCollab = "add_collaborator",
+
+  InexistentPost = "inexistent_post",
 }

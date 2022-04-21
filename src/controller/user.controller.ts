@@ -1,3 +1,4 @@
+import PinServices from "../services/pin.services";
 import UserServices from "../services/users.service";
 
 const fetchByEmail = (req, res, next) => {
@@ -30,10 +31,24 @@ const searchSuggest = (req, res, next) => {
     .catch(next);
 };
 
+const createPostPin = async (req, res, next) => {
+  PinServices.createPostPin(req.ctx, req.body.postId)
+  .then((data) => res.json(data))
+  .catch(next);
+}
+
+const userUnPinPost = async (req, res, next) => {
+  PinServices.userUnPinPost(req.ctx, req.body.postId)
+  .then((data) => res.json(data))
+  .catch(next);
+}
+
 export default {
   fetchByEmail,
   getUser,
   getUserPostStats,
   getSupporterStats,
   searchSuggest,
+  createPostPin,
+  userUnPinPost,
 };
