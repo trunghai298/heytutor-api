@@ -47,11 +47,11 @@ const createBan = async (ctx, payload) => {
     });
 
     let notiType;
-    if(type.includes("1-")) {
+    if (type.includes("1-")) {
       notiType = NOTI_TYPE.BanPost;
-    } else if(type.includes("2-")) {
+    } else if (type.includes("2-")) {
       notiType = NOTI_TYPE.BanRegister;
-    } else if(type.includes("3-")) {
+    } else if (type.includes("3-")) {
       notiType = NOTI_TYPE.BanComment;
     }
 
@@ -61,14 +61,14 @@ const createBan = async (ctx, payload) => {
       },
       attributes: ["name"],
       raw: true,
-    })
+    });
 
     const log = await ActivityServices.create({
       userId: adminId,
       userName: adminName,
       action: notiType,
-      content: `ban user ${userId}`,
-    })
+      content: `ban user ${userId} with type: ${type}`,
+    });
 
     const notification = {
       userId: userId,
@@ -78,12 +78,10 @@ const createBan = async (ctx, payload) => {
       notificationType: notiType,
       fromUserId: adminId,
       fromUserName: adminName,
-    } 
+    };
     await NotificationService.create(notification);
 
-
-
-    return "Create Ban Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "id",
@@ -131,8 +129,9 @@ const updateBan = async (ctx, payload) => {
         unbanDate: {
           [Op.gt]: today,
         },
+        type,
       },
-      attributes: ["id", "banDate"],
+      attributes: ["id", "banDate", "postId", "commentId"],
       raw: true,
     });
     let tempUnBanDate;
@@ -158,7 +157,43 @@ const updateBan = async (ctx, payload) => {
           },
         }
       );
-      return "Update Ban Success!!!";
+
+      const adminName = await Admin.findOne({
+        where: {
+          id: adminId,
+        },
+        attributes: ["name"],
+        raw: true,
+      });
+
+      const log = await ActivityServices.create({
+        userId: adminId,
+        userName: adminName,
+        action: type,
+        content: `update ban user ${userId} type: ${type}`,
+      });
+
+      let notiType;
+      if (type.includes("1-")) {
+        notiType = NOTI_TYPE.UpdateBanPost;
+      } else if (type.includes("2-")) {
+        notiType = NOTI_TYPE.UpdateBanRegister;
+      } else if (type.includes("3-")) {
+        notiType = NOTI_TYPE.UpdateBanComment;
+      }
+
+      const notification = {
+        userId: userId,
+        postId: ban.postId,
+        commentId: ban.commentId,
+        eventId: eventId,
+        notificationType: notiType,
+        fromUserId: adminId,
+        fromUserName: adminName,
+      };
+      await NotificationService.create(notification);
+
+      return { status: 200 };
     } else {
       return "Ban expired!!!";
     }
