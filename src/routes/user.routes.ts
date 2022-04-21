@@ -7,4 +7,6 @@ export default (app: any) => {
     .get("/user-request-stats/:userId", UserController.getUserPostStats)
     .get("/supporter-request-stats/:userId", UserController.getSupporterStats)
     .get("/search-suggest", UserController.searchSuggest)
+    .post("/user-create-pin-post", UserController.userCreatePostPin)
+    .post("/user-unpin-post", UserController.userUnPinPost);
 };

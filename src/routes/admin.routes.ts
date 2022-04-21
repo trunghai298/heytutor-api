@@ -14,5 +14,7 @@ export default (app: Application) => {
       AdminController.getActiveEventOfCollaborator
     )
     .get("/collaborator-information", AdminController.collaboratorInfo)
-    .get("/get-list-post-manage", AdminController.listPostManage);
+    .get("/get-list-post-manage", AdminController.listPostManage)
+    .post("/add-event-pin", AdminController.addEventPin)
+    .post("/delete-event-pin", AdminController.deleteEventPin);
 };
