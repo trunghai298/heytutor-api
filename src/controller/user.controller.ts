@@ -31,7 +31,7 @@ const searchSuggest = (req, res, next) => {
     .catch(next);
 };
 
-const createPostPin = async (req, res, next) => {
+const userCreatePostPin = async (req, res, next) => {
   PinServices.createPostPin(req.ctx, req.body.postId)
   .then((data) => res.json(data))
   .catch(next);
@@ -49,6 +49,6 @@ export default {
   getUserPostStats,
   getSupporterStats,
   searchSuggest,
-  createPostPin,
+  userCreatePostPin,
   userUnPinPost,
 };
