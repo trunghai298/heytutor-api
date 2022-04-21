@@ -33,7 +33,31 @@ const create = async (payload) => {
   }
 };
 
+const getActivitiesOfUser = async (ctx, filter) => {
+  const userId = ctx?.user?.id;
+  try {
+    const res = await Activity.findAll({
+      where: { 
+        userId,
+        filter,
+      },
+      raw: true,
+      order: [
+        ['createdAt', 'DESC']
+      ]
+    });
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "Cannot find user!!!",
+    });
+  }
+};
+
 export default {
   list,
   create,
-}
+  getActivitiesOfUser,
+};
