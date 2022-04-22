@@ -823,8 +823,8 @@ const countPendingEventOfCollaborator = async (userId) => {
   }
 };
 
-const getListUserEventsManageByCollaborator = async (userId) => {
-  // const userId = ctx?.user?.id;
+const getListUserEventsManageByCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
 
@@ -889,7 +889,8 @@ const getListUserEventsManageByCollaborator = async (userId) => {
   }
 };
 
-const listEventManageByCollaborator = async (userId) => {
+const listEventManageByCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
     const res = await Promise.all(

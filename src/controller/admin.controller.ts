@@ -49,13 +49,13 @@ const listCollaborator = async (req, res, next) => {
 };
 
 const getListUserEventInfo = (req, res, next) => {
-  EventService.getListUserEventsManageByCollaborator(req.body.userId)
+  EventService.getListUserEventsManageByCollaborator(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 const getActiveEventOfCollaborator = (req, res, next) => {
-  EventService.listEventManageByCollaborator(req.ctx?.user?.id)
+  EventService.listEventManageByCollaborator(req.ctx)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -84,6 +84,12 @@ const listPostManage = async (req, res, next) => {
     .catch(next);
 };
 
+const getPinEvent = async (req, res, next) => {
+  PinServices.getPinEvent()
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -98,4 +104,5 @@ export default {
   addEventPin,
   deleteEventPin,
   listPostManage,
+  getPinEvent,
 };

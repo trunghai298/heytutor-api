@@ -8,6 +8,9 @@ import Admin from "../models/admin.model";
 import { pick, compact, map } from "lodash";
 import ActivityServices from "./activity.service";
 import Post from "../models/post.model";
+import Event from "../models/event.model";
+import ReportService from "./report.service";
+import UserEventService from "./user-event.service";
 
 const createPostPin = async (ctx, postId) => {
   const userId = ctx?.user?.id;
@@ -286,6 +289,48 @@ const getListPinPost = async () => {
   }
 };
 
+const getPinEvent = async () => {
+  try {
+    const listEvent = await Pin.findAll({
+      where: {
+        eventId: {
+          [Op.ne]: null,
+        },
+        postId: {
+          [Op.eq]: null,
+        },
+      },
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listEvent, async (event) => {
+        const listUsers = await UserEventService.listUserOfEvent(event.eventId);
+        const listReport = await ReportService.listReportInEvent(event.eventId);
+        const eventDetail = await Event.findOne({
+          where: {
+            id: event.eventId,
+          },
+          raw: true,
+        });
+        const result = {
+          eventDetail: eventDetail,
+          listUserInEvent: listUsers,
+          listReportInEvent: listReport,
+        };
+        return result;
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Cannot find event pined!!!",
+    });
+  }
+};
+
 export default {
   createPostPin,
   checkPin,
@@ -293,4 +338,5 @@ export default {
   deleteEventPin,
   userUnPinPost,
   getListPinPost,
+  getPinEvent,
 };
