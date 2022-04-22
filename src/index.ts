@@ -7,6 +7,8 @@ jobController.checkBan();
 
 const PORT = process.env.SERVER_PORT || SERVER_PORT;
 
+// const PORT = 3002;
+
 (async () => {
   app.set("port", PORT);
   const appName = process.env.APP_NAME || APP_NAME_DEFAULT;

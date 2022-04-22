@@ -1,6 +1,7 @@
 import EventService from "../services/event.service";
 import PinServices from "../services/pin.services";
 import AdminServices from "../services/admin.service";
+import RankingService from "../services/ranking.service";
 
 const createAdmin = (req, res, next) => {
   try {
@@ -90,6 +91,12 @@ const getPinEvent = async (req, res, next) => {
     .catch(next);
 };
 
+const getTop10UserRanking = async (req, res, next) => {
+  RankingService.getTop10User()
+  .then((result) => res.json(result))
+  .catch(next);
+}
+
 export default {
   createAdmin,
   addCollaborator,
@@ -105,4 +112,5 @@ export default {
   deleteEventPin,
   listPostManage,
   getPinEvent,
+  getTop10UserRanking,
 };

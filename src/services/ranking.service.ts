@@ -25,6 +25,26 @@ const getUserRank = async (userId) => {
   }
 };
 
+const getTop10User = async () => {
+  try {
+    const res = await Ranking.findAll({
+      limit: 10,
+      order: [["rankPoint", "DESC"]],
+      raw: true,
+    });
+
+    return res;
+  } catch (error) {
+    console.log(error);
+    
+    throw new BadRequestError({
+      field: "id",
+      message: "Cannot find user.",
+    });
+  }
+};
+
 export default {
   getUserRank,
+  getTop10User,
 };
