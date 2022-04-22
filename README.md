@@ -24,3 +24,21 @@ Run in Postman or in your browser to delete and setup all the tables in your dat
 ```
 GET /mysql (http://localhost:3001/mysql)
 ```
+
+## Deploy back-end
+1. Create account on Aws
+![aws](https://user-images.githubusercontent.com/43951048/164775389-9608f7e3-9dd7-4a30-bcf1-e0bb60cc89bd.png)
+2. Launch an EC2 instance
+![ecsinstance](https://user-images.githubusercontent.com/43951048/164774358-2924d356-6ab6-4fef-9b29-1bd39761680e.png)
+ - Select Ubuntu 18.04
+3. SSH into your instance
+![ssh](https://user-images.githubusercontent.com/43951048/164775051-f564dc7e-a7f5-43e3-bc4a-2045840ce27c.png)
+4. Install Nodejs on Ubuntu
+![ubuntu](https://user-images.githubusercontent.com/43951048/164775112-6a46c0b7-54c7-437a-808c-a0c0587bb823.png)
+5. Install Git and clone repository from GitHub
+![git](https://user-images.githubusercontent.com/43951048/164775182-5c40df6b-d1f1-4986-b04c-89a6542929d0.png)
+6. Start the node.js app
+![runapp](https://user-images.githubusercontent.com/43951048/164775260-cf8d445b-0469-41d3-aeeb-ba9cc74d7de6.png)
+7. Keep App running using PM2
+![running](https://user-images.githubusercontent.com/43951048/164775298-220b0c2b-4333-4f7b-a942-f6b20eb3f9ed.png)
+
