@@ -3,6 +3,7 @@ import { Op } from "sequelize";
 import { map } from "lodash";
 import Report from "../models/report.model";
 import Ban from "../models/ban.model";
+import Events from "../models/event.model";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import User from "../models/user.model";
@@ -226,8 +227,19 @@ const listReportedPost = async () => {
           },
           raw: true,
         });
+        if (report.eventId !== null) {
+          const eventDetail = await Events.findOne({
+            where: {
+              id: report.eventId,
+            },
+            attributes: ["title", "description"],
+            raw: true,
+          });
 
-        return { ...report, ...postDetail };
+          return { ...report, ...postDetail, ...eventDetail };
+        } else if (report.eventId === null) {
+          return { ...report, ...postDetail };
+        }
       })
     );
 

@@ -315,14 +315,14 @@ const listCollaborator = async () => {
 
 const listPostManage = async () => {
   try {
-    const listPinPost = await PinServices.getListPinPost();
+    // const listPinPost = await PinServices.getListPinPost();
     const listReportedPost = await ReportService.listReportedPost();
-    const listNoRegisterPost = await UserPostService.getListPostNoRegister();
+    // const listNoRegisterPost = await UserPostService.getListPostNoRegister();
 
     return {
-      listPinPost,
+      // listPinPost,
       listReportedPost,
-      listNoRegisterPost,
+      // listNoRegisterPost,
     };
   } catch (error) {
     throw new NotFoundError({

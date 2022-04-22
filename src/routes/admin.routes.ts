@@ -18,4 +18,5 @@ export default (app: Application) => {
     .post("/add-event-pin", AdminController.addEventPin)
     .post("/delete-event-pin", AdminController.deleteEventPin)
     .get("/get-list-pined-event", AdminController.getPinEvent)
+    .get("/get-top-10-user-rank", AdminController.getTop10UserRanking)
 };
