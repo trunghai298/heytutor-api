@@ -830,6 +830,8 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
 
     let a = [];
 
+    
+
     const manageUserEventId = await Promise.all(
       map(listEvent, async (event) => {
         const listUserEvent = await UserEvent.findAll({
@@ -865,7 +867,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userEvent.userId
         );
 
-        if (getBanDetail.length !== 0) {
+        if (getBanDetail.length > 0) {
           return {
             rankInfo: getUserRank,
             eventInfo: getEvent,
@@ -874,11 +876,11 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
             nbOfNotResolvedReport: listReportNotResolved,
             nbOfReport: listReported,
           };
-        }
+        } 
       })
     );
 
-    return userEventData;
+    return userEventData.filter(Boolean);
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
@@ -887,7 +889,8 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
   }
 };
 
-const listEventManageByCollaborator = async (userId) => {
+const listEventManageByCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
     const res = await Promise.all(

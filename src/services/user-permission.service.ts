@@ -157,11 +157,13 @@ const createPermission = async (payload) => {
 
 const checkBan = async () => {
   const thirtyMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+  const currentTime = new Date(Date.now());
   try {
     const listBan = await Ban.findAll({
       where: {
         banDate: {
           [Op.gt]: thirtyMinutesAgo,
+          [Op.lt]: currentTime,
         },
       },
       raw: true,
@@ -261,11 +263,13 @@ const checkBan = async () => {
 
 const checkUnBan = async () => {
   const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+  const currentTime = new Date(Date.now());
   try {
     const listBan = await Ban.findAll({
       where: {
         unbanDate: {
           [Op.gt]: thirtyMinutesAgo,
+          [Op.lt]: currentTime,
         },
       },
       raw: true,
