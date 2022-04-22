@@ -23,6 +23,7 @@ import Student from "./models/student.model";
 import Class from "./models/class.model";
 import Course from "./models/course.model";
 import Department from "./models/department.model";
+import Event from "./models/event.model";
 const app = express();
 
 // Third party middlewares
@@ -63,7 +64,7 @@ app.post("/auth/admin", AuthController.adminLogin);
 
 const resetDb = async () => {
   try {
-    // await Message.sync({ force: true });
+    await Event.sync({ force: true });
   } catch (error) {
     console.log(error);
   }
@@ -75,6 +76,7 @@ app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
 });
 
 app.get("/mysql", async (req, res) => {
+  await resetDb();
   res.send({ message: "sync database successful" });
   // await setupFakeData(req, res);
 });
