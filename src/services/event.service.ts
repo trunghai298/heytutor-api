@@ -24,7 +24,6 @@ const create = async (ctx, payload) => {
 
     return event;
   } catch (error) {
-    console.log(error);
     throw new BadRequestError({
       field: "eventId",
       message: "Failed to create this item.",
@@ -926,7 +925,7 @@ const listEventManageByCollaborator = async (ctx) => {
   }
 };
 
-const collaboratorInfo = async () => {
+const listCollaboratorInfo = async () => {
   try {
     const listCollaborator = await Admin.findAll({
       where: {
@@ -956,6 +955,54 @@ const collaboratorInfo = async () => {
   }
 };
 
+const assignEventAdmin = async (ctx, payload) => {
+  const userId = ctx?.user?.id;
+  const { eventId, collaboratorId } = payload;
+  let list = [];
+  try {
+    const listAdmins = await Event.findOne({
+      where: {
+        id: eventId,
+      },
+      attributes: ["adminId"],
+      raw: true,
+    });
+
+    const isAdmin = await listAdmins.adminId.includes(userId);
+
+    const admins = listAdmins.adminId;
+
+    if (isAdmin === true) {
+      await list.push(...admins, collaboratorId);
+
+      const res = await Event.update(
+        {
+          adminId: list,
+        },
+        {
+          where: {
+            id: eventId,
+          },
+        }
+      );
+
+      return { status: 200 };
+    } else if (isAdmin === false) {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
 export default {
   create,
   edit,
@@ -975,6 +1022,7 @@ export default {
   countPendingEventOfCollaborator,
   getListUserEventsManageByCollaborator,
   listEventManageByCollaborator,
-  collaboratorInfo,
+  listCollaboratorInfo,
   listEventByAdmin,
+  assignEventAdmin,
 };

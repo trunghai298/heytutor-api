@@ -61,8 +61,8 @@ const getActiveEventOfCollaborator = (req, res, next) => {
     .catch(next);
 };
 
-const collaboratorInfo = (req, res, next) => {
-  EventService.collaboratorInfo()
+const listCollaboratorInfo = (req, res, next) => {
+  EventService.listCollaboratorInfo()
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -97,6 +97,18 @@ const getTop10UserRanking = async (req, res, next) => {
     .catch(next);
 };
 
+const collaboratorInfo = async (req, res, next) => {
+  AdminServices.collaboratorInfo(req.ctx, req.body.userId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
+const assignEventAdmin = async (req, res, next) => {
+  EventService.assignEventAdmin(req.ctx, req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -107,10 +119,12 @@ export default {
   getListUserEventInfo,
   listCollaborator,
   getActiveEventOfCollaborator,
-  collaboratorInfo,
+  listCollaboratorInfo,
   addEventPin,
   deleteEventPin,
   listPostManage,
   getPinEvent,
   getTop10UserRanking,
+  collaboratorInfo,
+  assignEventAdmin,
 };
