@@ -68,8 +68,9 @@ const Event = MySQLClient.define<EventInstance>("Event", {
     allowNull: true,
   },
   adminId: {
-    type: DataTypes.STRING,
-    allowNull: true,
+    type: DataTypes.JSON,
+    allowNull: false,
+    defaultValue: null,
   },
 });
 

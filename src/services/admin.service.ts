@@ -44,6 +44,7 @@ const addCollaborator = async (ctx, payload) => {
         role,
         permission,
         updatedBy: userId,
+        addBy: userId,
       });
       const username = await (
         await Admin.findOne({
@@ -91,6 +92,7 @@ const updateCollaborator = async (ctx, payload) => {
         name,
         role,
         permission,
+        updatedBy: userId,
       },
       {
         where: {
@@ -304,7 +306,7 @@ const listCollaborator = async () => {
           attributes: ["name"],
           raw: true,
         });
-        
+
         const collaboratorInfo = {
           userInfo: user,
           updateName: updateName.name,
@@ -346,6 +348,51 @@ const listPostManage = async () => {
   }
 };
 
+const collaboratorInfo = async (ctx, userId) => {
+  const adminId = ctx?.user.id;
+  try {
+    const isAdmin = await Admin.findOne({
+      where: {
+        id: adminId,
+      },
+      attributes: ["role"],
+      raw: true,
+    });
+
+    if (isAdmin.role === "Admin" || isAdmin.role === "superadmin") {
+      const res = await Admin.findOne({
+        where: {
+          id: userId,
+        },
+        attributes: { exclude: ["password"] },
+        raw: true,
+      });
+
+      const updatedName = await Admin.findOne({
+        where: {
+          id: res.addBy,
+        },
+        attributes: ["name"],
+        raw: true,
+      });
+
+      return { ...res, adminAddedName: updatedName.name };
+    } else if (isAdmin.role !== "Admin" && isAdmin.role !== "superadmin") {
+      throw new BadRequestError({
+        field: "adminId",
+        message: "You dont have permission to access this information",
+      });
+    }
+  } catch (error) {
+    console.log(error);
+
+    throw new NotFoundError({
+      field: "adminId",
+      message: "Admin is not found",
+    });
+  }
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -354,4 +401,5 @@ export default {
   systemDetailsInXDays,
   listCollaborator,
   listPostManage,
+  collaboratorInfo,
 };
