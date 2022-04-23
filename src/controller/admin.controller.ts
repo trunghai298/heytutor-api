@@ -50,7 +50,7 @@ const listCollaborator = async (req, res, next) => {
 };
 
 const getListUserEventInfo = (req, res, next) => {
-  EventService.getListUserEventsManageByCollaborator(req.body.userId)
+  EventService.getListUserEventsManageByCollaborator(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -93,9 +93,9 @@ const getPinEvent = async (req, res, next) => {
 
 const getTop10UserRanking = async (req, res, next) => {
   RankingService.getTop10User()
-  .then((result) => res.json(result))
-  .catch(next);
-}
+    .then((result) => res.json(result))
+    .catch(next);
+};
 
 export default {
   createAdmin,
