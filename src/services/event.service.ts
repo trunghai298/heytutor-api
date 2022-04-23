@@ -823,14 +823,12 @@ const countPendingEventOfCollaborator = async (userId) => {
   }
 };
 
-const getListUserEventsManageByCollaborator = async (ctx) => {
-  const userId = ctx?.user?.id;
+const getListUserEventsManageByCollaborator = async (userId) => {
+  // const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
 
     let a = [];
-
-    
 
     const manageUserEventId = await Promise.all(
       map(listEvent, async (event) => {
@@ -876,7 +874,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
             nbOfNotResolvedReport: listReportNotResolved,
             nbOfReport: listReported,
           };
-        } 
+        }
       })
     );
 

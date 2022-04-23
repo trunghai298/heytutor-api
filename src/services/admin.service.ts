@@ -280,10 +280,13 @@ const listCollaborator = async () => {
   try {
     const listCollaborators = await Admin.findAll({
       where: {
-        [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
+        role: {
+          [Op.like]: "ctv%",
+        },
+        // [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
       },
+      attributes: { exclude: ["password"] },
       raw: true,
-      logging: true,
     });
 
     const res = await Promise.all(
@@ -294,8 +297,17 @@ const listCollaborator = async () => {
         const nbOfActiveEvents =
           await EventService.countActiveEventOfCollaborator(user.id);
 
+        const updateName = await Admin.findOne({
+          where: {
+            id: user.updatedBy,
+          },
+          attributes: ["name"],
+          raw: true,
+        });
+        
         const collaboratorInfo = {
           userInfo: user,
+          updateName: updateName.name,
           nbOfPendingEvents: nbOfPendingEvents.length,
           nbOfActiveEvents: nbOfActiveEvents.length,
         };
@@ -306,6 +318,8 @@ const listCollaborator = async () => {
 
     return res;
   } catch (error) {
+    console.log(error);
+
     throw new NotFoundError({
       field: "userId",
       message: "Collaborator is not found",

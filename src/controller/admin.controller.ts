@@ -50,7 +50,7 @@ const listCollaborator = async (req, res, next) => {
 };
 
 const getListUserEventInfo = (req, res, next) => {
-  EventService.getListUserEventsManageByCollaborator(req.ctx)
+  EventService.getListUserEventsManageByCollaborator(req.body.userId)
     .then((result) => res.json(result))
     .catch(next);
 };
