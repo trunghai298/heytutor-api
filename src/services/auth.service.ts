@@ -64,7 +64,7 @@ export const login = async (params: any, ctx: any) => {
   return { token };
 };
 
-export const adminLogin = async (params: any) => {
+export const adminLogin = async (params: any, ctx: any) => {
   const { email, password } = params;
 
   const admin = await Admin.findOne({
@@ -89,6 +89,7 @@ export const adminLogin = async (params: any) => {
   }
 
   const token = await JWTUtils.sign({
+    ...ctx,
     user: admin,
   });
 

@@ -17,12 +17,14 @@ import Admin from "../models/admin.model";
 /**
  * To create a new event
  */
-const create = async (payload) => {
+const create = async (ctx, payload) => {
+  console.log(ctx);
   try {
     const event = await Event.create(payload);
 
     return event;
   } catch (error) {
+    console.log(error);
     throw new BadRequestError({
       field: "eventId",
       message: "Failed to create this item.",
@@ -269,14 +271,24 @@ const listEventByUser = async (ctx) => {
       })
     );
 
-    // map(EventStats, async (event) => {
-    //   console.log(event, "event", event.id);
-
-    //   const eventStats = await getEventUserPostDetail(userId, event.id);
-    //   mapEvent.push(eventStats);
-    // });
-
     return compact(listEventDetail);
+  } catch (error) {
+    return error;
+  }
+};
+
+const listEventByAdmin = async (ctx) => {
+  const { user } = ctx;
+  try {
+    const listEvent = await Event.findAll({
+      where: {
+        createId: user.id,
+      },
+      raw: true,
+      orderBy: [["createdAt", "DESC"]],
+    });
+
+    return listEvent;
   } catch (error) {
     return error;
   }
@@ -964,4 +976,5 @@ export default {
   getListUserEventsManageByCollaborator,
   listEventManageByCollaborator,
   collaboratorInfo,
+  listEventByAdmin,
 };

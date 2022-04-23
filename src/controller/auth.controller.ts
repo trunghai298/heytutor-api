@@ -29,7 +29,7 @@ const login = async (req: any, res: any, next: any) => {
 
 const adminLogin = async (req: any, res: any, next: any) => {
   try {
-    const result = await AuthServices.adminLogin(req.body);
+    const result = await AuthServices.adminLogin(req.body, req.ctx);
     res.json(result);
   } catch (e) {
     next(e);

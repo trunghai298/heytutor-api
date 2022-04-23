@@ -1,7 +1,7 @@
 import EventServices from "../services/event.service";
 
 const create = (req, res, next) => {
-  EventServices.create(req.body)
+  EventServices.create(req.ctx, req.body)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -26,6 +26,12 @@ const getNumberPostOfEvent = (req, res, next) => {
 
 const getEventUser = (req, res, next) => {
   EventServices.getEventUser(req.params.eventId)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+const listEventByAdmin = (req, res, next) => {
+  EventServices.listEventByAdmin(req.ctx)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -103,4 +109,5 @@ export default {
   getListEventNotEnroll,
   getEventTitle,
   getListPostOnEvent,
+  listEventByAdmin,
 };
