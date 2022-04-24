@@ -2,6 +2,7 @@ import EventService from "../services/event.service";
 import PinServices from "../services/pin.services";
 import AdminServices from "../services/admin.service";
 import RankingService from "../services/ranking.service";
+import ReportService from "../services/report.service";
 
 const createAdmin = (req, res, next) => {
   try {
@@ -44,7 +45,7 @@ const approveEvent = async (req, res, next) => {
 };
 
 const listCollaborator = async (req, res, next) => {
-  AdminServices.listCollaborator()
+  AdminServices.listCollaborator(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -109,6 +110,12 @@ const assignEventAdmin = async (req, res, next) => {
     .catch(next);
 };
 
+const getListReportOfUser = async (req, res, next) => {
+  ReportService.listReportOfUser(req.body.userId, req.body.eventId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 export default {
   createAdmin,
   addCollaborator,
@@ -127,4 +134,5 @@ export default {
   getTop10UserRanking,
   collaboratorInfo,
   assignEventAdmin,
+  getListReportOfUser,
 };

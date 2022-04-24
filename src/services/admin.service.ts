@@ -278,47 +278,67 @@ const systemDetailsInXDays = async (nbOfDays) => {
   }
 };
 
-const listCollaborator = async () => {
+const listCollaborator = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
-    const listCollaborators = await Admin.findAll({
+    const adminRole = Admin.findOne({
       where: {
-        role: {
-          [Op.like]: "ctv%",
-        },
-        // [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
+        id: userId,
       },
-      attributes: { exclude: ["password"] },
+      attributes: ["role"],
       raw: true,
     });
 
-    const res = await Promise.all(
-      map(listCollaborators, async (user) => {
-        const nbOfPendingEvents =
-          await EventService.countPendingEventOfCollaborator(user.id);
-
-        const nbOfActiveEvents =
-          await EventService.countActiveEventOfCollaborator(user.id);
-
-        const updateName = await Admin.findOne({
-          where: {
-            id: user.updatedBy,
+    if (adminRole === "superadmin" || adminRole === "Admin") {
+      const listCollaborators = await Admin.findAll({
+        where: {
+          role: {
+            [Op.like]: "ctv%",
           },
-          attributes: ["name"],
-          raw: true,
-        });
+          // [Op.or]: [{ role: "ctv1" }, { role: "ctv2" }],
+        },
+        attributes: { exclude: ["password"] },
+        raw: true,
+      });
 
-        const collaboratorInfo = {
-          userInfo: user,
-          updateName: updateName.name,
-          nbOfPendingEvents: nbOfPendingEvents.length,
-          nbOfActiveEvents: nbOfActiveEvents.length,
-        };
+      const res = await Promise.all(
+        map(listCollaborators, async (user) => {
+          const nbOfPendingEvents =
+            await EventService.countPendingEventOfCollaborator(user.id);
 
-        return collaboratorInfo;
-      })
-    );
+          const nbOfActiveEvents =
+            await EventService.countActiveEventOfCollaborator(user.id);
 
-    return res;
+          const nbOfUserInEvents =
+            await EventService.countUserReportInEventOfCollaborator(user.id);
+
+          const updateName = await Admin.findOne({
+            where: {
+              id: user.updatedBy,
+            },
+            attributes: ["name"],
+            raw: true,
+          });
+
+          const collaboratorInfo = {
+            userInfo: user,
+            updateName: updateName.name,
+            nbOfPendingEvents: nbOfPendingEvents.length,
+            nbOfActiveEvents: nbOfActiveEvents.length,
+            nbOfUserInEvents: nbOfUserInEvents,
+          };
+
+          return collaboratorInfo;
+        })
+      );
+
+      return res;
+    } else if (adminRole !== "superadmin" && adminRole !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
   } catch (error) {
     console.log(error);
 

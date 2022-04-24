@@ -7,10 +7,11 @@ interface ReportInstance extends Model {
   postId: number;
   reason: string;
   content: string;
-  createdAt: Date;
-  updatedAt: Date;
   eventId: number;
   commentId: number;
+  reportedBy: number;
+  isResolved: boolean;
+  resolvedBy: number;
 }
 
 const Report = MySQLClient.define<ReportInstance>("Report", {
@@ -33,6 +34,23 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
   content: {
     type: DataTypes.STRING,
   },
+  eventId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  commentId: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  reportedBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
+  isResolved: {
+    allowNull: false,
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
+  resolvedBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
@@ -42,12 +60,6 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     type: DataTypes.DATE,
     allowNull: false,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  eventId: {
-    type: DataTypes.INTEGER.UNSIGNED,
-  },
-  commentId: {
-    type: DataTypes.INTEGER.UNSIGNED,
   },
 });
 

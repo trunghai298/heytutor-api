@@ -1,3 +1,4 @@
+import ReportService from "../services/report.service";
 import PinServices from "../services/pin.services";
 import UserServices from "../services/users.service";
 
@@ -33,15 +34,21 @@ const searchSuggest = (req, res, next) => {
 
 const userCreatePostPin = async (req, res, next) => {
   PinServices.createPostPin(req.ctx, req.body.postId)
-  .then((data) => res.json(data))
-  .catch(next);
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 const userUnPinPost = async (req, res, next) => {
   PinServices.userUnPinPost(req.ctx, req.body.postId)
-  .then((data) => res.json(data))
-  .catch(next);
-}
+    .then((data) => res.json(data))
+    .catch(next);
+};
+
+const createReport = async (req, res, next) => {
+  ReportService.createReport(req.ctx, req.body)
+    .then((data) => res.json(data))
+    .catch(next);
+};
 
 export default {
   fetchByEmail,
@@ -51,4 +58,5 @@ export default {
   searchSuggest,
   userCreatePostPin,
   userUnPinPost,
+  createReport,
 };

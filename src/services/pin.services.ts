@@ -5,7 +5,7 @@ import { BadRequestError } from "../utils/errors";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import Admin from "../models/admin.model";
-import { pick, compact, map } from "lodash";
+import { pick, compact, map, flattenDeep } from "lodash";
 import ActivityServices from "./activity.service";
 import Post from "../models/post.model";
 import Event from "../models/event.model";
@@ -315,8 +315,8 @@ const getPinEvent = async () => {
         });
         const result = {
           eventDetail: eventDetail,
-          listUserInEvent: listUsers,
-          listReportInEvent: listReport,
+          listUserInEvent: flattenDeep(listUsers),
+          listReportInEvent: flattenDeep(listReport),
         };
         return result;
       })

@@ -3,7 +3,7 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { pick, compact, map } from "lodash";
+import { pick, compact, map, filter, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
@@ -815,6 +815,60 @@ const countActiveEventOfCollaborator = async (userId) => {
   }
 };
 
+const countUserReportInEventOfCollaborator = async (userId) => {
+  try {
+    const currentTime = new Date(Date.now());
+
+    // const listActiveEvent = await MySQLClient.query(
+    //   `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND endAt > now() AND isApproved = 1`,
+    //   { type: "SELECT" }
+    // );
+
+    const listEvents = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND isApproved = 1`,
+      { type: "SELECT" }
+    );
+
+    const listActiveEvent = filter(
+      listEvents,
+      (item) => item.endAt > currentTime
+    );
+    const listUserOfAllEvent = await Promise.all(
+      map(listEvents, async (event) => {
+        const users = await UserEventService.listUserOfEvent(event.id);
+        return users;
+      })
+    );
+
+    const listUserOfActiveEvent = await Promise.all(
+      map(listActiveEvent, async (event) => {
+        const users = await UserEventService.listUserOfEvent(event.id);
+        return users;
+      })
+    );
+
+    const listReportInEvent = await Promise.all(
+      map(listEvents, async (event) => {
+        const report = await ReportService.listReportInEvent(event.id);
+        return report;
+      })
+    );
+
+    return {
+      listUserOfAllEvent: flattenDeep(listUserOfAllEvent).length,
+      listUserOfActiveEvent: flattenDeep(listUserOfActiveEvent).length,
+      listReportInEvent: flattenDeep(listReportInEvent).length,
+    };
+  } catch (error) {
+    console.log(error);
+
+    throw new NotFoundError({
+      field: "userId",
+      message: "Collaborator is not found",
+    });
+  }
+};
+
 const countPendingEventOfCollaborator = async (userId) => {
   try {
     const pendingEvent = await Event.findAll({
@@ -871,7 +925,7 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userEvent.eventId
         );
         const listReportNotResolved =
-          await ReportService.listReportNotResolvedByUser(userEvent.userId);
+          await ReportService.listReportNotResolvedByUser(userEvent.userId, userEvent.eventId);
         const listReported = await ReportService.listAllReportOfUser(
           userEvent.userId
         );
@@ -909,8 +963,8 @@ const listEventManageByCollaborator = async (ctx) => {
 
         const result = {
           eventDetail: event,
-          listUserInEvent: listUsers,
-          listReportInEvent: listReport,
+          listUserInEvent: flattenDeep(listUsers),
+          listReportInEvent: flattenDeep(listReport),
         };
         return result;
       })
@@ -994,8 +1048,6 @@ const assignEventAdmin = async (ctx, payload) => {
       });
     }
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
       field: "eventId",
       message: "Event is not found",
@@ -1025,4 +1077,5 @@ export default {
   listCollaboratorInfo,
   listEventByAdmin,
   assignEventAdmin,
+  countUserReportInEventOfCollaborator,
 };
