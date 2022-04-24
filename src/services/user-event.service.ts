@@ -137,7 +137,7 @@ const listUserOfEvent = async (eventId) => {
       raw: true,
     });
 
-    return { ...listUsers };
+    return listUsers;
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",

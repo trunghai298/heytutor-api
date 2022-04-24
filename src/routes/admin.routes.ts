@@ -21,4 +21,5 @@ export default (app: Application) => {
     .get("/get-top-10-user-rank", AdminController.getTop10UserRanking)
     .get("/collaborator-detail-information", AdminController.collaboratorInfo)
     .post("/assign-event-admin", AdminController.assignEventAdmin)
+    .get("/list-reports-of-user-in-event", AdminController.getListReportOfUser)
 };
