@@ -7,7 +7,7 @@ export default (app: Application) => {
     .put("/update-collaborator", AdminController.updateCollaborator)
     .get("/get-system-detail", AdminController.systemDetailsInXDays)
     .put("/approve-event", AdminController.approveEvent)
-    .get("/list-collaborators", AdminController.listCollaborator)
+    // .get("/list-collaborators", AdminController.listCollaborator)
     .get("/manage-user-event", AdminController.getListUserEventInfo)
     .get(
       "/get-active-event-of-collaborator",

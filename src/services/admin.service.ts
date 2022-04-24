@@ -33,49 +33,59 @@ const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission } = payload;
   const userId = ctx?.user?.id;
   try {
-    const user = await Admin.findOne({
-      where: { email },
+    const adminInfo = Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role", "name"],
+      raw: true,
     });
-    if (user === null) {
-      const res = await Admin.create({
-        email,
-        password,
-        name,
-        role,
-        permission,
-        updatedBy: userId,
-        addBy: userId,
-      });
-      const username = await (
-        await Admin.findOne({
-          where: {
-            id: userId,
-          },
-        })
-      ).name;
-      const log = await ActivityServices.create({
-        userId,
-        username,
-        action: "add",
-        content: `new collaborator ${name}`,
-      });
 
-      const id = await Admin.count();
-      const payload = {
-        userId: id,
-        notificationType: NOTI_TYPE.NewCollab,
-        fromUserId: userId,
-        fromUsername: username,
-      };
-      await NotificationService.create(payload);
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const user = await Admin.findOne({
+        where: { email },
+        raw: true,
+      });
+      if (user === null) {
+        const res = await Admin.create({
+          email,
+          password,
+          name,
+          role,
+          permission,
+          updatedBy: userId,
+          addBy: userId,
+        });
 
-      return {
-        log,
-      };
-    } else {
-      return {
-        message: "User already existed",
-      };
+        const log = await ActivityServices.create({
+          userId,
+          username: adminInfo.name,
+          action: "add",
+          content: `new collaborator ${name}`,
+        });
+
+        const id = await Admin.count();
+        const payload = {
+          userId: id,
+          notificationType: NOTI_TYPE.NewCollab,
+          fromUserId: userId,
+          fromUsername: adminInfo.name,
+        };
+        await NotificationService.create(payload);
+
+        return {
+          log,
+        };
+      } else {
+        return {
+          message: "User already existed",
+        };
+      }
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
     }
   } catch (error) {
     console.log(error);
@@ -87,59 +97,66 @@ const updateCollaborator = async (ctx, payload) => {
   const { id, email, name, role, permission } = payload;
   const userId = ctx?.user?.id;
   try {
-    const res = await Admin.update(
-      {
-        name,
-        role,
-        permission,
-        updatedBy: userId,
+    const adminInfo = Admin.findOne({
+      where: {
+        id: userId,
       },
-      {
-        where: {
-          email,
-        },
-      }
-    );
-    const username = await (
-      await Admin.findOne({
-        where: {
-          id: userId,
-        },
-        raw: true,
-      })
-    ).name;
-    const log = await ActivityServices.create({
-      userId,
-      username,
-      action: "update",
-      content: `collaborator ${name}`,
+      attributes: ["role"],
+      raw: true,
     });
 
-    const payload = {
-      userId: id,
-      notificationType: NOTI_TYPE.UpdateCollab,
-      fromUserId: userId,
-      fromUsername: username,
-    };
-    await NotificationService.create(payload);
-    return {
-      log,
-    };
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const res = await Admin.update(
+        {
+          name,
+          role,
+          permission,
+          updatedBy: userId,
+        },
+        {
+          where: {
+            email,
+          },
+        }
+      );
+      const log = await ActivityServices.create({
+        userId,
+        username: adminInfo.name,
+        action: "update",
+        content: `collaborator ${name}`,
+      });
+
+      const payload = {
+        userId: id,
+        notificationType: NOTI_TYPE.UpdateCollab,
+        fromUserId: userId,
+        fromUsername: adminInfo.name,
+      };
+      await NotificationService.create(payload);
+      return {
+        log,
+      };
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
   } catch (error) {
     console.log(error);
     return error;
   }
 };
 
-const listAllCollaborator = async () => {
-  try {
-    const listCollaborator = await Admin.findAll({ raw: true });
-    return listCollaborator;
-  } catch (error) {
-    console.log(error);
-    return error;
-  }
-};
+// const listAllCollaborator = async () => {
+//   try {
+//     const listCollaborator = await Admin.findAll({ raw: true });
+//     return listCollaborator;
+//   } catch (error) {
+//     console.log(error);
+//     return error;
+//   }
+// };
 
 const listEventInXDays = async (nbFromDays, nbToDays) => {
   const currentDate = new Date(Date.now() - nbFromDays * 24 * 60 * 60 * 1000);
@@ -214,65 +231,84 @@ const listNewRegisterInXDays = async (nbFromDays, nbToDays) => {
   }
 };
 
-const systemDetailsInXDays = async (nbOfDays) => {
+const systemDetailsInXDays = async (ctx, nbOfDays) => {
   const twoTimeNbOfDays = nbOfDays * 2;
+  const userId = ctx?.user?.id;
 
   try {
-    const listEventsInXDays = await listEventInXDays(0, nbOfDays);
-    const nbEventInXDays = listEventsInXDays.length;
-    const listPostsInXDays = await listPostInXDays(0, nbOfDays);
-    const nbOfNewPostInXDays = listPostsInXDays.length;
-    const listAllNewRegisterInXDays = await listNewRegisterInXDays(0, nbOfDays);
-    const nbOfNewRegisterInXDays = listAllNewRegisterInXDays.length;
+    const adminInfo = Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role"],
+      raw: true,
+    });
 
-    const listEventInPreviousXDays = await listEventInXDays(
-      nbOfDays,
-      twoTimeNbOfDays
-    );
-    const nbEventInPreviousXDays = listEventInPreviousXDays.length;
-    const listPostsInPreviousXDays = await listPostInXDays(
-      nbOfDays,
-      twoTimeNbOfDays
-    );
-    const nbOfNewPostInPreviousXDays = listPostsInPreviousXDays.length;
-    const listAllNewRegisterInPreviousXDays = await listNewRegisterInXDays(
-      nbOfDays,
-      twoTimeNbOfDays
-    );
-    const nbOfNewRegisterInPreviousXDays =
-      listAllNewRegisterInPreviousXDays.length;
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const listEventsInXDays = await listEventInXDays(0, nbOfDays);
+      const nbEventInXDays = listEventsInXDays.length;
+      const listPostsInXDays = await listPostInXDays(0, nbOfDays);
+      const nbOfNewPostInXDays = listPostsInXDays.length;
+      const listAllNewRegisterInXDays = await listNewRegisterInXDays(
+        0,
+        nbOfDays
+      );
+      const nbOfNewRegisterInXDays = listAllNewRegisterInXDays.length;
 
-    let percentXdaysEventChange = nbEventInXDays * 100;
-    if (nbEventInPreviousXDays !== 0) {
-      percentXdaysEventChange =
-        ((nbEventInXDays - nbEventInPreviousXDays) / nbEventInPreviousXDays) *
-        100;
+      const listEventInPreviousXDays = await listEventInXDays(
+        nbOfDays,
+        twoTimeNbOfDays
+      );
+      const nbEventInPreviousXDays = listEventInPreviousXDays.length;
+      const listPostsInPreviousXDays = await listPostInXDays(
+        nbOfDays,
+        twoTimeNbOfDays
+      );
+      const nbOfNewPostInPreviousXDays = listPostsInPreviousXDays.length;
+      const listAllNewRegisterInPreviousXDays = await listNewRegisterInXDays(
+        nbOfDays,
+        twoTimeNbOfDays
+      );
+      const nbOfNewRegisterInPreviousXDays =
+        listAllNewRegisterInPreviousXDays.length;
+
+      let percentXdaysEventChange = nbEventInXDays * 100;
+      if (nbEventInPreviousXDays !== 0) {
+        percentXdaysEventChange =
+          ((nbEventInXDays - nbEventInPreviousXDays) / nbEventInPreviousXDays) *
+          100;
+      }
+
+      let percentXdaysPostChange = nbOfNewPostInXDays * 100;
+      if (nbOfNewPostInPreviousXDays !== 0) {
+        percentXdaysPostChange =
+          ((nbOfNewPostInXDays - nbOfNewPostInPreviousXDays) /
+            nbEventInPreviousXDays) *
+          100;
+      }
+
+      let percentXdaysRegisterChange = nbOfNewRegisterInXDays * 100;
+      if (nbOfNewRegisterInPreviousXDays !== 0) {
+        percentXdaysRegisterChange =
+          ((nbOfNewRegisterInXDays - nbOfNewRegisterInPreviousXDays) /
+            nbOfNewRegisterInPreviousXDays) *
+          100;
+      }
+
+      return {
+        nbEventInXDays,
+        percentXdaysEventChange,
+        nbOfNewPostInXDays,
+        percentXdaysPostChange,
+        nbOfNewRegisterInXDays,
+        percentXdaysRegisterChange,
+      };
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
     }
-
-    let percentXdaysPostChange = nbOfNewPostInXDays * 100;
-    if (nbOfNewPostInPreviousXDays !== 0) {
-      percentXdaysPostChange =
-        ((nbOfNewPostInXDays - nbOfNewPostInPreviousXDays) /
-          nbEventInPreviousXDays) *
-        100;
-    }
-
-    let percentXdaysRegisterChange = nbOfNewRegisterInXDays * 100;
-    if (nbOfNewRegisterInPreviousXDays !== 0) {
-      percentXdaysRegisterChange =
-        ((nbOfNewRegisterInXDays - nbOfNewRegisterInPreviousXDays) /
-          nbOfNewRegisterInPreviousXDays) *
-        100;
-    }
-
-    return {
-      nbEventInXDays,
-      percentXdaysEventChange,
-      nbOfNewPostInXDays,
-      percentXdaysPostChange,
-      nbOfNewRegisterInXDays,
-      percentXdaysRegisterChange,
-    };
   } catch (error) {
     return error;
   }
@@ -289,7 +325,7 @@ const listCollaborator = async (ctx) => {
       raw: true,
     });
 
-    if (adminRole === "superadmin" || adminRole === "Admin") {
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
       const listCollaborators = await Admin.findAll({
         where: {
           role: {
@@ -333,10 +369,10 @@ const listCollaborator = async (ctx) => {
       );
 
       return res;
-    } else if (adminRole !== "superadmin" && adminRole !== "Admin") {
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "You dont have permission to access this information",
       });
     }
   } catch (error) {
@@ -349,17 +385,33 @@ const listCollaborator = async (ctx) => {
   }
 };
 
-const listPostManage = async () => {
+const listPostManage = async (ctx) => {
+  const userId = ctx?.user?.id;
   try {
-    // const listPinPost = await PinServices.getListPinPost();
-    const listReportedPost = await ReportService.listReportedPost();
-    // const listNoRegisterPost = await UserPostService.getListPostNoRegister();
+    const adminRole = Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role"],
+      raw: true,
+    });
 
-    return {
-      // listPinPost,
-      listReportedPost,
-      // listNoRegisterPost,
-    };
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+      // const listPinPost = await PinServices.getListPinPost();
+      const listReportedPost = await ReportService.listReportedPost();
+      // const listNoRegisterPost = await UserPostService.getListPostNoRegister();
+
+      return {
+        // listPinPost,
+        listReportedPost,
+        // listNoRegisterPost,
+      };
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
   } catch (error) {
     throw new NotFoundError({
       field: "postId",
@@ -417,7 +469,7 @@ export default {
   createAdmin,
   addCollaborator,
   updateCollaborator,
-  listAllCollaborator,
+  // listAllCollaborator,
   systemDetailsInXDays,
   listCollaborator,
   listPostManage,
