@@ -255,7 +255,7 @@ const listReportNotResolved = async (ctx) => {
       raw: true,
     });
 
-    if (adminRole === "superadmin" || adminRole === "Admin") {
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
       const res = await Report.findAll({
         where: {
           isResolved: 0,
@@ -264,10 +264,10 @@ const listReportNotResolved = async (ctx) => {
       });
 
       return res;
-    } else if (adminRole !== "superadmin" && adminRole !== "Admin") {
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "You dont have permission to access this information",
       });
     }
   } catch (error) {
@@ -289,7 +289,7 @@ const listReportResolved = async (ctx) => {
       raw: true,
     });
 
-    if (adminRole === "superadmin" || adminRole === "Admin") {
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
       const res = await Report.findAll({
         where: {
           isResolved: 1,
@@ -298,10 +298,10 @@ const listReportResolved = async (ctx) => {
       });
 
       return res;
-    } else if (adminRole !== "superadmin" && adminRole !== "Admin") {
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "You dont have permission to access this information",
       });
     }
   } catch (error) {
@@ -392,6 +392,50 @@ const listReportedPost = async () => {
   }
 };
 
+const resolvedSimilarReport = async (
+  adminId,
+  userId,
+  eventId,
+  postId,
+  commentId
+) => {
+  try {
+    const listReportSimilar = await Report.findAll({
+      where: {
+        userId,
+        eventId,
+        postId,
+        commentId,
+      },
+      attributes: ["id"],
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listReportSimilar, async (report) => {
+        const update = await Report.update(
+          {
+            isResolved: 1,
+            resolvedBy: adminId,
+          },
+          {
+            where: {
+              id: report.id,
+            },
+          }
+        );
+      })
+    );
+
+    return { status: 200 };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "id",
+      message: "Report is not found",
+    });
+  }
+};
+
 export default {
   checkReportInDay,
   createReport,
@@ -403,4 +447,5 @@ export default {
   listReportResolved,
   listReportNotResolved,
   listReportOfUser,
+  resolvedSimilarReport,
 };

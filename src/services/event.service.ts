@@ -778,19 +778,34 @@ const approveEvent = async (ctx, eventId) => {
   const adminId = ctx?.user?.id;
 
   try {
-    const res = Event.update(
-      {
-        isApproved: 1,
-        approveBy: adminId,
+    const adminInfo = Admin.findOne({
+      where: {
+        id: adminId,
       },
-      {
-        where: {
-          eventId,
-        },
-      }
-    );
+      attributes: ["role", "name"],
+      raw: true,
+    });
 
-    return res;
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const res = Event.update(
+        {
+          isApproved: 1,
+          approveBy: adminId,
+        },
+        {
+          where: {
+            eventId,
+          },
+        }
+      );
+
+      return res;
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -925,7 +940,10 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userEvent.eventId
         );
         const listReportNotResolved =
-          await ReportService.listReportNotResolvedByUser(userEvent.userId, userEvent.eventId);
+          await ReportService.listReportNotResolvedByUser(
+            userEvent.userId,
+            userEvent.eventId
+          );
         const listReported = await ReportService.listAllReportOfUser(
           userEvent.userId
         );
@@ -979,26 +997,42 @@ const listEventManageByCollaborator = async (ctx) => {
   }
 };
 
-const listCollaboratorInfo = async () => {
+const listCollaboratorInfo = async (ctx) => {
+  const adminId = ctx?.user?.id;
   try {
-    const listCollaborator = await Admin.findAll({
+    const adminInfo = Admin.findOne({
       where: {
-        role: "ctv1",
+        id: adminId,
       },
-      attributes: ["id", "name", "isActive", "updatedBy"],
+      attributes: ["role", "name"],
       raw: true,
     });
 
-    console.log(listCollaborator);
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const listCollaborator = await Admin.findAll({
+        where: {
+          role: "ctv1",
+        },
+        attributes: ["id", "name", "isActive", "updatedBy"],
+        raw: true,
+      });
 
-    const res = await Promise.all(
-      map(listCollaborator, async (collaborator) => {
-        const info = await listEventManageByCollaborator(collaborator.id);
-        return { ...collaborator, info };
-      })
-    );
+      console.log(listCollaborator);
 
-    return res;
+      const res = await Promise.all(
+        map(listCollaborator, async (collaborator) => {
+          const info = await listEventManageByCollaborator(collaborator.id);
+          return { ...collaborator, info };
+        })
+      );
+
+      return res;
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
   } catch (error) {
     console.log(error);
 

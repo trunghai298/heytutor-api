@@ -26,14 +26,14 @@ const updateCollaborator = (req, res, next) => {
     .catch(next);
 };
 
-const listAllCollaborator = (req, res, next) => {
-  AdminServices.listAllCollaborator()
-    .then((result) => res.json(result))
-    .catch(next);
-};
+// const listAllCollaborator = (req, res, next) => {
+//   AdminServices.listAllCollaborator()
+//     .then((result) => res.json(result))
+//     .catch(next);
+// };
 
 const systemDetailsInXDays = (req, res, next) => {
-  AdminServices.systemDetailsInXDays(req.query.nbOfDays)
+  AdminServices.systemDetailsInXDays(req.ctx, req.query.nbOfDays)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -63,7 +63,7 @@ const getActiveEventOfCollaborator = (req, res, next) => {
 };
 
 const listCollaboratorInfo = (req, res, next) => {
-  EventService.listCollaboratorInfo()
+  EventService.listCollaboratorInfo(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -81,19 +81,19 @@ const deleteEventPin = async (req, res, next) => {
 };
 
 const listPostManage = async (req, res, next) => {
-  AdminServices.listPostManage()
+  AdminServices.listPostManage(req.ctx)
     .then((results) => res.json(results))
     .catch(next);
 };
 
 const getPinEvent = async (req, res, next) => {
-  PinServices.getPinEvent()
+  PinServices.getPinEvent(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 const getTop10UserRanking = async (req, res, next) => {
-  RankingService.getTop10User()
+  RankingService.getTop10User(req.ctx)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -120,7 +120,7 @@ export default {
   createAdmin,
   addCollaborator,
   updateCollaborator,
-  listAllCollaborator,
+  // listAllCollaborator,
   systemDetailsInXDays,
   approveEvent,
   getListUserEventInfo,
