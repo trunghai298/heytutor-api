@@ -3,7 +3,7 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { pick, compact, map } from "lodash";
+import { pick, compact, map, filter, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
@@ -24,7 +24,6 @@ const create = async (ctx, payload) => {
 
     return event;
   } catch (error) {
-    console.log(error);
     throw new BadRequestError({
       field: "eventId",
       message: "Failed to create this item.",
@@ -783,19 +782,34 @@ const approveEvent = async (ctx, eventId) => {
   const adminId = ctx?.user?.id;
 
   try {
-    const res = Event.update(
-      {
-        isApproved: 1,
-        approveBy: adminId,
+    const adminInfo = Admin.findOne({
+      where: {
+        id: adminId,
       },
-      {
-        where: {
-          eventId,
-        },
-      }
-    );
+      attributes: ["role", "name"],
+      raw: true,
+    });
 
-    return res;
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const res = Event.update(
+        {
+          isApproved: 1,
+          approveBy: adminId,
+        },
+        {
+          where: {
+            eventId,
+          },
+        }
+      );
+
+      return res;
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -813,6 +827,60 @@ const countActiveEventOfCollaborator = async (userId) => {
 
     return listActiveEvent;
   } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "Collaborator is not found",
+    });
+  }
+};
+
+const countUserReportInEventOfCollaborator = async (userId) => {
+  try {
+    const currentTime = new Date(Date.now());
+
+    // const listActiveEvent = await MySQLClient.query(
+    //   `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND endAt > now() AND isApproved = 1`,
+    //   { type: "SELECT" }
+    // );
+
+    const listEvents = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${userId}') AND isApproved = 1`,
+      { type: "SELECT" }
+    );
+
+    const listActiveEvent = filter(
+      listEvents,
+      (item) => item.endAt > currentTime
+    );
+    const listUserOfAllEvent = await Promise.all(
+      map(listEvents, async (event) => {
+        const users = await UserEventService.listUserOfEvent(event.id);
+        return users;
+      })
+    );
+
+    const listUserOfActiveEvent = await Promise.all(
+      map(listActiveEvent, async (event) => {
+        const users = await UserEventService.listUserOfEvent(event.id);
+        return users;
+      })
+    );
+
+    const listReportInEvent = await Promise.all(
+      map(listEvents, async (event) => {
+        const report = await ReportService.listReportInEvent(event.id);
+        return report;
+      })
+    );
+
+    return {
+      listUserOfAllEvent: flattenDeep(listUserOfAllEvent).length,
+      listUserOfActiveEvent: flattenDeep(listUserOfActiveEvent).length,
+      listReportInEvent: flattenDeep(listReportInEvent).length,
+    };
+  } catch (error) {
+    console.log(error);
+
     throw new NotFoundError({
       field: "userId",
       message: "Collaborator is not found",
@@ -876,7 +944,10 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
           userEvent.eventId
         );
         const listReportNotResolved =
-          await ReportService.listReportNotResolvedByUser(userEvent.userId);
+          await ReportService.listReportNotResolvedByUser(
+            userEvent.userId,
+            userEvent.eventId
+          );
         const listReported = await ReportService.listAllReportOfUser(
           userEvent.userId
         );
@@ -914,8 +985,8 @@ const listEventManageByCollaborator = async (ctx) => {
 
         const result = {
           eventDetail: event,
-          listUserInEvent: listUsers,
-          listReportInEvent: listReport,
+          listUserInEvent: flattenDeep(listUsers),
+          listReportInEvent: flattenDeep(listReport),
         };
         return result;
       })
@@ -930,32 +1001,94 @@ const listEventManageByCollaborator = async (ctx) => {
   }
 };
 
-const collaboratorInfo = async () => {
+const listCollaboratorInfo = async (ctx) => {
+  const adminId = ctx?.user?.id;
   try {
-    const listCollaborator = await Admin.findAll({
+    const adminInfo = Admin.findOne({
       where: {
-        role: "ctv1",
+        id: adminId,
       },
-      attributes: ["id", "name", "isActive", "updatedBy"],
+      attributes: ["role", "name"],
       raw: true,
     });
 
-    console.log(listCollaborator);
+    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+      const listCollaborator = await Admin.findAll({
+        where: {
+          role: "ctv1",
+        },
+        attributes: ["id", "name", "isActive", "updatedBy"],
+        raw: true,
+      });
 
-    const res = await Promise.all(
-      map(listCollaborator, async (collaborator) => {
-        const info = await listEventManageByCollaborator(collaborator.id);
-        return { ...collaborator, info };
-      })
-    );
+      console.log(listCollaborator);
 
-    return res;
+      const res = await Promise.all(
+        map(listCollaborator, async (collaborator) => {
+          const info = await listEventManageByCollaborator(collaborator.id);
+          return { ...collaborator, info };
+        })
+      );
+
+      return res;
+    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
   } catch (error) {
     console.log(error);
 
     throw new NotFoundError({
       field: "listCollaborator",
       message: "Collaborator is not found",
+    });
+  }
+};
+
+const assignEventAdmin = async (ctx, payload) => {
+  const userId = ctx?.user?.id;
+  const { eventId, collaboratorId } = payload;
+  let list = [];
+  try {
+    const listAdmins = await Event.findOne({
+      where: {
+        id: eventId,
+      },
+      attributes: ["adminId"],
+      raw: true,
+    });
+
+    const isAdmin = await listAdmins.adminId.includes(userId);
+
+    const admins = listAdmins.adminId;
+
+    if (isAdmin === true) {
+      await list.push(...admins, collaboratorId);
+
+      const res = await Event.update(
+        {
+          adminId: list,
+        },
+        {
+          where: {
+            id: eventId,
+          },
+        }
+      );
+
+      return { status: 200 };
+    } else if (isAdmin === false) {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to update this information",
+      });
+    }
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
     });
   }
 };
@@ -979,6 +1112,8 @@ export default {
   countPendingEventOfCollaborator,
   getListUserEventsManageByCollaborator,
   listEventManageByCollaborator,
-  collaboratorInfo,
+  listCollaboratorInfo,
   listEventByAdmin,
+  assignEventAdmin,
+  countUserReportInEventOfCollaborator,
 };

@@ -9,7 +9,11 @@ interface IAdminInstance extends Model {
   role: string;
   permissions: string;
   isActive: boolean;
+  addBy: number;
   updatedBy: number;
+  address: string;
+  phone: string;
+  facebook: string;
 }
 
 const Admin = MySQLClient.define<IAdminInstance>("Admin", {
@@ -26,6 +30,15 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
     type: DataTypes.STRING,
   },
   name: {
+    type: DataTypes.STRING,
+  },
+  address: {
+    type: DataTypes.STRING,
+  },
+  phone: {
+    type: DataTypes.STRING,
+  },
+  facebook: {
     type: DataTypes.STRING,
   },
   role: {
@@ -50,6 +63,10 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
     defaultValue: true,
   },
   updatedBy: {
+    type: DataTypes.INTEGER.UNSIGNED,
+    allowNull: false,
+  },
+  addBy: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
   },

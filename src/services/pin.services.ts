@@ -5,7 +5,7 @@ import { BadRequestError } from "../utils/errors";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import Admin from "../models/admin.model";
-import { pick, compact, map } from "lodash";
+import { pick, compact, map, flattenDeep } from "lodash";
 import ActivityServices from "./activity.service";
 import Post from "../models/post.model";
 import Event from "../models/event.model";
@@ -289,40 +289,60 @@ const getListPinPost = async () => {
   }
 };
 
-const getPinEvent = async () => {
+const getPinEvent = async (ctx) => {
+  const adminId = ctx?.user?.id;
   try {
-    const listEvent = await Pin.findAll({
+    const adminRole = Admin.findOne({
       where: {
-        eventId: {
-          [Op.ne]: null,
-        },
-        postId: {
-          [Op.eq]: null,
-        },
+        id: adminId,
       },
+      attributes: ["role"],
       raw: true,
     });
 
-    const res = await Promise.all(
-      map(listEvent, async (event) => {
-        const listUsers = await UserEventService.listUserOfEvent(event.eventId);
-        const listReport = await ReportService.listReportInEvent(event.eventId);
-        const eventDetail = await Event.findOne({
-          where: {
-            id: event.eventId,
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+      const listEvent = await Pin.findAll({
+        where: {
+          eventId: {
+            [Op.ne]: null,
           },
-          raw: true,
-        });
-        const result = {
-          eventDetail: eventDetail,
-          listUserInEvent: listUsers,
-          listReportInEvent: listReport,
-        };
-        return result;
-      })
-    );
+          postId: {
+            [Op.eq]: null,
+          },
+        },
+        raw: true,
+      });
 
-    return res;
+      const res = await Promise.all(
+        map(listEvent, async (event) => {
+          const listUsers = await UserEventService.listUserOfEvent(
+            event.eventId
+          );
+          const listReport = await ReportService.listReportInEvent(
+            event.eventId
+          );
+          const eventDetail = await Event.findOne({
+            where: {
+              id: event.eventId,
+            },
+            raw: true,
+          });
+          const result = {
+            eventDetail: eventDetail,
+            listUserInEvent: flattenDeep(listUsers),
+            listReportInEvent: flattenDeep(listReport),
+          };
+          return result;
+        })
+      );
+
+      return res;
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
   } catch (error) {
     throw new BadRequestError({
       field: "id",

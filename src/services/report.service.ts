@@ -8,6 +8,7 @@ import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import User from "../models/user.model";
 import Post from "../models/post.model";
+import Admin from "../models/admin.model";
 
 const checkReportInDay = async () => {
   const lastMidnight = new Date();
@@ -78,7 +79,7 @@ const checkReportInDay = async () => {
       })
     );
 
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "id",
@@ -137,41 +138,177 @@ const createReport = async (ctx, payload) => {
     }
 
     await NotificationService.create(payload);
-    return "Success!!!";
+    return { status: 200 };
   } catch (error) {
-    return error;
+    throw new BadRequestError({
+      field: "id",
+      message: "Failed to create this item.",
+    });
   }
 };
 
-const listReportNotResolvedByUser = async (userId) => {
+const listReportNotResolvedByUser = async (userId, eventId) => {
   try {
-    const res = await Report.findAll({
+    const listReport = await Report.findAll({
       where: {
         userId,
+        eventId,
         isResolved: 0,
       },
       raw: true,
     });
 
-    return res;
+    const eventTitle = await Events.findOne({
+      where: {
+        id: eventId,
+      },
+      raw: true,
+    });
+
+    return {
+      eventTitle,
+      listReport,
+    };
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
   }
 };
 
-const listReportResolvedByUser = async (userId) => {
+const listReportResolvedByUser = async (userId, eventId) => {
   try {
-    const res = await Report.findAll({
+    const listReport = await Report.findAll({
       where: {
         userId,
+        eventId,
         isResolved: 1,
       },
       raw: true,
     });
 
-    return res;
+    const reportDetails = await Promise.all(
+      map(listReport, async (report) => {
+        const adminUpdate = Admin.findOne({
+          where: {
+            id: report.resolvedBy,
+          },
+          attributes: ["email", "name", "role"],
+          raw: true,
+        });
+
+        return {
+          ...report,
+          ...adminUpdate,
+        };
+      })
+    );
+
+    const eventTitle = await Events.findOne({
+      where: {
+        id: eventId,
+      },
+      raw: true,
+    });
+
+    return {
+      eventTitle,
+      reportDetails,
+    };
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
+};
+
+const listReportOfUser = async (userId, eventId) => {
+  try {
+    const listReportNotResolved = await listReportNotResolvedByUser(
+      userId,
+      eventId
+    );
+    const listReportResolved = await listReportResolvedByUser(userId, eventId);
+
+    return {
+      listReportNotResolved: listReportNotResolved,
+      listReportResolved: listReportResolved,
+    };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
+};
+
+const listReportNotResolved = async (ctx) => {
+  const userId = ctx?.user?.id;
+  try {
+    const adminRole = Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role"],
+      raw: true,
+    });
+
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+      const res = await Report.findAll({
+        where: {
+          isResolved: 0,
+        },
+        raw: true,
+      });
+
+      return res;
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
+  }
+};
+
+const listReportResolved = async (ctx) => {
+  const userId = ctx?.user?.id;
+  try {
+    const adminRole = Admin.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["role"],
+      raw: true,
+    });
+
+    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+      const res = await Report.findAll({
+        where: {
+          isResolved: 1,
+        },
+        raw: true,
+      });
+
+      return res;
+    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+      throw new BadRequestError({
+        field: "ctx",
+        message: "You dont have permission to access this information",
+      });
+    }
+  } catch (error) {
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
   }
 };
 
@@ -186,7 +323,10 @@ const listAllReportOfUser = async (userId) => {
 
     return res;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "userId",
+      message: "User is not found",
+    });
   }
 };
 
@@ -198,7 +338,7 @@ const listReportInEvent = async (eventId) => {
       },
     });
 
-    return { ...listReport };
+    return listReport;
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
@@ -252,6 +392,50 @@ const listReportedPost = async () => {
   }
 };
 
+const resolvedSimilarReport = async (
+  adminId,
+  userId,
+  eventId,
+  postId,
+  commentId
+) => {
+  try {
+    const listReportSimilar = await Report.findAll({
+      where: {
+        userId,
+        eventId,
+        postId,
+        commentId,
+      },
+      attributes: ["id"],
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listReportSimilar, async (report) => {
+        const update = await Report.update(
+          {
+            isResolved: 1,
+            resolvedBy: adminId,
+          },
+          {
+            where: {
+              id: report.id,
+            },
+          }
+        );
+      })
+    );
+
+    return { status: 200 };
+  } catch (error) {
+    throw new NotFoundError({
+      field: "id",
+      message: "Report is not found",
+    });
+  }
+};
+
 export default {
   checkReportInDay,
   createReport,
@@ -260,4 +444,8 @@ export default {
   listAllReportOfUser,
   listReportInEvent,
   listReportedPost,
+  listReportResolved,
+  listReportNotResolved,
+  listReportOfUser,
+  resolvedSimilarReport,
 };
