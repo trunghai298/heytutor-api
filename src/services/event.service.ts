@@ -642,9 +642,9 @@ const getEventByDuration = async () => {
 
     for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
-      const createDate = event.createdAt.getTime();
+      const startDate = event.startAt.getTime();
 
-      if (endDate - createDate < 1000 * 60 * 60 * 24 * 7) {
+      if (endDate - startDate < 1000 * 60 * 60 * 24 * 7) {
         mapShortTerm.push(event);
       }
     }
@@ -660,9 +660,9 @@ const getEventByDuration = async () => {
 
     for (const event of await listEvent) {
       const endDate = event.endAt.getTime();
-      const createDate = event.createdAt.getTime();
+      const startDate = event.startAt.getTime();
 
-      if (endDate - createDate > 1000 * 60 * 60 * 24 * 7) {
+      if (endDate - startDate > 1000 * 60 * 60 * 24 * 7) {
         mapLongTerm.push(event);
       }
     }
