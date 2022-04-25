@@ -6,7 +6,6 @@ interface EventInstance extends Model {
   createId: number;
   title: string;
   description: string;
-  viewCount: number;
   createdAt: Date;
   updatedAt: Date;
   endAt: Date;
@@ -28,9 +27,6 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   createId: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: true,
-  },
-  viewCount: {
-    type: DataTypes.INTEGER.UNSIGNED,
   },
   title: {
     type: DataTypes.STRING,
