@@ -223,6 +223,7 @@ const countPeopleCmtOfPost = async (postId) => {
     });
     return res;
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "postId",
       message: "Post has no comment.",
@@ -518,7 +519,6 @@ const supporterDetailOfPost = async (postId) => {
 };
 
 const getAllDetailsByPostId = async (postId) => {
-  console.log(postId, process.env.DB_NAME);
   try {
     const [commentCount, registers, supporters, postDetails] =
       await Promise.all([

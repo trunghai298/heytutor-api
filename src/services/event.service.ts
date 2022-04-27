@@ -230,6 +230,7 @@ const getPostOfEvent = async (params) => {
 
     return finalRes;
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "eventId",
       message: "Event has no post.",

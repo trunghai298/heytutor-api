@@ -42,7 +42,7 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     type: DataTypes.STRING,
   },
   comment: {
-    type: DataTypes.STRING,
+    type: DataTypes.TEXT,
   },
   likeCount: {
     type: DataTypes.INTEGER.UNSIGNED,
