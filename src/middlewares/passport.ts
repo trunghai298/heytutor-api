@@ -6,8 +6,8 @@ import { uuid } from "uuidv4";
 import User from "../models/user.model";
 
 const GOOGLE_CLIENT_ID =
-  "395446492480-n5g1o0qb93ibrulml67jhfa16r2bh9nc.apps.googleusercontent.com";
-const GOOGLE_CLIENT_SECRET = "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";
+  "580901820462-tceg8k5m6v39j2ppks4o42t9ktar2sgc.apps.googleusercontent.com";
+const GOOGLE_CLIENT_SECRET = "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";
 
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
