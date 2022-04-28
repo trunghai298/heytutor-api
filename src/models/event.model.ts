@@ -8,6 +8,7 @@ interface EventInstance extends Model {
   description: string;
   createdAt: Date;
   updatedAt: Date;
+  startAt: Date;
   endAt: Date;
   hashtag: string;
   content: string;
@@ -44,7 +45,9 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   },
   endAt: {
     type: DataTypes.DATE,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  startAt: {
+    type: DataTypes.DATE,
   },
   hashtag: {
     type: DataTypes.TEXT,
