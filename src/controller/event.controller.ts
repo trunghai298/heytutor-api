@@ -81,8 +81,8 @@ const getEventTitle = (req, res, next) => {
 const getListEventNotEnroll = (req, res, next) => {
   EventServices.getListEventNotEnroll(
     req.ctx,
-    req.query.limit,
-    req.query.offset
+    req.body.limit,
+    req.body.offset
   )
     .then((evt) => res.json(evt))
     .catch(next);
