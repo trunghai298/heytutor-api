@@ -191,6 +191,10 @@ const getPostOfEvent = async (params) => {
       map(res, async (post) => {
         let registerUsers = null;
         let supporterUsers = null;
+        const postDetail = await Post.findOne({
+          where: { id: post.postId },
+          raw: true,
+        });
 
         if (post.registerId) {
           registerUsers = await Promise.all(
@@ -220,12 +224,13 @@ const getPostOfEvent = async (params) => {
             })
           );
         }
-        return { ...post, registerUsers, supporterUsers };
+        return { ...post, postData: postDetail, registerUsers, supporterUsers };
       })
     );
 
     return finalRes;
   } catch (error) {
+    console.log(error);
     throw new NotFoundError({
       field: "eventId",
       message: "Event has no post.",

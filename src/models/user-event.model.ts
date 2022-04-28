@@ -8,7 +8,6 @@ interface UserEventInstance extends Model {
   eventId: number;
   isSupporter: boolean;
   isRequestor: boolean;
-  adminId: any;
 }
 
 const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
