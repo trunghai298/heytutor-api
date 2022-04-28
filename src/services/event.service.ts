@@ -18,12 +18,11 @@ import Admin from "../models/admin.model";
  * To create a new event
  */
 const create = async (ctx, payload) => {
-  console.log(ctx);
   try {
     const event = await Event.create(payload);
-
     return event;
   } catch (error) {
+    console.log(error);
     throw new BadRequestError({
       field: "eventId",
       message: "Failed to create this item.",

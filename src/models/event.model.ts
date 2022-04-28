@@ -42,6 +42,9 @@ const Event = MySQLClient.define<EventInstance>("Event", {
     type: DataTypes.DATE,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
+  startAt: {
+    type: DataTypes.DATE,
+  },
   endAt: {
     type: DataTypes.DATE,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
@@ -65,7 +68,6 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   },
   adminId: {
     type: DataTypes.JSON,
-    allowNull: false,
     defaultValue: null,
   },
 });
