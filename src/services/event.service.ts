@@ -566,7 +566,7 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
           attributes: ["id"],
           raw: true,
         });
-        return eventData;
+          return eventData;
       })
     );
 
@@ -583,7 +583,7 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
       })
     );
 
-    return listEventNotEnroll;
+    return compact(listEventNotEnroll);
 
     // let difference = mapEventId.filter((x) => !mapEventUserId.includes(x));
 
