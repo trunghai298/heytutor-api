@@ -11,7 +11,6 @@ export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
 export const login = async (params: any, ctx: any) => {
   const { email, password } = params;
-  console.log("ctx", ctx);
   if (!email || !password) {
     throw new BadRequestError({
       field: "email",
