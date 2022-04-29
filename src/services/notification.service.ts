@@ -6,7 +6,7 @@ import Notification from "../models/notification.model";
  */
 const listNotification = async (ctx) => {
   const userId = ctx?.user?.id;
-
+  console.log("ctx", ctx);
   try {
     const res = await Notification.findAll({
       where: { userId },
