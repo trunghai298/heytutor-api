@@ -99,9 +99,10 @@ app.get("/fap-data", async (req, res, next) => {
 process.env.NODE_ENV !== NodeEnv.Test && app.use(initLogger());
 app.use(initSecurity());
 
+app.get("/", (req, res) => res.send("Hello World"));
+
 // JWT verification
 app.use(authenticateJWT());
 Route(app);
-app.get("/", (req, res) => res.send("Hello World"));
 
 export default app;
