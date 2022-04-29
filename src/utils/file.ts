@@ -29,7 +29,7 @@ export const uploadFile = async (
   new Promise((resolve, reject) => {
     clientS3.putObject(
       {
-        Bucket: "heytutor2",
+        Bucket: "heytutor-s3",
         Key: bucketPath,
         Body: buffer,
         ACL: "public-read",
@@ -37,7 +37,7 @@ export const uploadFile = async (
       },
       (err, res) => (err ? reject(err) : resolve(res))
     );
-    console.log("completed  " + "heytutor2" + "/" + bucketPath);
+    console.log("completed  " + "heytutor-s3" + "/" + bucketPath);
   });
 
 export default {
