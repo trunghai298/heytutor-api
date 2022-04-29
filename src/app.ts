@@ -32,6 +32,9 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(initPassport());
 
+require("dotenv").config();
+console.log(process.env);
+
 const compare = require("tsscmp");
 const auth = require("basic-auth");
 
@@ -98,7 +101,6 @@ app.use(initSecurity());
 
 // JWT verification
 // app.use(authenticateJWT());
-console.log(process.env);
 Route(app);
 app.get("/", (req, res) => res.send("Hello World"));
 
