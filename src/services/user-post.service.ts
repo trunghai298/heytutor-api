@@ -10,7 +10,8 @@ import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
-import usersService from "./users.service";
+import UsersService from "./users.service";
+import ActivityServices from "./activity.service";
 
 /**
  * To create a new term
@@ -247,6 +248,14 @@ const removeRegister = async (ctx, payload) => {
       attributes: ["name"],
       raw: true,
     });
+
+    const log = await ActivityServices.create({
+      userId,
+      username: user.name,
+      action: "Remove register",
+      content: `userId: ${userId} remove userId: ${registerId} from register list of postId: ${postId}`,
+    });
+
     const payload = {
       userId: registerId,
       postId: postId,
@@ -256,7 +265,7 @@ const removeRegister = async (ctx, payload) => {
       fromUsername: user.name,
     };
     await NotificationService.create(payload);
-    return "Remove Register Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -288,6 +297,14 @@ const cancelRegister = async (ctx, payload) => {
       attributes: ["name"],
       raw: true,
     });
+
+    const log = await ActivityServices.create({
+      userId,
+      username: user.name,
+      action: "Cancel register",
+      content: `userId: ${userId} cancel register from postId: ${postId} of userId: ${ownerId}`,
+    });
+
     const payload = {
       userId: ownerId,
       postId: postId,
@@ -297,7 +314,7 @@ const cancelRegister = async (ctx, payload) => {
       fromUsername: user.name,
     };
     await NotificationService.create(payload);
-    return "Cancel Register Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -340,6 +357,14 @@ const addSupporter = async (ctx, payload) => {
         attributes: ["name"],
         raw: true,
       });
+
+      const log = await ActivityServices.create({
+        userId,
+        username: user.name,
+        action: "Confirm register",
+        content: `userId: ${userId} confirm register for request from ${registerId} of postId: ${postId}`,
+      });
+
       await NotificationService.create({
         userId: registerId,
         postId,
@@ -347,7 +372,7 @@ const addSupporter = async (ctx, payload) => {
         fromUserId: userId,
         fromUsername: user.name,
       });
-      return "Accept Supporter Success!!!";
+      return {status: 200};
     } else {
       return { status: "fail" };
     }
@@ -426,7 +451,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(registering, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          usersService.getUserData(post.userId),
+          UsersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -446,7 +471,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(supporting, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          usersService.getUserData(post.userId),
+          UsersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -498,7 +523,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
         const postData = await getPost(post.postId);
         const registerUsers = await Promise.all(
           map(post.registerId, async (id) => {
-            const registerUser = await usersService.getUserData(id);
+            const registerUser = await UsersService.getUserData(id);
             return {
               id,
               username: registerUser.name,
@@ -527,6 +552,9 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
       where: {
         userId,
         registerId: {
+          [Op.eq]: null,
+        },
+        supporterId: {
           [Op.eq]: null,
         },
       },
@@ -576,7 +604,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
         });
         const supporterUsers = await Promise.all(
           map(post.supporterId, async (id) => {
-            const userData = await usersService.getUserData(id);
+            const userData = await UsersService.getUserData(id);
             return {
               id: userData.id,
               username: userData.name,
@@ -664,8 +692,8 @@ const listPostDone = async (userId, limit, offset) => {
   }
 };
 
-const getListMyRequests = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id;
+const getListMyRequests = async (userId, limit, offset) => {
+  // const userId = ctx?.user?.id;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 
@@ -689,11 +717,11 @@ const getListMyRequests = async (ctx, limit, offset) => {
     const postDone = await listPostDone(userId, limitValue, offsetValue);
 
     return {
-      postHasRegister,
-      postHasNoRegister,
-      postHasSupporter,
-      postOnEvent,
-      postDone,
+      postHasRegister: postHasRegister,
+      postHasNoRegister: postHasNoRegister,
+      postHasSupporter: postHasSupporter,
+      postOnEvent: postOnEvent,
+      postDone: postDone,
     };
   } catch (error) {
     throw new BadRequestError({

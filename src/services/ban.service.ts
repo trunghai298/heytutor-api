@@ -7,6 +7,7 @@ import NotificationService from "./notification.service";
 import Admin from "../models/admin.model";
 import ActivityServices from "./activity.service";
 import ReportService from "./report.service";
+import UserPermission from "../models/user-permission.model";
 
 /**
  * To create a new class
@@ -67,10 +68,43 @@ const createBan = async (ctx, payload) => {
 
       let notiType;
       if (type.includes("1-")) {
+        const permission = await UserPermission.update(
+          {
+            canPost: 0,
+          },
+          {
+            where: {
+              userId: userId,
+              eventId: eventId,
+            },
+          }
+        );
         notiType = NOTI_TYPE.BanPost;
       } else if (type.includes("2-")) {
+        const permission = await UserPermission.update(
+          {
+            canRegister: 0,
+          },
+          {
+            where: {
+              userId: userId,
+              eventId: eventId,
+            },
+          }
+        );
         notiType = NOTI_TYPE.BanRegister;
       } else if (type.includes("3-")) {
+        const permission = await UserPermission.update(
+          {
+            canComment: 0,
+          },
+          {
+            where: {
+              userId: userId,
+              eventId: eventId,
+            },
+          }
+        );
         notiType = NOTI_TYPE.BanComment;
       }
 

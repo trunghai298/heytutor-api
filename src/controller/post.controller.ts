@@ -43,7 +43,7 @@ const getListPostByFilter = (req, res, next) => {
 };
 
 const getPostDetailByPostId = (req, res, next) => {
-  PostServices.getAllDetailsByPostId(req.params.postId)
+  PostServices.getAllDetailsByPostId(req.body.postId)
     .then((posts) => res.json(posts))
     .catch(next);
 };
