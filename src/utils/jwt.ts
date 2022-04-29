@@ -1,6 +1,7 @@
 import jwt from "jsonwebtoken";
 
-export const JWT_SECRET: string = process.env.JWT_SECRET || "";
+export const JWT_SECRET: string =
+  process.env.JWT_SECRET || "heytutor-jwt-private";
 
 export const sign = (payload: any, opts: any = {}) => {
   const options = {
