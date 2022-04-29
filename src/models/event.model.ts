@@ -49,9 +49,6 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   endAt: {
     type: DataTypes.DATE,
   },
-  startAt: {
-    type: DataTypes.DATE,
-  },
   hashtag: {
     type: DataTypes.TEXT,
   },
