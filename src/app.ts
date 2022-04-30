@@ -23,7 +23,7 @@ import Student from "./models/student.model";
 import Class from "./models/class.model";
 import Course from "./models/course.model";
 import Department from "./models/department.model";
-import Event from "./models/event.model";
+import User from "./models/user.model";
 const app = express();
 
 // Third party middlewares
@@ -69,7 +69,7 @@ app.post("/auth/admin", AuthController.adminLogin);
 
 const resetDb = async () => {
   try {
-    await Event.sync({ force: true });
+    // await User.sync({ force: true });
   } catch (error) {
     console.log(error);
   }

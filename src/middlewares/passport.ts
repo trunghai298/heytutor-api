@@ -7,7 +7,6 @@ import User from "../models/user.model";
 
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID;
 const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET;
-console.log(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET);
 var GoogleStrategy = require("passport-google-oauth20").Strategy;
 
 export const initPassport = () => {
@@ -32,10 +31,15 @@ export const initPassport = () => {
       {
         clientID: GOOGLE_CLIENT_ID,
         clientSecret: GOOGLE_CLIENT_SECRET,
-        callbackURL: "/auth/google/callback",
+        callbackURL: `http://localhost:3001/auth/google/callback`,
       },
       async (accessToken, refreshToken, profile, cb) => {
-        console.log("accessToken", accessToken);
+        const profileJson = profile._json;
+
+        if (profileJson.hd !== "fpt.edu.vn") {
+          console.log("Access denied");
+        }
+
         try {
           const user = await MySQLClient.transaction(async (transaction) => {
             const user = await User.findOne({
@@ -45,11 +49,13 @@ export const initPassport = () => {
             if (!user) {
               return User.create(
                 {
-                  id: uuid(),
-                  isAdmin: 0,
-                  userName: profile.displayName,
-                  googleId: profile.id,
-                  maxTasks: 50,
+                  email: profileJson.email,
+                  password: 1,
+                  avatar: profileJson.picture,
+                  name: profileJson.name,
+                  googleId: profileJson.sub,
+                  stdId: profileJson.email.split("@")[0],
+                  firstTimeLogin: 1,
                 },
                 { transaction }
               );

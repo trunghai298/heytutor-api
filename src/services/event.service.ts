@@ -539,7 +539,7 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
   const userId = ctx?.user?.id;
   const today = new Date(Date.now());
   try {
-    const eventNotEnroll = await UserEvent.findAll({
+    const eventsNotEnroll = await UserEvent.findAll({
       where: {
         userId: {
           [Op.ne]: userId,
@@ -549,28 +549,12 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
         [Sequelize.fn("DISTINCT", Sequelize.col("eventId")), "eventId"],
       ],
       raw: true,
-      limit: parseInt(limit) || 3,
+      limit: parseInt(limit) || 10,
       offset: parseInt(offset) || 0,
     });
 
-    const listEventActive = await Promise.all(
-      map(eventNotEnroll, async (event) => {
-        const eventData = await Event.findOne({
-          where: {
-            id: event.eventId,
-            endAt: {
-              [Op.gt]: today,
-            },
-          },
-          attributes: ["id"],
-          raw: true,
-        });
-          return eventData;
-      })
-    );
-
     const listEventNotEnroll = await Promise.all(
-      map(listEventActive, async (event) => {
+      map(eventsNotEnroll, async (event) => {
         if (event !== null) {
           const eventDetail = await getEventDetail(event.id);
           const eventUser = await getEventUser(event.id);

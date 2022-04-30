@@ -679,8 +679,8 @@ const listPostDone = async (userId, limit, offset) => {
   }
 };
 
-const getListMyRequests = async (userId, limit, offset) => {
-  // const userId = ctx?.user?.id;
+const getListMyRequests = async (ctx, limit, offset) => {
+  const userId = ctx?.user?.id;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 

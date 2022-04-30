@@ -7,7 +7,7 @@ const getPostStats = (req, res, next) => {
 };
 
 const getListMyRequests = (req, res, next) => {
-  UserPostServices.getListMyRequests(req.body.userId, req.query.limit, req.query.offset)
+  UserPostServices.getListMyRequests(req.ctx, req.query.limit, req.query.offset)
     .then((result) => res.json(result))
     .catch(next);
 };

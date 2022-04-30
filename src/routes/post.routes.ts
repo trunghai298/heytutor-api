@@ -6,6 +6,6 @@ export default (app) => {
     .put("/update-post", PostController.edit)
     .delete("/post/:id", PostController.deletePost)
     .get("/get-list-post-by-filter", PostController.getListPostByFilter)
-    .get("/get-post-detail", PostController.getPostDetailByPostId)
+    .get("/get-post-detail/:postId", PostController.getPostDetailByPostId)
     .get("/get-list-hashtag", PostController.getListHashtag);
 };
