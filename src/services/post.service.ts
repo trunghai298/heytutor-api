@@ -98,11 +98,11 @@ const update = async (payload) => {
 /**
  * To edit an existed post
  */
-const edit = async (payload) => {
-  const transaction = await MySQLClient.transaction();
+const edit = async (ctx, payload) => {
+  const { user } = ctx;
   try {
-    const { postId, content } = payload;
-    const post = await Post.findOne({ where: { id: postId } });
+    const { postId, title, content, deadline } = payload;
+    const post = await Post.findOne({ where: { id: postId }, raw: true });
 
     if (!post) {
       throw new NotFoundError({
@@ -111,14 +111,18 @@ const edit = async (payload) => {
       });
     }
 
-    const updatedPost = await Post.update(
-      { content },
-      { where: { id: postId }, transaction }
-    );
-    await transaction.commit();
-    return updatedPost;
+    await Post.update({ title, content, deadline }, { where: { id: postId } });
+
+    await activityService.create({
+      userId: user.id,
+      username: user.name,
+      action: "edit_post",
+      content: `chỉnh sửa bài đăng ${post.id}`,
+    });
+
+    return Post.findOne({ where: { id: postId }, raw: true });
   } catch (error) {
-    await transaction.rollback();
+    console.log(error);
     throw new BadRequestError({
       field: "postId",
       message: "Failed to edit this post.",

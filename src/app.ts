@@ -33,6 +33,7 @@ app.use(bodyParser.json());
 app.use(initPassport());
 
 require("dotenv").config();
+console.log(`Connected to ${process.env.DB_HOST}`);
 
 const compare = require("tsscmp");
 const auth = require("basic-auth");

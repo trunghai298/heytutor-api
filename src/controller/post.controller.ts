@@ -19,7 +19,7 @@ const listAllPost = (req, res, next) => {
 };
 
 const edit = (req, res, next) => {
-  PostServices.edit(req.body)
+  PostServices.edit(req.ctx, req.body)
     .then((post) => res.json(post))
     .catch(next);
 };
