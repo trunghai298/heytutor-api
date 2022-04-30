@@ -217,13 +217,6 @@ const updateBan = async (ctx, payload) => {
           }
         );
 
-        const log = await ActivityServices.create({
-          userId: adminId,
-          userName: adminInfo.name,
-          action: type,
-          content: `update ban user ${userId} type: ${type} by ${adminId}`,
-        });
-
         let notiType;
         if (type.includes("1-")) {
           notiType = NOTI_TYPE.UpdateBanPost;
@@ -232,6 +225,13 @@ const updateBan = async (ctx, payload) => {
         } else if (type.includes("3-")) {
           notiType = NOTI_TYPE.UpdateBanComment;
         }
+
+        const log = await ActivityServices.create({
+          userId: adminId,
+          userName: adminInfo.name,
+          action: notiType,
+          content: `update ban user ${userId} type: ${type} by ${adminId}`,
+        });
 
         const notification = {
           userId: userId,

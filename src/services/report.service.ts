@@ -9,6 +9,7 @@ import { NOTI_TYPE } from "../constants/notification";
 import User from "../models/user.model";
 import Post from "../models/post.model";
 import Admin from "../models/admin.model";
+import ActivityServices from "./activity.service";
 
 const checkReportInDay = async () => {
   const lastMidnight = new Date();
@@ -105,7 +106,7 @@ const createReport = async (ctx, payload) => {
       });
     }
     const user = await User.findOne({
-      where: { userId },
+      where: { reporterId },
       attributes: ["name"],
       raw: true,
     });
@@ -120,24 +121,35 @@ const createReport = async (ctx, payload) => {
     };
 
     let results;
+    let notiType;
     if (postId === null && commentId === null) {
+      notiType = NOTI_TYPE.ReportUser;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportUser,
+        notificationType: notiType,
       };
     } else if (postId !== null && commentId === null) {
+      notiType = NOTI_TYPE.ReportPost;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportPost,
+        notificationType: notiType,
       };
     } else if (postId !== null && commentId !== null) {
+      notiType = NOTI_TYPE.ReportComment;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportComment,
+        notificationType: notiType,
       };
     }
 
-    await NotificationService.create(payload);
+    const log = await ActivityServices.create({
+      userId,
+      reporterId,
+      action: notiType,
+      content: `userId ${userId} un join event ${eventId}`,
+    });
+
+    await NotificationService.create(results);
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({

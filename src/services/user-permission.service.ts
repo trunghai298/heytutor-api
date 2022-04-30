@@ -54,7 +54,7 @@ const initPermission = async () => {
     const log = await ActivityServices.create({
       userId: 5,
       username: "superadmin",
-      action: "init_default_permission",
+      action: NOTI_TYPE.InitPermission,
       content: "SuperAdmin assign default permission for all users",
     });
   } catch (error) {
@@ -139,7 +139,7 @@ const checkEventPermission = async () => {
     const log = await ActivityServices.create({
       userId: 5,
       username: "superadmin",
-      action: "daily_event_permission",
+      action: NOTI_TYPE.CheckEventPermission,
       content: `SuperAdmin change permission for all users in list events ${listEvent} at ${today}`,
     });
 
@@ -166,7 +166,7 @@ const createPermission = async (payload) => {
     const log = await ActivityServices.create({
       userId: 5,
       username: "superadmin",
-      action: "create_permission",
+      action: NOTI_TYPE.NewPermission,
       content: `SuperAdmin change permission for userId ${userId} in event ${eventId}`,
     });
 
@@ -302,10 +302,7 @@ const checkUnBan = async () => {
     const res = await Promise.all(
       map(listBan, async (ban) => {
         if (
-          ban.type === "1-1" ||
-          ban.type === "1-2" ||
-          ban.type === "1-3" ||
-          ban.type === "1-4"
+          ban.type.includes("1-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -329,15 +326,13 @@ const checkUnBan = async () => {
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanPost,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
         } else if (
-          ban.type === "2-1" ||
-          ban.type === "2-2" ||
-          ban.type === "2-3" ||
-          ban.type === "2-4"
+          ban.type.includes("2-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -361,15 +356,13 @@ const checkUnBan = async () => {
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanRegister,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
         } else if (
-          ban.type === "3-1" ||
-          ban.type === "3-2" ||
-          ban.type === "3-3" ||
-          ban.type === "3-4"
+          ban.type.includes("3-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -393,6 +386,7 @@ const checkUnBan = async () => {
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanComment,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };

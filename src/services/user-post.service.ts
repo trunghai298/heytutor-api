@@ -200,20 +200,28 @@ const addRegister = async (ctx, postId) => {
         attributes: ["name"],
         raw: true,
       });
+
+      const log = await ActivityServices.create({
+        userId,
+        username: user.name,
+        action: NOTI_TYPE.RequestRegister,
+        content: `userId: ${userId} register support for postId: ${postId} of userId: ${userPost.userId}`,
+      });
+
       const payload = {
         userId: userPost.userId,
-        postId: userPost.postId,
+        postId: postId,
         eventId: userPost.eventId,
         notificationType: NOTI_TYPE.RequestRegister,
         fromUserId: userId,
         fromUsername: user.name,
       };
       await NotificationService.create(payload);
-      return "Register Success!!!";
+      return { status: 200 };
     } else {
       throw new BadRequestError({
         field: "id",
-        message: "Bạn đang bị cấm đăng kí bài!!!",
+        message: "User is currently ban register support!!!",
       });
     }
   } catch (error) {
@@ -252,7 +260,7 @@ const removeRegister = async (ctx, payload) => {
     const log = await ActivityServices.create({
       userId,
       username: user.name,
-      action: "Remove register",
+      action: NOTI_TYPE.RemoveRegister,
       content: `userId: ${userId} remove userId: ${registerId} from register list of postId: ${postId}`,
     });
 
@@ -301,7 +309,7 @@ const cancelRegister = async (ctx, payload) => {
     const log = await ActivityServices.create({
       userId,
       username: user.name,
-      action: "Cancel register",
+      action: NOTI_TYPE.CancelRegister,
       content: `userId: ${userId} cancel register from postId: ${postId} of userId: ${ownerId}`,
     });
 
@@ -361,7 +369,7 @@ const addSupporter = async (ctx, payload) => {
       const log = await ActivityServices.create({
         userId,
         username: user.name,
-        action: "Confirm register",
+        action: NOTI_TYPE.AcceptSupporter,
         content: `userId: ${userId} confirm register for request from ${registerId} of postId: ${postId}`,
       });
 
@@ -372,7 +380,7 @@ const addSupporter = async (ctx, payload) => {
         fromUserId: userId,
         fromUsername: user.name,
       });
-      return {status: 200};
+      return { status: 200 };
     } else {
       return { status: "fail" };
     }

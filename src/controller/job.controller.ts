@@ -9,12 +9,12 @@ const dailyCheck = () => {
       await UserPermissionService.checkUnBan();
       console.log("UserPermissionService checkUnBan success!");
     });
-    cron.schedule("0 */5 * * *", async function () {
+    cron.schedule("0 */2 * * *", async function () {
       await UserPermissionService.checkEventPermission();
       console.log("UserPermissionService checkEventPermission success!");
     });
   } catch (error) {
-    console.log( "alo", error);
+    console.log(error);
   }
 };
 
