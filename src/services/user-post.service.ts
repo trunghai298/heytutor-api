@@ -1,4 +1,3 @@
-import { create } from "./comment.service";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
@@ -10,7 +9,7 @@ import Ranking from "../models/ranking.model";
 import userPermissionService from "./user-permission.service";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
-import usersService from "./users.service";
+import UsersService from "./users.service";
 import activityService from "./activity.service";
 
 /**
@@ -198,18 +197,18 @@ const addRegister = async (ctx, postId) => {
 
       const payload = {
         userId: userPost.userId,
-        postId: userPost.postId,
+        postId: postId,
         eventId: userPost.eventId,
         notificationType: NOTI_TYPE.RequestRegister,
         fromUserId: user.id,
         fromUsername: user.name,
       };
       await NotificationService.create(payload);
-      return "Register Success!!!";
+      return { status: 200 };
     } else {
       throw new BadRequestError({
         field: "id",
-        message: "Bạn đang bị cấm đăng kí bài!!!",
+        message: "User is currently ban register support!!!",
       });
     }
   } catch (error) {
@@ -301,7 +300,7 @@ const cancelRegister = async (ctx, payload) => {
       fromUsername: user.name,
     };
     await NotificationService.create(payload);
-    return "Cancel Register Success!!!";
+    return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
@@ -441,7 +440,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(registering, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          usersService.getUserData(post.userId),
+          UsersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -461,7 +460,7 @@ const listRegistedRequests = async (ctx, params) => {
       map(supporting, async (post) => {
         const [postData, userData] = await Promise.all([
           getPost(post.postId),
-          usersService.getUserData(post.userId),
+          UsersService.getUserData(post.userId),
         ]);
 
         delete postData.id;
@@ -505,15 +504,13 @@ const listPostHasRegister = async (userId, limit, offset) => {
         },
       },
       raw: true,
-      limit,
-      offset,
     });
     const res = await Promise.all(
       map(postHasRegister, async (post) => {
         const postData = await getPost(post.postId);
         const registerUsers = await Promise.all(
           map(post.registerId, async (id) => {
-            const registerUser = await usersService.getUserData(id);
+            const registerUser = await UsersService.getUserData(id);
             return {
               id,
               username: registerUser.name,
@@ -542,6 +539,9 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
       where: {
         userId,
         registerId: {
+          [Op.eq]: null,
+        },
+        supporterId: {
           [Op.eq]: null,
         },
       },
@@ -591,7 +591,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
         });
         const supporterUsers = await Promise.all(
           map(post.supporterId, async (id) => {
-            const userData = await usersService.getUserData(id);
+            const userData = await UsersService.getUserData(id);
             return {
               id: userData.id,
               username: userData.name,
@@ -679,8 +679,8 @@ const listPostDone = async (userId, limit, offset) => {
   }
 };
 
-const getListMyRequests = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id;
+const getListMyRequests = async (userId, limit, offset) => {
+  // const userId = ctx?.user?.id;
   const limitValue = limit || 100;
   const offsetValue = offset || 0;
 
@@ -704,11 +704,11 @@ const getListMyRequests = async (ctx, limit, offset) => {
     const postDone = await listPostDone(userId, limitValue, offsetValue);
 
     return {
-      postHasRegister,
-      postHasNoRegister,
-      postHasSupporter,
-      postOnEvent,
-      postDone,
+      postHasRegister: postHasRegister,
+      postHasNoRegister: postHasNoRegister,
+      postHasSupporter: postHasSupporter,
+      postOnEvent: postOnEvent,
+      postDone: postDone,
     };
   } catch (error) {
     throw new BadRequestError({

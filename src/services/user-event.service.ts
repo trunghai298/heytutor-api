@@ -64,7 +64,6 @@ const joinEvent = async (ctx, payload) => {
 
     return { status: 200 };
   } catch (error) {
-    console.log(error);
     throw new BadRequestError({
       field: "userId-eventId",
       message: "Failed to create this item.",

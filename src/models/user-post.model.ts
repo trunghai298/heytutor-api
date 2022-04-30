@@ -23,36 +23,45 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   supporterId: {
+    allowNull: true,
     type: DataTypes.JSON,
     defaultValue: null,
   },
   registerId: {
+    allowNull: true,
     type: DataTypes.JSON,
     defaultValue: null,
   },
   postId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: null,
   },
   isPending: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
-    defaultValue: 0,
+    defaultValue: 1,
   },
   isActive: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
   isDone: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
   isConfirmed: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },

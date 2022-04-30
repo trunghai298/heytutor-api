@@ -30,7 +30,8 @@ const createAdmin = async () => {
 };
 
 const addCollaborator = async (ctx, payload) => {
-  const { email, password, name, role, permission } = payload;
+  const { email, password, name, role, permission, address, phone, facebook } =
+    payload;
   const userId = ctx?.user?.id;
   try {
     const adminInfo = Admin.findOne({
@@ -53,6 +54,9 @@ const addCollaborator = async (ctx, payload) => {
           name,
           role,
           permission,
+          address,
+          phone,
+          facebook,
           updatedBy: userId,
           addBy: userId,
         });
@@ -60,8 +64,8 @@ const addCollaborator = async (ctx, payload) => {
         const log = await ActivityServices.create({
           userId,
           username: adminInfo.name,
-          action: "add",
-          content: `new collaborator ${name}`,
+          action: NOTI_TYPE.NewCollab,
+          content: `adminId ${userId} add new collaborator ${name}`,
         });
 
         const id = await Admin.count();
@@ -94,14 +98,15 @@ const addCollaborator = async (ctx, payload) => {
 };
 
 const updateCollaborator = async (ctx, payload) => {
-  const { id, email, name, role, permission } = payload;
+  const { id, email, name, role, permission, address, phone, facebook } =
+    payload;
   const userId = ctx?.user?.id;
   try {
     const adminInfo = Admin.findOne({
       where: {
         id: userId,
       },
-      attributes: ["role"],
+      attributes: ["role", "name"],
       raw: true,
     });
 
@@ -111,6 +116,9 @@ const updateCollaborator = async (ctx, payload) => {
           name,
           role,
           permission,
+          address,
+          phone,
+          facebook,
           updatedBy: userId,
         },
         {
@@ -122,8 +130,8 @@ const updateCollaborator = async (ctx, payload) => {
       const log = await ActivityServices.create({
         userId,
         username: adminInfo.name,
-        action: "update",
-        content: `collaborator ${name}`,
+        action: NOTI_TYPE.UpdateCollab,
+        content: `adminId ${userId} update collaboratorId ${id}`,
       });
 
       const payload = {
@@ -133,9 +141,7 @@ const updateCollaborator = async (ctx, payload) => {
         fromUsername: adminInfo.name,
       };
       await NotificationService.create(payload);
-      return {
-        log,
-      };
+      return { status: 200 };
     } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",

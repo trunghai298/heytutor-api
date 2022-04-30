@@ -8,6 +8,7 @@ import { BadRequestError } from "../utils/errors";
 const { Op } = require("sequelize");
 import { NOTI_TYPE } from "../constants/notification";
 import NotificationService from "./notification.service";
+import ActivityServices from "./activity.service";
 
 //Run first time to get all permission.
 const initPermission = async () => {
@@ -16,8 +17,6 @@ const initPermission = async () => {
       attributes: ["id"],
       raw: true,
     });
-
-    console.log("123");
 
     const userPermission = await Promise.all(
       map(listUser, async (user) => {
@@ -32,8 +31,6 @@ const initPermission = async () => {
         await createPermission(payload);
       })
     );
-
-    console.log("456");
 
     const listUserEvent = await UserEvent.findAll({
       attributes: ["userId", "eventId"],
@@ -53,6 +50,13 @@ const initPermission = async () => {
         await createPermission(payload);
       })
     );
+
+    const log = await ActivityServices.create({
+      userId: 5,
+      username: "superadmin",
+      action: NOTI_TYPE.InitPermission,
+      content: "SuperAdmin assign default permission for all users",
+    });
   } catch (error) {
     return error;
   }
@@ -100,7 +104,28 @@ const checkUserRegisterPermission = async (userId, eventId) => {
   }
 };
 
-// Run 1 time per days
+const checkUserCommentPermission = async (userId, eventId) => {
+  try {
+    const canPost = await UserPermission.findOne({
+      where: {
+        userId: userId,
+        eventId: eventId,
+      },
+      attributes: ["canRegister"],
+      raw: true,
+    });
+
+    if (canPost.canComment === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
+// Run every 2 hours
 const checkEventPermission = async () => {
   const today = new Date(Date.now());
 
@@ -132,9 +157,19 @@ const checkEventPermission = async () => {
       })
     );
 
+    const log = await ActivityServices.create({
+      userId: 5,
+      username: "superadmin",
+      action: NOTI_TYPE.CheckEventPermission,
+      content: `SuperAdmin change permission for all users in list events ${listEvent} at ${today}`,
+    });
+
     return { status: 200 };
   } catch (error) {
-    return error;
+    throw new BadRequestError({
+      field: "eventId",
+      message: "Cannot find this event",
+    });
   }
 };
 
@@ -149,117 +184,127 @@ const createPermission = async (payload) => {
       eventId: eventId,
     });
 
-    return { status: 200 };
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-const checkBan = async () => {
-  const thirtyMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
-  const currentTime = new Date(Date.now());
-  try {
-    const listBan = await Ban.findAll({
-      where: {
-        banDate: {
-          [Op.gt]: thirtyMinutesAgo,
-          [Op.lt]: currentTime,
-        },
-      },
-      raw: true,
+    const log = await ActivityServices.create({
+      userId: 5,
+      username: "superadmin",
+      action: NOTI_TYPE.NewPermission,
+      content: `SuperAdmin change permission for userId ${userId} in event ${eventId}`,
     });
 
-    const res = await Promise.all(
-      map(listBan, async (ban) => {
-        if (
-          ban.type === "1-1" ||
-          ban.type === "1-2" ||
-          ban.type === "1-3" ||
-          ban.type === "1-4"
-        ) {
-          const permission = await UserPermission.update(
-            {
-              canPost: 0,
-            },
-            {
-              where: {
-                userId: ban.userId,
-                eventId: ban.eventId,
-              },
-            }
-          );
-
-          const payload = {
-            userId: ban.userId,
-            notificationType: NOTI_TYPE.BanPost,
-            fromUser: 5,
-            fromUserName: "Trung Hai",
-          };
-          await NotificationService.create(payload);
-        } else if (
-          ban.type === "2-1" ||
-          ban.type === "2-2" ||
-          ban.type === "2-3" ||
-          ban.type === "2-4"
-        ) {
-          const permission = await UserPermission.update(
-            {
-              canRegister: 0,
-            },
-            {
-              where: {
-                userId: ban.userId,
-                eventId: ban.eventId,
-              },
-            }
-          );
-
-          const payload = {
-            userId: ban.userId,
-            notificationType: NOTI_TYPE.BanRegister,
-            fromUser: 5,
-            fromUserName: "Trung Hai",
-          };
-          await NotificationService.create(payload);
-        } else if (
-          ban.type === "3-1" ||
-          ban.type === "3-2" ||
-          ban.type === "3-3" ||
-          ban.type === "3-4"
-        ) {
-          const permission = await UserPermission.update(
-            {
-              canComment: 0,
-            },
-            {
-              where: {
-                userId: ban.userId,
-                eventId: ban.eventId,
-              },
-            }
-          );
-
-          const payload = {
-            userId: ban.userId,
-            notificationType: NOTI_TYPE.BanComment,
-            fromUser: 5,
-            fromUserName: "Trung Hai",
-          };
-          await NotificationService.create(payload);
-        }
-      })
-    );
-
     return { status: 200 };
   } catch (error) {
-    console.log(error);
-
     throw new BadRequestError({
-      field: "id",
+      field: "eventId-userId",
       message: "Failed to create this item.",
     });
   }
 };
+
+// const checkBan = async () => {
+//   const thirtyMinutesAgo = new Date(Date.now() - 10 * 60 * 1000);
+//   const currentTime = new Date(Date.now());
+//   try {
+//     const listBan = await Ban.findAll({
+//       where: {
+//         banDate: {
+//           [Op.gt]: thirtyMinutesAgo,
+//           [Op.lt]: currentTime,
+//         },
+//       },
+//       raw: true,
+//     });
+
+//     const res = await Promise.all(
+//       map(listBan, async (ban) => {
+//         if (
+//           ban.type === "1-1" ||
+//           ban.type === "1-2" ||
+//           ban.type === "1-3" ||
+//           ban.type === "1-4"
+//         ) {
+//           const permission = await UserPermission.update(
+//             {
+//               canPost: 0,
+//             },
+//             {
+//               where: {
+//                 userId: ban.userId,
+//                 eventId: ban.eventId,
+//               },
+//             }
+//           );
+          
+//           const payload = {
+//             userId: ban.userId,
+//             notificationType: NOTI_TYPE.UpdateBanPost,
+//             fromUser: 5,
+//             fromUserName: "Trung Hai",
+//           };
+//           await NotificationService.create(payload);
+//         } else if (
+//           ban.type === "2-1" ||
+//           ban.type === "2-2" ||
+//           ban.type === "2-3" ||
+//           ban.type === "2-4"
+//         ) {
+//           const permission = await UserPermission.update(
+//             {
+//               canRegister: 0,
+//             },
+//             {
+//               where: {
+//                 userId: ban.userId,
+//                 eventId: ban.eventId,
+//               },
+//             }
+//           );
+
+//           const payload = {
+//             userId: ban.userId,
+//             notificationType: NOTI_TYPE.BanRegister,
+//             fromUser: 5,
+//             fromUserName: "Trung Hai",
+//           };
+//           await NotificationService.create(payload);
+//         } else if (
+//           ban.type === "3-1" ||
+//           ban.type === "3-2" ||
+//           ban.type === "3-3" ||
+//           ban.type === "3-4"
+//         ) {
+//           const permission = await UserPermission.update(
+//             {
+//               canComment: 0,
+//             },
+//             {
+//               where: {
+//                 userId: ban.userId,
+//                 eventId: ban.eventId,
+//               },
+//             }
+//           );
+
+//           const payload = {
+//             userId: ban.userId,
+//             notificationType: NOTI_TYPE.BanComment,
+//             fromUser: 5,
+//             fromUserName: "Trung Hai",
+//           };
+//           await NotificationService.create(payload);
+//         }
+//       })
+//     );
+
+//     return { status: 200 };
+//   } catch (error) {
+//     console.log(error);
+
+//     throw new BadRequestError({
+//       field: "id",
+//       message: "Failed to create this item.",
+//     });
+//   }
+// };
 
 const checkUnBan = async () => {
   const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
@@ -278,10 +323,7 @@ const checkUnBan = async () => {
     const res = await Promise.all(
       map(listBan, async (ban) => {
         if (
-          ban.type === "1-1" ||
-          ban.type === "1-2" ||
-          ban.type === "1-3" ||
-          ban.type === "1-4"
+          ban.type.includes("1-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -295,18 +337,23 @@ const checkUnBan = async () => {
             }
           );
 
+          const log = await ActivityServices.create({
+            userId: 5,
+            userName: "superadmin",
+            action: NOTI_TYPE.UpdateBanPost,
+            content: `Update post permission for user ${ban.userId} in event ${ban.eventId}`,
+          });
+
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanPost,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
         } else if (
-          ban.type === "2-1" ||
-          ban.type === "2-2" ||
-          ban.type === "2-3" ||
-          ban.type === "2-4"
+          ban.type.includes("2-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -320,18 +367,23 @@ const checkUnBan = async () => {
             }
           );
 
+          const log = await ActivityServices.create({
+            userId: 5,
+            userName: "superadmin",
+            action: NOTI_TYPE.UpdateBanRegister,
+            content: `Update register permission for user ${ban.userId} in event ${ban.eventId}`,
+          });
+
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanRegister,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
         } else if (
-          ban.type === "3-1" ||
-          ban.type === "3-2" ||
-          ban.type === "3-3" ||
-          ban.type === "3-4"
+          ban.type.includes("3-")
         ) {
           const permission = await UserPermission.update(
             {
@@ -345,9 +397,17 @@ const checkUnBan = async () => {
             }
           );
 
+          const log = await ActivityServices.create({
+            userId: 5,
+            userName: "superadmin",
+            action: NOTI_TYPE.UpdateBanComment,
+            content: `Update comment permission for user ${ban.userId} in event ${ban.eventId}`,
+          });
+
           const payload = {
             userId: ban.userId,
             notificationType: NOTI_TYPE.UnBanComment,
+            eventId: ban.eventId,
             fromUser: 5,
             fromUserName: "Trung Hai",
           };
@@ -366,11 +426,12 @@ const checkUnBan = async () => {
 };
 
 export default {
-  checkBan,
+  // checkBan,
   checkUnBan,
   initPermission,
   createPermission,
   checkEventPermission,
   checkUserCreatePostPermission,
   checkUserRegisterPermission,
+  checkUserCommentPermission,
 };

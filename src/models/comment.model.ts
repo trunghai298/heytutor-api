@@ -22,12 +22,15 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   rollComment: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isLiked: {
@@ -39,6 +42,7 @@ const Comment = MySQLClient.define<CommentInstance>("Comment", {
     defaultValue: false,
   },
   likedBy: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   likeCount: {

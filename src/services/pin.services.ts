@@ -42,7 +42,7 @@ const createPostPin = async (ctx, postId) => {
       const log = await ActivityServices.create({
         userId: userId,
         userName: userName,
-        action: "user_pin_post",
+        action: NOTI_TYPE.UserPinPost,
         content: `user ${userId} pin post: ${postId}`,
       });
 
@@ -103,7 +103,7 @@ const userUnPinPost = async (ctx, postId) => {
       const log = await ActivityServices.create({
         userId: userId,
         userName: userName,
-        action: "user_un_pin_post",
+        action: NOTI_TYPE.UserUnPinPost,
         content: `user ${userId} unpin post: ${postId}`,
       });
 
@@ -158,7 +158,7 @@ const checkPin = async () => {
         const log = await ActivityServices.create({
           userId: pin.pinBy,
           userName: pin.userPin,
-          action: "system_un_pin_post",
+          action: NOTI_TYPE.SysUnPinPost,
           content: `system unpin post ${pin.postId} of user ${pin.pinBy}`,
         });
 
@@ -203,8 +203,8 @@ const addEventPin = async (ctx, eventId) => {
       const log = await ActivityServices.create({
         userId: userId,
         userName: admin.name,
-        action: "add_pin_event",
-        content: `admin pin event ${eventId}`,
+        action: NOTI_TYPE.PinEvent,
+        content: `adminId ${userId} pin event ${eventId}`,
       });
 
       return { status: 200 };
@@ -240,8 +240,8 @@ const deleteEventPin = async (ctx, eventId) => {
       const log = await ActivityServices.create({
         userId: userId,
         userName: admin.name,
-        action: "Un_pin_event",
-        content: `admin unpin event ${eventId}`,
+        action: NOTI_TYPE.UnPinEvent,
+        content: `adminId ${userId} unpin event ${eventId}`,
       });
 
       return { status: 200 };

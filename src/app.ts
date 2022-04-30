@@ -102,7 +102,7 @@ app.use(initSecurity());
 app.get("/", (req, res) => res.send("Hello World"));
 
 // JWT verification
-app.use(authenticateJWT());
+// app.use(authenticateJWT());
 Route(app);
 
 export default app;

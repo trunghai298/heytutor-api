@@ -11,13 +11,13 @@ const listCommentByPost = (req, res, next) => {
 };
 
 const create = (req, res, next) => {
-  CommentServices.create(req.body, req.ctx)
+  CommentServices.createComment(req.ctx, req.body)
     .then((comment) => res.json(comment))
     .catch(next);
 };
 
 const edit = (req, res, next) => {
-  CommentServices.edit(req.params.commentId, req.body, req.ctx)
+  CommentServices.editComment(req.ctx, req.body, )
     .then((comment) => res.json(comment))
     .catch(next);
 };

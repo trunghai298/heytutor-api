@@ -1,3 +1,4 @@
+import { NOTI_TYPE } from "./../constants/notification";
 import Comment from "../models/comment.model";
 import MySQLClient from "../clients/mysql";
 import Post from "../models/post.model";
@@ -42,58 +43,64 @@ const create = async (ctx, payload) => {
         userId: user.id,
         postId: post.id,
         eventId: eventId,
-        isDone: 0,
-        isActive: 0,
-        isPending: 1,
-        isConfirmed: 0,
       });
 
-      await activityService.create({
+      const log = await activityService.create({
         userId: user.id,
         username: user.name,
-        action: "create_post",
-        content: `tạo post ${post.id}`,
+        action: NOTI_TYPE.NewPost,
+        content: `Người dùng ${user.id} tạo vấn đề ${post.id}`,
       });
 
       return post;
     } else {
       throw new BadRequestError({
-        field: "Ban continues!!!",
-        message: "User do not have permission to create this post.",
+        field: "Lệnh cấm còn hiệu lực!!!",
+        message: "Người dùng không có quyền tạo vấn đề vào lúc này",
       });
     }
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
-      message: "Failed to create this post.",
+      message: "Không thể tạo vấn đề vào lúc này",
     });
   }
 };
 
-const update = async (payload) => {
-  const { postId } = payload;
-  const transaction = await MySQLClient.transaction();
-  try {
-    const post = await Post.findOne({ where: { id: postId } });
-    if (!post) {
-      throw new NotFoundError({
-        field: "id",
-        message: "Post is not found",
-      });
-    }
+// const update = async (ctx, payload) => {
+//   const { user } = ctx;
+//   const { postId } = payload;
+//   const transaction = await MySQLClient.transaction();
 
-    await Post.update({ ...payload }, { where: { id: postId }, transaction });
-    await transaction.commit();
-    const postUpdated = await Post.findOne({ where: { id: postId } });
-    return postUpdated;
-  } catch (error) {
-    await transaction.rollback();
-    throw new BadRequestError({
-      field: "postId",
-      message: "Failed to update this post.",
-    });
-  }
-};
+//   try {
+//     const post = await Post.findOne({ where: { id: postId } });
+//     if (!post) {
+//       throw new NotFoundError({
+//         field: "id",
+//         message: "Không thể tìm được vấn đề!",
+//       });
+//     }
+
+//     await Post.update({ ...payload }, { where: { id: postId }, transaction });
+//     await transaction.commit();
+
+//     const log = await activityService.create({
+//       userId: user.id,
+//       username: user.name,
+//       action: NOTI_TYPE.UpdatePost,
+//       content: `Người dùng ${user.id} tạo post ${post.id}`,
+//     });
+
+//     const postUpdated = await Post.findOne({ where: { id: postId } });
+//     return postUpdated;
+//   } catch (error) {
+//     await transaction.rollback();
+//     throw new BadRequestError({
+//       field: "postId",
+//       message: "Không thể cập nhật vấn đề này.",
+//     });
+//   }
+// };
 
 /**
  * To edit an existed post
@@ -107,7 +114,7 @@ const edit = async (ctx, payload) => {
     if (!post) {
       throw new NotFoundError({
         field: "id",
-        message: "Post is not found",
+        message: "Không thể tìm được vấn đề.",
       });
     }
 
@@ -125,7 +132,7 @@ const edit = async (ctx, payload) => {
     console.log(error);
     throw new BadRequestError({
       field: "postId",
-      message: "Failed to edit this post.",
+      message: "Có lỗi khi cập nhật vấn đề này.",
     });
   }
 };
@@ -658,7 +665,7 @@ export default {
   listPostByUserId,
   listAllPost,
   create,
-  update,
+  // update,
   edit,
   deletePost,
   getListPostByFilter,

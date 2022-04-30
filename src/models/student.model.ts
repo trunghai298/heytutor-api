@@ -21,7 +21,7 @@ const Student = MySQLClient.define<StudentInstance>("Student", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   stdId: {
-    primaryKey: true,
+    allowNull: false,
     type: DataTypes.STRING,
   },
   stdCode: {

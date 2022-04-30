@@ -26,36 +26,35 @@ const Event = MySQLClient.define<EventInstance>("Event", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   createId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
-    allowNull: true,
   },
   title: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   description: {
+    allowNull: false,
     type: DataTypes.TEXT,
   },
-  createdAt: {
-    type: DataTypes.DATE,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
   startAt: {
+    allowNull: false,
     type: DataTypes.DATE,
   },
   endAt: {
+    allowNull: false,
     type: DataTypes.DATE,
   },
   hashtag: {
+    allowNull: true,
     type: DataTypes.TEXT,
   },
   content: {
+    allowNull: false,
     type: DataTypes.TEXT,
   },
   image: {
+    allowNull: false,
     type: DataTypes.TEXT,
   },
   isApproved: {
@@ -69,6 +68,16 @@ const Event = MySQLClient.define<EventInstance>("Event", {
   adminId: {
     type: DataTypes.JSON,
     defaultValue: null,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 

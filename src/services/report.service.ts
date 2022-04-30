@@ -9,6 +9,7 @@ import { NOTI_TYPE } from "../constants/notification";
 import User from "../models/user.model";
 import Post from "../models/post.model";
 import Admin from "../models/admin.model";
+import ActivityServices from "./activity.service";
 
 const checkReportInDay = async () => {
   const lastMidnight = new Date();
@@ -105,7 +106,7 @@ const createReport = async (ctx, payload) => {
       });
     }
     const user = await User.findOne({
-      where: { userId },
+      where: { reporterId },
       attributes: ["name"],
       raw: true,
     });
@@ -120,24 +121,35 @@ const createReport = async (ctx, payload) => {
     };
 
     let results;
+    let notiType;
     if (postId === null && commentId === null) {
+      notiType = NOTI_TYPE.ReportUser;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportUser,
+        notificationType: notiType,
       };
     } else if (postId !== null && commentId === null) {
+      notiType = NOTI_TYPE.ReportPost;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportPost,
+        notificationType: notiType,
       };
     } else if (postId !== null && commentId !== null) {
+      notiType = NOTI_TYPE.ReportComment;
       results = {
         ...payload,
-        notificationType: NOTI_TYPE.ReportComment,
+        notificationType: notiType,
       };
     }
 
-    await NotificationService.create(payload);
+    const log = await ActivityServices.create({
+      userId,
+      reporterId,
+      action: notiType,
+      content: `userId ${userId} un join event ${eventId}`,
+    });
+
+    await NotificationService.create(results);
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
@@ -158,6 +170,39 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
       raw: true,
     });
 
+    const reportDetail = await Promise.all(
+      map(listReport, async (report) => {
+        const postTitle = await Post.findOne({
+          where: {
+            id: report.postId,
+          },
+          attributes: ["title"],
+          raw: true,
+        });
+        const reportedName = await User.findOne({
+          where: {
+            id: report.reportedBy,
+          },
+          attributes: ["name"],
+          raw: true,
+        });
+
+        return {
+          ...report,
+          postTitle: postTitle.title,
+          reportedName: reportedName.name,
+        }
+      })
+    );
+
+    const userInfo = await User.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["name"],
+      raw: true,
+    });
+
     const eventTitle = await Events.findOne({
       where: {
         id: eventId,
@@ -166,13 +211,14 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
     });
 
     return {
+      userInfo,
       eventTitle,
-      listReport,
+      reportDetail,
     };
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng",
     });
   }
 };
@@ -190,20 +236,28 @@ const listReportResolvedByUser = async (userId, eventId) => {
 
     const reportDetails = await Promise.all(
       map(listReport, async (report) => {
-        const adminUpdate = Admin.findOne({
+        const adminUpdate = await Admin.findOne({
           where: {
             id: report.resolvedBy,
           },
-          attributes: ["email", "name", "role"],
+          attributes: ["name"],
           raw: true,
         });
 
         return {
           ...report,
-          ...adminUpdate,
+          adminUpdate: adminUpdate.name,
         };
       })
     );
+
+    const userInfo = await User.findOne({
+      where: {
+        id: userId,
+      },
+      attributes: ["name"],
+      raw: true,
+    });
 
     const eventTitle = await Events.findOne({
       where: {
@@ -213,13 +267,14 @@ const listReportResolvedByUser = async (userId, eventId) => {
     });
 
     return {
+      userInfo,
       eventTitle,
       reportDetails,
     };
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -230,6 +285,7 @@ const listReportOfUser = async (userId, eventId) => {
       userId,
       eventId
     );
+
     const listReportResolved = await listReportResolvedByUser(userId, eventId);
 
     return {
@@ -237,6 +293,9 @@ const listReportOfUser = async (userId, eventId) => {
       listReportResolved: listReportResolved,
     };
   } catch (error) {
+
+    console.log(error);
+    
     throw new NotFoundError({
       field: "userId",
       message: "User is not found",
@@ -267,13 +326,13 @@ const listReportNotResolved = async (ctx) => {
     } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập vào thông tin này.",
       });
     }
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -301,7 +360,7 @@ const listReportResolved = async (ctx) => {
     } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập vào thông tin này.",
       });
     }
   } catch (error) {

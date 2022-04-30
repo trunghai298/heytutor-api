@@ -17,7 +17,6 @@ const Term = MySQLClient.define<TermInstance>("Term", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   termId: {
-    primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   termName: {

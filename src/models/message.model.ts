@@ -21,27 +21,35 @@ const Message = MySQLClient.define<MessageInstance>("Message", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   senderId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   senderName: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   receiverId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   receiverName: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   conversationId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   message: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   isSeen: {
     type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
   seenAt: {
+    allowNull: true,
     type: DataTypes.DATE,
     defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },

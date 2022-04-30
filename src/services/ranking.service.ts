@@ -52,8 +52,6 @@ const getTop10User = async (ctx) => {
       });
     }
   } catch (error) {
-    console.log(error);
-
     throw new BadRequestError({
       field: "id",
       message: "Cannot find user.",
@@ -61,7 +59,78 @@ const getTop10User = async (ctx) => {
   }
 };
 
+const reCalculatePoint = async (payload) => {
+  const { userId, score, type } = payload;
+  try {
+    const rankPointInfo = await Ranking.findOne({
+      where: { userId: userId },
+      raw: true,
+    });
+    if (type === 1) {
+      const newVoteCount = rankPointInfo.voteCount + 1;
+
+      const newRankScore =
+        (rankPointInfo.rankPoint * rankPointInfo.voteCount + score) /
+        newVoteCount;
+
+      let newCreditPoint;
+      if (score >= 1 && score < 2) {
+        newCreditPoint = rankPointInfo.creditPoint - 0.5;
+      } else if (score >= 2 && score < 3) {
+        newCreditPoint = rankPointInfo.creditPoint - 0.25;
+      } else if (score >= 3 && score < 4) {
+        newCreditPoint = rankPointInfo.creditPoint + 0.25;
+      } else if (score >= 4 && score < 5) {
+        newCreditPoint = rankPointInfo.creditPoint + 0.5;
+      } else if (score === 5) {
+        newCreditPoint = rankPointInfo.creditPoint + 1;
+      }
+
+      const res = await Ranking.update(
+        {
+          rankPoint: newRankScore,
+          voteCount: newVoteCount,
+          creditPoint: newCreditPoint,
+        },
+        {
+          where: {
+            userId: userId,
+          },
+        }
+      );
+
+      return { status: 200 };
+    } else if (type === 2) {
+      const newVoteCount = rankPointInfo.requestVoteCount + 1;
+
+      const newRequestPoint =
+        (rankPointInfo.requestPoint * rankPointInfo.requestVoteCount + score) /
+        newVoteCount;
+
+      const res = await Ranking.update(
+        {
+          requestPoint: newRequestPoint,
+          requestVoteCount: newVoteCount,
+        },
+        {
+          where: {
+            userId: userId,
+          },
+        }
+      );
+
+      return { status: 200 };
+    }
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "Failed to create this item.",
+    });
+  }
+};
+
 export default {
   getUserRank,
   getTop10User,
+  reCalculatePoint,
 };

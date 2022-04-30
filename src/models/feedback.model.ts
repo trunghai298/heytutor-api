@@ -1,16 +1,18 @@
 import { Model, DataTypes } from "sequelize";
 import MySQLClient from "../clients/mysql";
-import Event from "./event.model";
-import User from "./user.model";
-interface UserEventInstance extends Model {
+
+interface IFeedbackInstance extends Model {
   id: number;
   userId: number;
-  eventId: number;
-  isSupporter: boolean;
-  isRequestor: boolean;
+  postId: number;
+  type: number;
+  score: number;
+  reason: string;
+  content: string;
+  fromUserId: number;
 }
 
-const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
+const Feedback = MySQLClient.define<IFeedbackInstance>("Feedback", {
   id: {
     allowNull: false,
     autoIncrement: true,
@@ -21,16 +23,29 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
     allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  eventId: {
+  postId: {
     allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  isSupporter: {
-    allowNull: true,
+  type: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
-  isRequestor: {
+  score: {
+    allowNull: false,
+    type: DataTypes.DOUBLE,
+  },
+    allowNull: false,
+  reason: {
+    allowNull: false,
+    type: DataTypes.STRING,
+  },
+  content: {
     allowNull: true,
+    type: DataTypes.STRING,
+  },
+  fromUserId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   createdAt: {
@@ -45,10 +60,4 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
   },
 });
 
-Event.hasMany(UserEvent, { foreignKey: "id" });
-UserEvent.belongsTo(Event, { foreignKey: "eventId" });
-
-User.hasMany(UserEvent, { foreignKey: "id" });
-UserEvent.belongsTo(User, { foreignKey: "userId" });
-
-export default UserEvent;
+export default Feedback;
