@@ -1,3 +1,4 @@
+import FeedbackController from "../controller/feedback.controller";
 import UserController from "../controller/user.controller";
 
 export default (app: any) => {
@@ -10,4 +11,5 @@ export default (app: any) => {
     .post("/user-create-pin-post", UserController.userCreatePostPin)
     .post("/user-unpin-post", UserController.userUnPinPost)
     .post("/create-report", UserController.createReport)
+    .post("/add-new-feedback", FeedbackController.addNewFeedback)
 };

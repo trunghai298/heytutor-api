@@ -74,14 +74,12 @@ const joinEvent = async (ctx, payload) => {
     const log = await ActivityServices.create({
       userId,
       username,
-      action: "Join Event",
-      content: `${username} join event ${eventId}`,
+      action: NOTI_TYPE.JoinEvent,
+      content: `userId ${userId} join event ${eventId}`,
     });
 
     return { status: 200 };
-
   } catch (error) {
-    console.log(error);
     throw new BadRequestError({
       field: "userId-eventId",
       message: "Failed to create this item.",
@@ -116,8 +114,8 @@ const unJoinEvent = async (ctx, event) => {
     const log = await ActivityServices.create({
       userId,
       username,
-      action: "unJoin Event",
-      content: `${username} un join event ${eventId}`,
+      action: NOTI_TYPE.UnJoinEvent,
+      content: `userId ${userId} un join event ${eventId}`,
     });
     return { status: 200 };
   } catch (error) {

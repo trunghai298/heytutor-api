@@ -22,8 +22,14 @@ export enum NOTI_TYPE {
   UpdateBanPost = "update_ban_post",
   UpdateBanComment = "update_ban_comment",
 
+  UpdatePermissionPost = "update_permission_can_post",
+  UpdatePermissionComment = "update_permission_can_post",
+  UpdatePermissionRegister = "update_permission_can_post",
+
   UserPinPost = "user_pin_post",
   UserUnPinPost = "user_un_pin_post",
+  PinEvent = "admin_pin_event",
+  UnPinEvent = "admin_un_pin_event",
   OverNumberPostPined = "over_number_posts_pined",
   SysUnPinPost = "system_un_pin_post",
 
@@ -36,4 +42,8 @@ export enum NOTI_TYPE {
   NewCollab = "add_collaborator",
 
   InexistentPost = "inexistent_post",
+
+  InitPermission = "init_default_permission",
+  CheckEventPermission = "daily_event_permission",
+  NewPermission = "create_permission",
 }
