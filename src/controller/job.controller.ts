@@ -1,3 +1,4 @@
+import PinServices from "../services/pin.services";
 import UserPermissionService from "../services/user-permission.service";
 const cron = require("node-cron");
 
@@ -8,6 +9,8 @@ const dailyCheck = () => {
       // console.log("UserPermissionService checkBan success!");
       await UserPermissionService.checkUnBan();
       console.log("UserPermissionService checkUnBan success!");
+      await PinServices.checkPin();
+      console.log("PinServices checkPin success!");
     });
     cron.schedule("0 */2 * * *", async function () {
       await UserPermissionService.checkEventPermission();

@@ -33,13 +33,18 @@ export enum NOTI_TYPE {
   OverNumberPostPined = "over_number_posts_pined",
   SysUnPinPost = "system_un_pin_post",
 
+  NewPost = "create_post",
   NewFeedback = "new_feedback",
   NewMessage = "new_message",
   NewComment = "new_comment",
+  NewPermission = "create_permission",
+
   UpdateComment = "update_comment",
+  UpdatePost = "update_post",
 
   JoinEvent = "join_event",
   UnJoinEvent = "unjoined_event",
+
   UpdateCollab = "update_collaborator",
   NewCollab = "add_collaborator",
 
@@ -47,5 +52,4 @@ export enum NOTI_TYPE {
 
   InitPermission = "init_default_permission",
   CheckEventPermission = "daily_event_permission",
-  NewPermission = "create_permission",
 }
