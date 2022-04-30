@@ -6,12 +6,6 @@ const create = (req, res, next) => {
     .catch(next);
 };
 
-const update = (req, res, next) => {
-  PostServices.update(req.body)
-    .then((post) => res.json(post))
-    .catch(next);
-};
-
 const listAllPost = (req, res, next) => {
   PostServices.listAllPost(req.query.limit, req.query.offset)
     .then((posts) => res.json(posts))
@@ -58,7 +52,6 @@ export default {
   listPostByUserId,
   listAllPost,
   create,
-  update,
   edit,
   deletePost,
   getListPostByFilter,

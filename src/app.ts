@@ -33,7 +33,9 @@ app.use(bodyParser.json());
 app.use(initPassport());
 
 require("dotenv").config();
-console.log(`Connected to ${process.env.DB_HOST}`);
+console.log(
+  `Connected to ${process.env.DB_HOST} - dbName: ${process.env.DB_NAME} - port: ${process.env.DB_PORT}`
+);
 
 const compare = require("tsscmp");
 const auth = require("basic-auth");
@@ -102,7 +104,7 @@ app.use(initSecurity());
 app.get("/", (req, res) => res.send("Hello World"));
 
 // JWT verification
-// app.use(authenticateJWT());
+app.use(authenticateJWT());
 Route(app);
 
 export default app;
