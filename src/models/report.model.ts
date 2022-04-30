@@ -26,7 +26,7 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     allowNull: false,
   },
   postId: {
-    allowNull: true,
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   reason: {
