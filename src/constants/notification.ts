@@ -35,6 +35,8 @@ export enum NOTI_TYPE {
 
   NewFeedback = "new_feedback",
   NewMessage = "new_message",
+  NewComment = "new_comment",
+  UpdateComment = "update_comment",
 
   JoinEvent = "join_event",
   UnJoinEvent = "unjoined_event",

@@ -73,10 +73,24 @@ const reCalculatePoint = async (payload) => {
         (rankPointInfo.rankPoint * rankPointInfo.voteCount + score) /
         newVoteCount;
 
+      let newCreditPoint;
+      if (score >= 1 && score < 2) {
+        newCreditPoint = rankPointInfo.creditPoint - 0.5;
+      } else if (score >= 2 && score < 3) {
+        newCreditPoint = rankPointInfo.creditPoint - 0.25;
+      } else if (score >= 3 && score < 4) {
+        newCreditPoint = rankPointInfo.creditPoint + 0.25;
+      } else if (score >= 4 && score < 5) {
+        newCreditPoint = rankPointInfo.creditPoint + 0.5;
+      } else if (score === 5) {
+        newCreditPoint = rankPointInfo.creditPoint + 1;
+      }
+
       const res = await Ranking.update(
         {
           rankPoint: newRankScore,
           voteCount: newVoteCount,
+          creditPoint: newCreditPoint,
         },
         {
           where: {
@@ -104,10 +118,15 @@ const reCalculatePoint = async (payload) => {
           },
         }
       );
-      
+
       return { status: 200 };
     }
-  } catch (error) {}
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "Failed to create this item.",
+    });
+  }
 };
 
 export default {

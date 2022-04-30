@@ -111,7 +111,7 @@ const assignEventAdmin = async (req, res, next) => {
 };
 
 const getListReportOfUser = async (req, res, next) => {
-  ReportService.listReportOfUser(req.body.userId, req.body.eventId)
+  ReportService.listReportOfUser(req.params.userId, req.params.eventId)
     .then((result) => res.json(result))
     .catch(next);
 };

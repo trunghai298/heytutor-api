@@ -104,6 +104,27 @@ const checkUserRegisterPermission = async (userId, eventId) => {
   }
 };
 
+const checkUserCommentPermission = async (userId, eventId) => {
+  try {
+    const canPost = await UserPermission.findOne({
+      where: {
+        userId: userId,
+        eventId: eventId,
+      },
+      attributes: ["canRegister"],
+      raw: true,
+    });
+
+    if (canPost.canComment === 1) {
+      return true;
+    } else {
+      return false;
+    }
+  } catch (error) {
+    return error;
+  }
+};
+
 // Run every 2 hours
 const checkEventPermission = async () => {
   const today = new Date(Date.now());
@@ -412,4 +433,5 @@ export default {
   checkEventPermission,
   checkUserCreatePostPermission,
   checkUserRegisterPermission,
+  checkUserCommentPermission,
 };
