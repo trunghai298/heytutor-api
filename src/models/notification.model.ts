@@ -21,25 +21,32 @@ const Notification = MySQLClient.define<NotificationInstance>("Notification", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    allowNull: false,
     primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   commentId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   notificationType: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   fromUserId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   fromUsername: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   status: {

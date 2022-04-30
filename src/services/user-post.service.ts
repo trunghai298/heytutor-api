@@ -1,4 +1,3 @@
-import { create } from "./comment.service";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserPost from "../models/user-post.model";
 import { Op } from "sequelize";
@@ -523,8 +522,6 @@ const listPostHasRegister = async (userId, limit, offset) => {
         },
       },
       raw: true,
-      limit,
-      offset,
     });
     const res = await Promise.all(
       map(postHasRegister, async (post) => {

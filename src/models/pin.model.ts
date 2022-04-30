@@ -17,15 +17,19 @@ const Pin = MySQLClient.define<IPinInstance>("Pin", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   eventId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   pinBy: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userPin: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   createdAt: {

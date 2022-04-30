@@ -24,38 +24,36 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   email: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   password: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   name: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   address: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   phone: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   facebook: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   role: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   permissions: {
+    allowNull: true,
     type: DataTypes.STRING,
-  },
-  createdAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
-  },
-  updatedAt: {
-    type: DataTypes.DATE,
-    allowNull: false,
-    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
   isActive: {
     allowNull: false,
@@ -69,6 +67,16 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
   addBy: {
     type: DataTypes.INTEGER.UNSIGNED,
     allowNull: false,
+  },
+  createdAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
+  },
+  updatedAt: {
+    type: DataTypes.DATE,
+    allowNull: false,
+    defaultValue: MySQLClient.literal("CURRENT_TIMESTAMP"),
   },
 });
 

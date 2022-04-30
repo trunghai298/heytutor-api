@@ -26,21 +26,27 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     allowNull: false,
   },
   postId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   reason: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   content: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   eventId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   commentId: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   reportedBy: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isResolved: {
@@ -49,6 +55,7 @@ const Report = MySQLClient.define<ReportInstance>("Report", {
     defaultValue: false,
   },
   resolvedBy: {
+    allowNull: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   createdAt: {

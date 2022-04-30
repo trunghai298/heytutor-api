@@ -17,7 +17,6 @@ const Course = MySQLClient.define<CourseInstance>("Course", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   courseId: {
-    primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   deptId: {

@@ -242,6 +242,7 @@ const listReportOfUser = async (userId, eventId) => {
       userId,
       eventId
     );
+    
     const listReportResolved = await listReportResolvedByUser(userId, eventId);
 
     return {

@@ -17,16 +17,21 @@ const Conversation = MySQLClient.define<ConversationInstance>("Conversation", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   postId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId1: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId2: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   status: {
+    allowNull: false,
     type: DataTypes.STRING,
+    defaultValue: "open",
   },
   createdAt: {
     type: DataTypes.DATE,

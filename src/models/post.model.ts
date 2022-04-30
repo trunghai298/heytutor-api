@@ -25,21 +25,27 @@ const Post = MySQLClient.define<PostInstance>("Post", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   title: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   content: {
+    allowNull: false,
     type: DataTypes.TEXT,
   },
   minPrice: {
+    allowNull: true,
     type: DataTypes.DOUBLE,
   },
   images: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   hashtag: {
+    allowNull: true,
     type: DataTypes.STRING,
   },
   isEdited: {

@@ -16,7 +16,6 @@ const Department = MySQLClient.define<DepartmentInstance>("Department", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   deptId: {
-    primaryKey: true,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   termId: {

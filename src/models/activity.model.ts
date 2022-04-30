@@ -17,15 +17,19 @@ const Activity = MySQLClient.define<IActivityInstance>("Activity", {
     type: DataTypes.INTEGER.UNSIGNED,
   },
   userId: {
+    allowNull: false,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   username: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   action: {
+    allowNull: false,
     type: DataTypes.STRING,
   },
   content: {
+    allowNull: false,
     type: DataTypes.TEXT,
   },
   createdAt: {
