@@ -83,8 +83,8 @@ const checkReportInDay = async () => {
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "id",
-      message: ".",
+      field: "",
+      message: error,
     });
   }
 };

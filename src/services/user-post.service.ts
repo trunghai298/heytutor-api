@@ -10,7 +10,7 @@ import userPermissionService from "./user-permission.service";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import UsersService from "./users.service";
-import activityService from "./activity.service";
+import ActivityService from "./activity.service";
 
 /**
  * To create a new term
@@ -203,18 +203,30 @@ const addRegister = async (ctx, postId) => {
         fromUserId: user.id,
         fromUsername: user.name,
       };
-      await NotificationService.create(payload);
+
+      const payloadActivity = {
+        userId: user.id,
+        username: user.name,
+        action: NOTI_TYPE.RequestRegister,
+        content: `Người dùng ${user.id} đăng kí hỗ trợ vấn đề ${postId}`,
+      };
+
+      await Promise.all([
+        NotificationService.create(payload),
+        ActivityService.create(payloadActivity),
+      ]);
+
       return { status: 200 };
     } else {
       throw new BadRequestError({
         field: "id",
-        message: "User is currently ban register support!!!",
+        message: "Người dùng đang bị giới hạn đăng kí hỗ trợ!",
       });
     }
   } catch (error) {
     throw new BadRequestError({
-      field: "id",
-      message: error,
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -255,20 +267,20 @@ const removeRegister = async (ctx, payload) => {
     const payloadActivity = {
       userId: user.id,
       username: user.name,
-      action: "remove_register",
-      content: `loại người đăng kí ${registerId} ra khỏi vấn đề ${postId}`,
+      action: NOTI_TYPE.RemoveRegister,
+      content: `Loại người đăng kí ${registerId} ra khỏi vấn đề ${postId}`,
     };
 
     await Promise.all([
       NotificationService.create(payloadNoti),
-      activityService.create(payloadActivity),
+      ActivityService.create(payloadActivity),
     ]);
 
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "postId",
-      message: error,
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -299,12 +311,24 @@ const cancelRegister = async (ctx, payload) => {
       fromUserId: user.id,
       fromUsername: user.name,
     };
-    await NotificationService.create(payload);
+
+    const payloadActivity = {
+      userId: user.id,
+      username: user.name,
+      action: NOTI_TYPE.CancelRegister,
+      content: `Người dùng ${user.id} hủy đăng kí hỗ trợ cho vấn đề ${postId}`,
+    };
+
+    await Promise.all([
+      NotificationService.create(payload),
+      ActivityService.create(payloadActivity),
+    ]);
+
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "postId",
-      message: error,
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -343,8 +367,8 @@ const addSupporter = async (ctx, payload) => {
       const payloadActivity = {
         userId: user.id,
         username: user.name,
-        action: "choose_supporter",
-        content: `chọn người hỗ trợ ${registerId} cho vấn đề ${postId}`,
+        action: NOTI_TYPE.AcceptSupporter,
+        content: `Chọn người hỗ trợ ${registerId} cho vấn đề ${postId}`,
       };
 
       const payloadNoti = {
@@ -357,7 +381,7 @@ const addSupporter = async (ctx, payload) => {
 
       await Promise.all([
         NotificationService.create(payloadNoti),
-        activityService.create(payloadActivity),
+        ActivityService.create(payloadActivity),
       ]);
 
       return { status: 200 };
@@ -365,10 +389,9 @@ const addSupporter = async (ctx, payload) => {
       return { status: "fail" };
     }
   } catch (error) {
-    console.log(error);
     throw new BadRequestError({
-      field: "id",
-      message: error,
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -528,7 +551,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "User not found.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -562,7 +585,7 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "User not found.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -609,7 +632,7 @@ const listPostHasSupporter = async (userId, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "User not found.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -644,7 +667,7 @@ const listPostOnEvent = async (userId, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "User not found.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -674,7 +697,7 @@ const listPostDone = async (userId, limit, offset) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "User not found.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -712,8 +735,8 @@ const getListMyRequests = async (ctx, limit, offset) => {
     };
   } catch (error) {
     throw new BadRequestError({
-      field: "userId",
-      message: "User not found.",
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -753,8 +776,8 @@ const getRegisteredNearDeadline = async (ctx) => {
     return compact(res);
   } catch (error) {
     throw new BadRequestError({
-      field: "userId",
-      message: "User not found.",
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -773,8 +796,6 @@ const postDoneOfUser = async (ctx) => {
       raw: true,
     });
 
-    console.log("postHasRegister", postHasRegister.length);
-
     const totalPosted = await UserPost.findAll({
       where: {
         userId,
@@ -782,8 +803,6 @@ const postDoneOfUser = async (ctx) => {
       logging: true,
       raw: true,
     });
-
-    console.log("totalPosted", totalPosted.length);
 
     const supporterRequest = await MySQLClient.query(
       `SELECT * FROM UserPosts WHERE JSON_CONTAINS(JSON_EXTRACT(UserPosts.supporterId, '$[*]'), '${userId}' , '$')`,
@@ -803,8 +822,8 @@ const postDoneOfUser = async (ctx) => {
     };
   } catch (error) {
     throw new BadRequestError({
-      field: "userId",
-      message: "User not found.",
+      field: "ctx",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -837,8 +856,8 @@ const getListPostNoRegister = async () => {
     return res;
   } catch (error) {
     throw new NotFoundError({
-      field: "id",
-      message: "Post is not found",
+      field: "",
+      message: "Có lỗi khi tìm vấn đề.",
     });
   }
 };

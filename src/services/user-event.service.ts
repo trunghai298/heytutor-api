@@ -46,7 +46,7 @@ const joinEvent = async (ctx, eventId) => {
 
     throw new BadRequestError({
       field: "userId-eventId",
-      message: "Failed to create this item.",
+      message: "Có lỗi khi tham gia sự kiện.",
     });
   }
 };
@@ -78,7 +78,7 @@ const unJoinEvent = async (ctx, eventId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId-eventId",
-      message: "Failed to create this item.",
+      message: "Có lỗi khi hủy tham gia sự kiện.",
     });
   }
 };
