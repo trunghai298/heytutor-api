@@ -4,5 +4,6 @@ export default (app) => {
   app
     .get("/user-event/list", UserEventController.list)
     .post("/join-event", UserEventController.joinEvent)
-    .delete("/unjoin-event", UserEventController.unJoinEvent);
+    .delete("/unjoin-event", UserEventController.unJoinEvent)
+    .get("/check-user-in-event", UserEventController.checkUserInEvent)
 };

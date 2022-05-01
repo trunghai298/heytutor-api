@@ -51,7 +51,7 @@ const getActivitiesOfUser = async (ctx, filter) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Cannot find user!!!",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };

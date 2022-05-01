@@ -109,7 +109,27 @@ const listUserOfEvent = async (eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện.",
+    });
+  }
+};
+
+const checkUserInEvent = async (ctx, eventId) => {
+  const { user } = ctx;
+  try {
+    const isInEvent = await UserEvent.findOne({
+      where: {
+        userId: user.id,
+        eventId: eventId,
+      },
+      raw: true,
+    });
+
+    return isInEvent ? true : false;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };
@@ -119,4 +139,5 @@ export default {
   joinEvent,
   unJoinEvent,
   listUserOfEvent,
+  checkUserInEvent,
 };
