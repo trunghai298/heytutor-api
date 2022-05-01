@@ -14,7 +14,7 @@ export const login = async (params: any, ctx: any) => {
   if (!email || !password) {
     throw new BadRequestError({
       field: "email",
-      message: "Email and password is required",
+      message: "Bắt buộc phải có email và mật khẩu.",
     });
   }
 
@@ -26,7 +26,7 @@ export const login = async (params: any, ctx: any) => {
   if (!userDB) {
     throw new NotFoundError({
       field: "user",
-      message: "User not found !",
+      message: "Không tìm thấy người dùng!",
     });
   }
 
@@ -35,7 +35,7 @@ export const login = async (params: any, ctx: any) => {
   if (!isSamePassword) {
     throw new BadRequestError({
       field: "password",
-      message: "Password is not correct",
+      message: "Sai mật khẩu.",
     });
   }
 
@@ -74,7 +74,7 @@ export const adminLogin = async (params: any, ctx: any) => {
   if (!admin) {
     throw new BadRequestError({
       field: "email",
-      message: "User is not exist",
+      message: "Người dùng không tồn tại.",
     });
   }
 
@@ -83,7 +83,7 @@ export const adminLogin = async (params: any, ctx: any) => {
   if (!isSamePassword) {
     throw new BadRequestError({
       field: "password",
-      message: "Password is not correct",
+      message: "Mật khẩu không đúng.",
     });
   }
 

@@ -43,7 +43,7 @@ const edit = async (payload) => {
     if (!post) {
       throw new NotFoundError({
         field: "id",
-        message: "Event is not found",
+        message: "Không tìm thấy sự kiện.",
       });
     }
 
@@ -57,7 +57,7 @@ const edit = async (payload) => {
     await transaction.rollback();
     throw new BadRequestError({
       field: "eventId",
-      message: error,
+      message: "Không thể chỉnh sửa sự kiện.",
     });
   }
 };
@@ -74,7 +74,7 @@ const deleteEvent = async (eventId) => {
     if (transaction) transaction.rollback();
     throw new BadRequestError({
       field: "eventId",
-      message: "Failed to delete this item.",
+      message: "Không xóa được sự kiện.",
     });
   }
 };
@@ -93,8 +93,8 @@ const getEventStats = async (eventId) => {
     };
   } catch (error) {
     throw new NotFoundError({
-      field: "postId",
-      message: "Post is not found",
+      field: "eventId",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };
@@ -110,7 +110,7 @@ const getNumberPostOfEvent = async (eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };
@@ -143,7 +143,7 @@ const getEventUser = async (eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };
@@ -162,7 +162,7 @@ const getEventDetail = async (eventId) => {
 
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };

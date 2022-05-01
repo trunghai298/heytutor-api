@@ -261,7 +261,7 @@ const getUserStatusInEvent = async (userId, eventId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Can not find user",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
