@@ -166,9 +166,6 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
       raw: true,
     });
 
-console.log(listReport);
-
-
     const reportDetail = await Promise.all(
       map(listReport, async (report) => {
         const postTitle = await Post.findOne({
@@ -198,20 +195,20 @@ console.log(listReport);
       where: {
         id: userId,
       },
-      attributes: ["name", "id"],
+      attributes: ["name"],
       raw: true,
     });
 
-    // const eventTitle = await Events.findOne({
-    //   where: {
-    //     id: eventId,
-    //   },
-    //   raw: true,
-    // });
+    const eventTitle = await Events.findOne({
+      where: {
+        id: eventId,
+      },
+      raw: true,
+    });
 
     return {
       userInfo,
-      // eventTitle,
+      eventTitle,
       reportDetail,
     };
   } catch (error) {

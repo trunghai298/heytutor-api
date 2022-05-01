@@ -948,8 +948,6 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
       })
     );
 
-    console.log(a);
-
     const userEventData = await Promise.all(
       map(a, async (userEvent) => {
         const getUserRank = await RankingService.getUserRank(userEvent.userId);
@@ -970,17 +968,22 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
             userEvent.userId,
             userEvent.eventId
           );
+
         const listReported = await ReportService.listAllReportOfUser(
           userEvent.userId
         );
-        return {
-          rankInfo: getUserRank,
-          eventInfo: getEvent,
-          userInfo: getUserDetail,
-          userBanInfo: getBanDetail,
-          nbOfNotResolvedReport: listReportNotResolved,
-          nbOfReport: listReported,
-        };
+        if (listReportNotResolved.reportDetail.length > 0) {
+          return {
+            rankInfo: getUserRank,
+            eventInfo: getEvent,
+            userInfo: getUserDetail,
+            userBanInfo: getBanDetail,
+            nbOfNotResolvedReport: listReportNotResolved,
+            nbOfReport: listReported,
+          };
+        } else {
+          return null;
+        }
       })
     );
 
