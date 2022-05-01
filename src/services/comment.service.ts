@@ -16,7 +16,7 @@ const fetchById = async (id) =>
  * To create a new comment on a post
  */
 export const createComment = async (ctx, payload) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const { postId, comment } = payload;
   const postInfo = await Post.findOne({
     where: { postId },
@@ -25,32 +25,29 @@ export const createComment = async (ctx, payload) => {
 
   try {
     if (
-      UserPermissionService.checkUserCommentPermission(userId, postInfo.eventId)
+      UserPermissionService.checkUserCommentPermission(
+        user.id,
+        postInfo.eventId
+      )
     ) {
       const res = await Comment.create({
         postId,
-        userId: userId,
+        userId: user.id,
         comment,
       });
 
-      const user = await User.findOne({
-        where: { userId },
-        attributes: ["name"],
-        raw: true,
-      });
-
       const log = await ActivityServices.create({
-        userId: userId,
+        userId: user.id,
         username: user.name,
         action: NOTI_TYPE.NewComment,
-        content: `userId: ${userId} create new comment for postId: ${postId}`,
+        content: `Người dùng ${user.id} tạo bình luận mới cho vấn đề ${postId}.`,
       });
 
       const result = {
         userId: postInfo.userId,
         postId: postId,
         notificationType: NOTI_TYPE.NewComment,
-        fromUserId: userId,
+        fromUserId: user.id,
         fromUsername: user.name,
       };
       await NotificationService.create(result);
@@ -59,13 +56,13 @@ export const createComment = async (ctx, payload) => {
     } else {
       throw new BadRequestError({
         field: "ctx",
-        message: "You had been baned from comment in the system!!!",
+        message: "Bạn đang bị cấm bình luận.",
       });
     }
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Failed to create this item.",
+      message: "Không thể tạo bình luận.",
     });
   }
 };
@@ -74,36 +71,39 @@ export const createComment = async (ctx, payload) => {
  * To edit a new comment on a post
  */
 export const editComment = async (ctx, payload) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const { comment, commentId } = payload;
   try {
     const previousComment = await Comment.findOne({
       where: {
-        commentId,
+        id: commentId,
       },
       attributes: ["comment"],
       raw: true,
     });
-    await Comment.update({ comment }, { where: { commentId, userId } });
 
-    const user = await User.findOne({
-      where: { userId },
-      attributes: ["name"],
-      raw: true,
-    });
+    await Comment.update(
+      { comment },
+      {
+        where: {
+          id: commentId,
+          userId: user.id,
+        },
+      }
+    );
 
     const log = await ActivityServices.create({
-      userId: userId,
+      userId: user.id,
       username: user.name,
       action: NOTI_TYPE.UpdateComment,
-      content: `userId: ${userId} update commentId: ${commentId} previous value: "${previousComment.comment}"`,
+      content: `Người dùng ${user.id} thay đổi bình luận ${commentId} bình luận trước đấy: "${previousComment.comment}".`,
     });
 
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Failed to update this item.",
+      message: "Không thể thay đổi bình luận này.",
     });
   }
 };
