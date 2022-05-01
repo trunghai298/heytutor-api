@@ -99,7 +99,7 @@ const getTop10UserRanking = async (req, res, next) => {
 };
 
 const collaboratorInfo = async (req, res, next) => {
-  AdminServices.collaboratorInfo(req.ctx, req.body.userId)
+  AdminServices.collaboratorInfo(req.ctx, req.query.userId)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -111,8 +111,6 @@ const assignEventAdmin = async (req, res, next) => {
 };
 
 const getListReportOfUser = async (req, res, next) => {
-  console.log(req.query);
-  
   ReportService.listReportOfUser(req.query.userId, req.query.eventId)
     .then((result) => res.json(result))
     .catch(next);

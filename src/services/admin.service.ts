@@ -32,17 +32,9 @@ const createAdmin = async () => {
 const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission, address, phone, facebook } =
     payload;
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   try {
-    const adminInfo = Admin.findOne({
-      where: {
-        id: userId,
-      },
-      attributes: ["role", "name"],
-      raw: true,
-    });
-
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const user = await Admin.findOne({
         where: { email },
         raw: true,
@@ -57,23 +49,23 @@ const addCollaborator = async (ctx, payload) => {
           address,
           phone,
           facebook,
-          updatedBy: userId,
-          addBy: userId,
+          updatedBy: user.id,
+          addBy: user.id,
         });
 
         const log = await ActivityServices.create({
-          userId,
-          username: adminInfo.name,
+          userId: user.id,
+          username: user.name,
           action: NOTI_TYPE.NewCollab,
-          content: `adminId ${userId} add new collaborator ${name}`,
+          content: `admin ${user.name} thêm cộng tác viên mới ${name}`,
         });
 
         const id = await Admin.count();
         const payload = {
           userId: id,
           notificationType: NOTI_TYPE.NewCollab,
-          fromUserId: userId,
-          fromUsername: adminInfo.name,
+          fromUserId: user.id,
+          fromUsername: user.name,
         };
         await NotificationService.create(payload);
 
@@ -82,13 +74,13 @@ const addCollaborator = async (ctx, payload) => {
         };
       } else {
         return {
-          message: "User already existed",
+          message: "Người dùng đã tồn tại.",
         };
       }
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không quyền thay đổi thông tin này.",
       });
     }
   } catch (error) {
@@ -100,17 +92,9 @@ const addCollaborator = async (ctx, payload) => {
 const updateCollaborator = async (ctx, payload) => {
   const { id, email, name, role, permission, address, phone, facebook } =
     payload;
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   try {
-    const adminInfo = Admin.findOne({
-      where: {
-        id: userId,
-      },
-      attributes: ["role", "name"],
-      raw: true,
-    });
-
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const res = await Admin.update(
         {
           name,
@@ -119,7 +103,7 @@ const updateCollaborator = async (ctx, payload) => {
           address,
           phone,
           facebook,
-          updatedBy: userId,
+          updatedBy: user.id,
         },
         {
           where: {
@@ -128,24 +112,24 @@ const updateCollaborator = async (ctx, payload) => {
         }
       );
       const log = await ActivityServices.create({
-        userId,
-        username: adminInfo.name,
+        userId: user.id,
+        username: user.name,
         action: NOTI_TYPE.UpdateCollab,
-        content: `adminId ${userId} update collaboratorId ${id}`,
+        content: `Quản trị viên ${user.name} sửa thông tin của cộng tác viên ${name}`,
       });
 
       const payload = {
         userId: id,
         notificationType: NOTI_TYPE.UpdateCollab,
-        fromUserId: userId,
-        fromUsername: adminInfo.name,
+        fromUserId: user.id,
+        fromUsername: user.name,
       };
       await NotificationService.create(payload);
       return { status: 200 };
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không có quyền thay đổi thông tin này.",
       });
     }
   } catch (error) {
@@ -239,18 +223,11 @@ const listNewRegisterInXDays = async (nbFromDays, nbToDays) => {
 
 const systemDetailsInXDays = async (ctx, nbOfDays) => {
   const twoTimeNbOfDays = nbOfDays * 2;
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
 
   try {
-    const adminInfo = Admin.findOne({
-      where: {
-        id: userId,
-      },
-      attributes: ["role"],
-      raw: true,
-    });
 
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const listEventsInXDays = await listEventInXDays(0, nbOfDays);
       const nbEventInXDays = listEventsInXDays.length;
       const listPostsInXDays = await listPostInXDays(0, nbOfDays);
@@ -309,29 +286,24 @@ const systemDetailsInXDays = async (ctx, nbOfDays) => {
         nbOfNewRegisterInXDays,
         percentXdaysRegisterChange,
       };
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập thông tin này.",
       });
     }
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "userId",
+      message: "Không tìm thấy quản trị viên này.",
+    });
   }
 };
 
 const listCollaborator = async (ctx) => {
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   try {
-    const adminRole = Admin.findOne({
-      where: {
-        id: userId,
-      },
-      attributes: ["role"],
-      raw: true,
-    });
-
-    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const listCollaborators = await Admin.findAll({
         where: {
           role: {
@@ -375,34 +347,24 @@ const listCollaborator = async (ctx) => {
       );
 
       return res;
-    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập thông tin này.",
       });
     }
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
       field: "userId",
-      message: "Collaborator is not found",
+      message: "Không tìm thấy quản trị viên này.",
     });
   }
 };
 
 const listPostManage = async (ctx) => {
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   try {
-    const adminRole = Admin.findOne({
-      where: {
-        id: userId,
-      },
-      attributes: ["role"],
-      raw: true,
-    });
-
-    if (adminRole.role === "superadmin" || adminRole.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       // const listPinPost = await PinServices.getListPinPost();
       const listReportedPost = await ReportService.listReportedPost();
       // const listNoRegisterPost = await UserPostService.getListPostNoRegister();
@@ -412,32 +374,25 @@ const listPostManage = async (ctx) => {
         listReportedPost,
         // listNoRegisterPost,
       };
-    } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập thông tin này.",
       });
     }
   } catch (error) {
     throw new NotFoundError({
-      field: "postId",
-      message: "Post is not found",
+      field: "userId",
+      message: "Không tìm thấy quản trị viên này.",
     });
   }
 };
 
 const collaboratorInfo = async (ctx, userId) => {
-  const adminId = ctx?.user.id;
+  const {admin} = ctx;
   try {
-    const isAdmin = await Admin.findOne({
-      where: {
-        id: adminId,
-      },
-      attributes: ["role"],
-      raw: true,
-    });
 
-    if (isAdmin.role === "Admin" || isAdmin.role === "superadmin") {
+    if (admin.role === "Admin" || admin.role === "superadmin") {
       const res = await Admin.findOne({
         where: {
           id: userId,
@@ -455,21 +410,21 @@ const collaboratorInfo = async (ctx, userId) => {
       });
 
       return { ...res, adminAddedName: updatedName.name };
-    } else if (isAdmin.role !== "Admin" && isAdmin.role !== "superadmin") {
+    } else if (admin.role !== "Admin" && admin.role !== "superadmin") {
       throw new BadRequestError({
         field: "adminId",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền truy cập thông tin này.",
       });
     }
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
       field: "adminId",
-      message: "Admin is not found",
+      message: "Không tìm thấy quản trị viên này.",
     });
   }
 };
+
+const listAllActivityRelatedToReport = async (ctx, ) => {}
 
 export default {
   createAdmin,
