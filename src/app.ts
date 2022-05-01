@@ -77,7 +77,11 @@ const resetDb = async () => {
 
 app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
   const token = await sign({ user: req.user });
-  res.redirect(`${process.env.WEB_URL}?token=${token}`);
+  if (!req.user.email.includes("fpt.edu.vn")) {
+    res.redirect(`http://localhost:3000?error=access_denied`);
+  } else {
+    res.redirect(`http://localhost:3000?token=${token}`);
+  }
 });
 
 app.get("/mysql", async (req, res) => {

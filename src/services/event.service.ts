@@ -1021,11 +1021,7 @@ const listEventManageByCollaborator = async (collabId) => {
 
 const listCollaboratorInfo = async (ctx) => {
   const { user } = ctx;
-  console.log("ctx", ctx);
 
-  console.log("user", user);
-
-  console.log(user.role);
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       const listCollaborator = await Admin.findAll({

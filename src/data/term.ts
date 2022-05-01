@@ -43,18 +43,18 @@ export const TERMS = [
   //   id: 28,
   //   name: "Fall2020",
   // },
-  // {
-  //   termId: 29,
-  //   termName: "Spring2021",
-  // },
-  // {
-  //   termId: 30,
-  //   termName: "Summer2021",
-  // },
-  // {
-  //   termId: 31,
-  //   termName: "Fall2021",
-  // },
+  {
+    termId: 29,
+    termName: "Spring2021",
+  },
+  {
+    termId: 30,
+    termName: "Summer2021",
+  },
+  {
+    termId: 31,
+    termName: "Fall2021",
+  },
   {
     termId: 32,
     termName: "Spring2022",

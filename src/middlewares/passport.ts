@@ -44,8 +44,10 @@ export const initPassport = () => {
           const user = await MySQLClient.transaction(async (transaction) => {
             const user = await User.findOne({
               where: { googleId: profile.id },
+              raw: true,
               transaction,
             });
+
             if (!user) {
               return User.create(
                 {
