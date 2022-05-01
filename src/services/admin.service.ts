@@ -32,7 +32,7 @@ const createAdmin = async () => {
 const addCollaborator = async (ctx, payload) => {
   const { email, password, name, role, permission, address, phone, facebook } =
     payload;
-  const {user} = ctx;
+  const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       const user = await Admin.findOne({
@@ -92,7 +92,7 @@ const addCollaborator = async (ctx, payload) => {
 const updateCollaborator = async (ctx, payload) => {
   const { id, email, name, role, permission, address, phone, facebook } =
     payload;
-  const {user} = ctx;
+  const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       const res = await Admin.update(
@@ -223,10 +223,9 @@ const listNewRegisterInXDays = async (nbFromDays, nbToDays) => {
 
 const systemDetailsInXDays = async (ctx, nbOfDays) => {
   const twoTimeNbOfDays = nbOfDays * 2;
-  const {user} = ctx;
+  const { user } = ctx;
 
   try {
-
     if (user.role === "superadmin" || user.role === "Admin") {
       const listEventsInXDays = await listEventInXDays(0, nbOfDays);
       const nbEventInXDays = listEventsInXDays.length;
@@ -301,7 +300,7 @@ const systemDetailsInXDays = async (ctx, nbOfDays) => {
 };
 
 const listCollaborator = async (ctx) => {
-  const {user} = ctx;
+  const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       const listCollaborators = await Admin.findAll({
@@ -362,7 +361,7 @@ const listCollaborator = async (ctx) => {
 };
 
 const listPostManage = async (ctx) => {
-  const {user} = ctx;
+  const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       // const listPinPost = await PinServices.getListPinPost();
@@ -389,10 +388,9 @@ const listPostManage = async (ctx) => {
 };
 
 const collaboratorInfo = async (ctx, userId) => {
-  const {admin} = ctx;
+  const { user } = ctx;
   try {
-
-    if (admin.role === "Admin" || admin.role === "superadmin") {
+    if (user.role === "Admin" || user.role === "superadmin") {
       const res = await Admin.findOne({
         where: {
           id: userId,
@@ -410,7 +408,7 @@ const collaboratorInfo = async (ctx, userId) => {
       });
 
       return { ...res, adminAddedName: updatedName.name };
-    } else if (admin.role !== "Admin" && admin.role !== "superadmin") {
+    } else if (user.role !== "Admin" && user.role !== "superadmin") {
       throw new BadRequestError({
         field: "adminId",
         message: "Bạn không có quyền truy cập thông tin này.",
@@ -424,7 +422,7 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
-const listAllActivityRelatedToReport = async (ctx, ) => {}
+const listAllActivityRelatedToReport = async (ctx) => {};
 
 export default {
   createAdmin,
