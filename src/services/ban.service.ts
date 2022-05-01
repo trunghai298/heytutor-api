@@ -25,41 +25,33 @@ import UserPermission from "../models/user-permission.model";
 // };
 
 const createBan = async (ctx, payload) => {
-  const adminId = ctx?.admin?.id;
-  const { userId, type, banDate, eventId, postId, commentId } = payload;
-  // const banDate = new Date(Date.now());
+  const { user } = ctx;
+  const { userId, type, eventId, postId, commentId } = payload;
+  const banDate = new Date(Date.now());
 
   let unBanDate;
   try {
-    const adminInfo = await Admin.findOne({
-      where: {
-        id: adminId,
-      },
-      attributes: ["name", "role"],
-      raw: true,
-    });
-
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       if (type === "1-1" || type === "2-1" || type === "3-1") {
-        unBanDate = new Date(banDate + 1 * 24 * 60 * 60 * 1000);
+        unBanDate = new Date(Date.now() + 1 * 24 * 60 * 60 * 1000);
       } else if (type === "1-2" || type === "2-2" || type === "3-2") {
-        unBanDate = new Date(banDate + 3 * 24 * 60 * 60 * 1000);
+        unBanDate = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000);
       } else if (type === "1-3" || type === "2-3" || type === "3-3") {
-        unBanDate = new Date(banDate + 5 * 24 * 60 * 60 * 1000);
+        unBanDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
       } else if (type === "1-4" || type === "2-4" || type === "3-4") {
-        unBanDate = new Date(banDate + 7 * 24 * 60 * 60 * 1000);
+        unBanDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
       }
       const createBan = await Ban.create({
         userId: userId,
         type: type,
         banDate: banDate,
         unbanDate: unBanDate,
-        banBy: adminId,
+        banBy: user.id,
         eventId: eventId,
       });
 
       const updateReport = await ReportService.resolvedSimilarReport(
-        adminId,
+        user.id,
         userId,
         eventId,
         postId,
@@ -109,10 +101,10 @@ const createBan = async (ctx, payload) => {
       }
 
       const log = await ActivityServices.create({
-        userId: adminId,
-        userName: adminInfo.name,
+        userId: user.id,
+        userName: user.name,
         action: notiType,
-        content: `ban user ${userId} with type: ${type} by ${adminId}`,
+        content: `ban user ${userId} with type: ${type} by ${user.id}`,
       });
 
       const notification = {
@@ -121,22 +113,22 @@ const createBan = async (ctx, payload) => {
         commentId: commentId,
         eventId: eventId,
         notificationType: notiType,
-        fromUserId: adminId,
-        fromUserName: adminInfo.name,
+        fromUserId: user.id,
+        fromUserName: user.name,
       };
       await NotificationService.create(notification);
 
       return { status: 200 };
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
@@ -169,19 +161,12 @@ const createBan = async (ctx, payload) => {
 // }
 
 const updateBan = async (ctx, payload) => {
-  const adminId = ctx?.admin?.id;
+  const { user } = ctx;
   const { userId, type, eventId } = payload;
   const today = new Date(Date.now());
   // const banDate = new Date(Date.now());
   try {
-    const adminInfo = await Admin.findOne({
-      where: {
-        id: adminId,
-      },
-      attributes: ["name", "role"],
-      raw: true,
-    });
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const ban = await Ban.findOne({
         where: {
           userId,
@@ -207,7 +192,7 @@ const updateBan = async (ctx, payload) => {
         const res = await Ban.update(
           {
             unbanDate: tempUnBanDate,
-            updateBy: adminId,
+            updateBy: user.id,
             eventId: eventId,
           },
           {
@@ -227,10 +212,10 @@ const updateBan = async (ctx, payload) => {
         }
 
         const log = await ActivityServices.create({
-          userId: adminId,
-          userName: adminInfo.name,
+          userId: user.id,
+          userName: user.name,
           action: notiType,
-          content: `update ban user ${userId} type: ${type} by ${adminId}`,
+          content: `update ban user ${userId} type: ${type} by ${user.id}`,
         });
 
         const notification = {
@@ -239,25 +224,25 @@ const updateBan = async (ctx, payload) => {
           commentId: ban.commentId,
           eventId: eventId,
           notificationType: notiType,
-          fromUserId: adminId,
-          fromUserName: adminInfo.name,
+          fromUserId: user.id,
+          fromUserName: user.name,
         };
         await NotificationService.create(notification);
 
         return { status: 200 };
       } else {
-        return "Ban expired!!!";
+        return "Lệnh cấm đã hết hiệu lực.";
       }
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này",
       });
     }
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
