@@ -1,6 +1,6 @@
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import { Op } from "sequelize";
-import { map } from "lodash";
+import { map, compact } from "lodash";
 import Report from "../models/report.model";
 import Ban from "../models/ban.model";
 import Events from "../models/event.model";
@@ -90,7 +90,7 @@ const checkReportInDay = async () => {
 };
 
 const createReport = async (ctx, payload) => {
-  const {reporter} = ctx;
+  const { reporter } = ctx;
   const { userId, postId, eventId, reason, content, commentId } = payload;
 
   try {
@@ -166,6 +166,9 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
       raw: true,
     });
 
+console.log(listReport);
+
+
     const reportDetail = await Promise.all(
       map(listReport, async (report) => {
         const postTitle = await Post.findOne({
@@ -187,7 +190,7 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
           ...report,
           postTitle: postTitle.title,
           reportedName: reportedName.name,
-        }
+        };
       })
     );
 
@@ -195,20 +198,20 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
       where: {
         id: userId,
       },
-      attributes: ["name"],
+      attributes: ["name", "id"],
       raw: true,
     });
 
-    const eventTitle = await Events.findOne({
-      where: {
-        id: eventId,
-      },
-      raw: true,
-    });
+    // const eventTitle = await Events.findOne({
+    //   where: {
+    //     id: eventId,
+    //   },
+    //   raw: true,
+    // });
 
     return {
       userInfo,
-      eventTitle,
+      // eventTitle,
       reportDetail,
     };
   } catch (error) {
@@ -289,9 +292,8 @@ const listReportOfUser = async (userId, eventId) => {
       listReportResolved: listReportResolved,
     };
   } catch (error) {
-
     console.log(error);
-    
+
     throw new NotFoundError({
       field: "userId",
       message: "Không tìm thấy người dùng.",
