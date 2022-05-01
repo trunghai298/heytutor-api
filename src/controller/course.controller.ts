@@ -6,6 +6,13 @@ const create = (req, res, next) => {
     .catch(next);
 };
 
+const list = (req, res, next) => {
+  CourseServices.list(req.query.limit, req.query.offset)
+    .then((students) => res.json(students))
+    .catch(next);
+};
+
 export default {
   create,
+  list,
 };

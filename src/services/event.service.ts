@@ -895,7 +895,6 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
   const userId = ctx?.user?.id;
   try {
     const listEvent = await countActiveEventOfCollaborator(userId);
-
     let a = [];
 
     const manageUserEventId = await Promise.all(
