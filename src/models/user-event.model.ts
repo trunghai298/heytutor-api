@@ -27,10 +27,12 @@ const UserEvent = MySQLClient.define<UserEventInstance>("UserEvent", {
   },
   isSupporter: {
     allowNull: true,
+    defaultValue: 0,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   isRequestor: {
     allowNull: true,
+    defaultValue: 0,
     type: DataTypes.INTEGER.UNSIGNED,
   },
   createdAt: {

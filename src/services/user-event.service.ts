@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
 import UserPermissionService from "./user-permission.service";
 import ActivityServices from "./activity.service";
+import UserPermission from "../models/user-permission.model";
 
 /**
  * To create a new term
@@ -18,42 +19,19 @@ const list = async () => {
   }
 };
 
-const joinEvent = async (ctx, payload) => {
+const joinEvent = async (ctx, eventId) => {
   const { user } = ctx;
-  const { eventId, isSupporter, isRequestor } = payload;
 
   try {
-    const res = await UserEvent.findOne({
-      where: {
-        userId: user.id,
-        eventId,
-      },
-      attributes: ["isSupporter", "isRequestor"],
-      raw: true,
+    await UserEvent.create({
+      userId: user.id,
+      eventId: eventId,
     });
 
-    if (res === null) {
-      await UserEvent.create({
-        userId: user.id,
-        eventId: eventId,
-        isSupporter: isSupporter,
-        isRequestor: isRequestor,
-      });
-      await UserPermissionService.createPermission({
-        userId: user.id,
-        eventId: eventId,
-      });
-    } else {
-      await UserEvent.update(
-        {
-          isSupporter: isSupporter,
-          isRequestor: isRequestor,
-        },
-        {
-          where: { userId: user.id, eventId },
-        }
-      );
-    }
+    await UserPermissionService.createPermission({
+      userId: user.id,
+      eventId: eventId,
+    });
 
     await ActivityServices.create({
       userId: user.id,
@@ -64,6 +42,8 @@ const joinEvent = async (ctx, payload) => {
 
     return { status: 200 };
   } catch (error) {
+    console.log(error);
+
     throw new BadRequestError({
       field: "userId-eventId",
       message: "Failed to create this item.",
@@ -71,9 +51,8 @@ const joinEvent = async (ctx, payload) => {
   }
 };
 
-const unJoinEvent = async (ctx, event) => {
+const unJoinEvent = async (ctx, eventId) => {
   const { user } = ctx;
-  const eventId = event.eventId;
   try {
     const res = await UserEvent.destroy({
       where: {
@@ -81,11 +60,19 @@ const unJoinEvent = async (ctx, event) => {
         eventId,
       },
     });
+
+    const result = await UserPermission.destroy({
+      where: {
+        userId: user.id,
+        eventId,
+      },
+    });
+
     const log = await ActivityServices.create({
       userId: user.id,
       username: user.name,
       action: "unjoin_event",
-      content: `${user.name} huỷ tham gia sự kiện ${eventId}`,
+      content: `người dùng ${user.name} huỷ tham gia sự kiện ${eventId}`,
     });
     return { status: 200 };
   } catch (error) {

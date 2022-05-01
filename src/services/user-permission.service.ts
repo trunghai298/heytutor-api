@@ -233,7 +233,7 @@ const createPermission = async (payload) => {
 //               },
 //             }
 //           );
-          
+
 //           const payload = {
 //             userId: ban.userId,
 //             notificationType: NOTI_TYPE.UpdateBanPost,
@@ -322,9 +322,7 @@ const checkUnBan = async () => {
 
     const res = await Promise.all(
       map(listBan, async (ban) => {
-        if (
-          ban.type.includes("1-")
-        ) {
+        if (ban.type.includes("1-")) {
           const permission = await UserPermission.update(
             {
               canPost: 1,
@@ -352,9 +350,7 @@ const checkUnBan = async () => {
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
-        } else if (
-          ban.type.includes("2-")
-        ) {
+        } else if (ban.type.includes("2-")) {
           const permission = await UserPermission.update(
             {
               canRegister: 1,
@@ -382,9 +378,7 @@ const checkUnBan = async () => {
             fromUserName: "Trung Hai",
           };
           await NotificationService.create(payload);
-        } else if (
-          ban.type.includes("3-")
-        ) {
+        } else if (ban.type.includes("3-")) {
           const permission = await UserPermission.update(
             {
               canComment: 1,

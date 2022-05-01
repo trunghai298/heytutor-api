@@ -265,15 +265,12 @@ const listEventByUser = async (ctx) => {
       })
     );
 
+    const eventstat = compact(EventStats);
+
     const listEventDetail = await Promise.all(
-      map(EventStats, async (event) => {
-        if (event !== null) {
-          const eventStats = await getEventUserPostDetail(
-            user.id,
-            event.eventId
-          );
-          return eventStats;
-        }
+      map(eventstat, async (event) => {
+        const eventStats = await getEventUserPostDetail(user.id, event.id);
+        return eventStats;
       })
     );
 
@@ -281,7 +278,8 @@ const listEventByUser = async (ctx) => {
   } catch (error) {
     throw new NotFoundError({
       field: "ctx",
-      message: "Không tìm thấy cộng tác viên này.",
+      // message: "Không tìm thấy người dùng này.",
+      message: error,
     });
   }
 };
@@ -303,13 +301,11 @@ const listEventByAdmin = async (ctx) => {
   }
 };
 
-const getUserRoleInEvent = async (ctx, eventId) => {
-  const { user } = ctx;
-
+const getUserRoleInEvent = async (userId, eventId) => {
   try {
     const userRole = await UserEvent.findAll({
       where: {
-        userId: user.id,
+        userId,
         eventId,
       },
       attributes: ["isSupporter", "isRequestor"],
@@ -325,12 +321,11 @@ const getUserRoleInEvent = async (ctx, eventId) => {
   }
 };
 
-const getPostOfUserInEvent = async (ctx, eventId) => {
-  const { user } = ctx;
+const getPostOfUserInEvent = async (userId, eventId) => {
   try {
     const listPostsOfUser = await UserPost.findAll({
       where: {
-        userId: user.id,
+        userId,
         eventId,
       },
       raw: true,
@@ -339,7 +334,8 @@ const getPostOfUserInEvent = async (ctx, eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Không tìm thấy sự kiện này.",
+      // message: "Không tìm thấy sự kiện này.",
+      message: error,
     });
   }
 };
@@ -496,7 +492,7 @@ const isShortTermEvent = async (eventId) => {
   }
 };
 
-const getEventUserPostDetail = async (ctx, eventId) => {
+const getEventUserPostDetail = async (userId, eventId) => {
   try {
     // const listSupporter = await UserEvent.findAll({
     //   where: {
@@ -527,9 +523,9 @@ const getEventUserPostDetail = async (ctx, eventId) => {
     // const eventPosts = await getPostOfEvent(eventId);
     const postNearDeadline = await getPostNearEndInEvent(eventId);
     const postNoRegister = await getPostNoRegisterInEvent(eventId);
-    const eventUserPosts = await getPostOfUserInEvent(ctx, eventId);
+    const eventUserPosts = await getPostOfUserInEvent(userId, eventId);
     const eventDetail = await getEventDetail(eventId);
-    const eventRole = await getUserRoleInEvent(ctx, eventId);
+    // const eventRole = await getUserRoleInEvent(userId, eventId);
     return {
       eventContent: eventDetail,
       // listUserSupporter: supportList,
@@ -538,12 +534,15 @@ const getEventUserPostDetail = async (ctx, eventId) => {
       listNonRegisterPost: postNoRegister.length,
       listUserRequestor: requestorList.length,
       // listPostOfEvent: eventPosts,
-      userRoleInEvent: eventRole,
+      // userRoleInEvent: eventRole,
     };
   } catch (error) {
+    console.log(error);
+
     throw new NotFoundError({
       field: "eventId",
-      message: "Không tìm thấy sự kiện này.",
+      // message: "Không tìm thấy sự kiện này.",
+      message: error,
     });
   }
 };
