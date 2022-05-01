@@ -106,11 +106,10 @@ const create = async (ctx, payload) => {
  * To edit an existed post
  */
 const edit = async (ctx, payload) => {
-  const { postId, title, content, deadline } = payload;
   const { user } = ctx;
-  const transaction = await MySQLClient.transaction();
   try {
-    const post = await Post.findOne({ where: { id: postId } });
+    const { postId, title, content, deadline } = payload;
+    const post = await Post.findOne({ where: { id: postId }, raw: true });
 
     if (!post) {
       throw new NotFoundError({
@@ -119,22 +118,18 @@ const edit = async (ctx, payload) => {
       });
     }
 
-    const updatedPost = await Post.update(
-      { title, content, deadline },
-      { where: { id: postId }, transaction }
-    );
-    await transaction.commit();
+    await Post.update({ title, content, deadline }, { where: { id: postId } });
 
-    const log = await activityService.create({
+    await activityService.create({
       userId: user.id,
       username: user.name,
-      action: NOTI_TYPE.UpdatePost,
-      content: `Người dùng ${user.id} cập nhật vấn đề ${post.id}, dữ liệu cũ: ${payload}`,
+      action: "edit_post",
+      content: `chỉnh sửa bài đăng ${post.id}`,
     });
 
-    return updatedPost;
+    return Post.findOne({ where: { id: postId }, raw: true });
   } catch (error) {
-    await transaction.rollback();
+    console.log(error);
     throw new BadRequestError({
       field: "postId",
       message: "Có lỗi khi cập nhật vấn đề này.",

@@ -1,10 +1,7 @@
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
 import UserPermissionService from "./user-permission.service";
-import { NOTI_TYPE } from "../constants/notification";
-import NotificationService from "./notification.service";
 import ActivityServices from "./activity.service";
-import User from "../models/user.model";
 
 /**
  * To create a new term
@@ -22,13 +19,13 @@ const list = async () => {
 };
 
 const joinEvent = async (ctx, payload) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const { eventId, isSupporter, isRequestor } = payload;
 
   try {
     const res = await UserEvent.findOne({
       where: {
-        userId,
+        userId: user.id,
         eventId,
       },
       attributes: ["isSupporter", "isRequestor"],
@@ -37,13 +34,13 @@ const joinEvent = async (ctx, payload) => {
 
     if (res === null) {
       await UserEvent.create({
-        userId: userId,
+        userId: user.id,
         eventId: eventId,
         isSupporter: isSupporter,
         isRequestor: isRequestor,
       });
       await UserPermissionService.createPermission({
-        userId: userId,
+        userId: user.id,
         eventId: eventId,
       });
     } else {
@@ -53,29 +50,16 @@ const joinEvent = async (ctx, payload) => {
           isRequestor: isRequestor,
         },
         {
-          where: { userId, eventId },
+          where: { userId: user.id, eventId },
         }
       );
     }
-    // const payload = {
-    //   userId: userId,
-    //   eventId: eventId,
-    //   notificationType: NOTI_TYPE.JoinEvent,
-    // };
-    // await NotificationService.create(payload);
 
-    const username = await (
-      await User.findOne({
-        where: {
-          id: userId,
-        },
-      })
-    ).name;
-    const log = await ActivityServices.create({
-      userId,
-      username,
-      action: NOTI_TYPE.JoinEvent,
-      content: `userId ${userId} join event ${eventId}`,
+    await ActivityServices.create({
+      userId: user.id,
+      username: user.name,
+      action: "join_event",
+      content: `${user.name} tham gia sự kiện ${eventId}`,
     });
 
     return { status: 200 };
@@ -88,34 +72,20 @@ const joinEvent = async (ctx, payload) => {
 };
 
 const unJoinEvent = async (ctx, event) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const eventId = event.eventId;
   try {
     const res = await UserEvent.destroy({
       where: {
-        userId,
+        userId: user.id,
         eventId,
       },
     });
-
-    // const payload = {
-    //   userId: userId,
-    //   eventId: eventId,
-    //   notificationType: NOTI_TYPE.UnJoinEvent,
-    // };
-    // await NotificationService.create(payload);
-    const username = await (
-      await User.findOne({
-        where: {
-          id: userId,
-        },
-      })
-    ).name;
     const log = await ActivityServices.create({
-      userId,
-      username,
-      action: NOTI_TYPE.UnJoinEvent,
-      content: `userId ${userId} un join event ${eventId}`,
+      userId: user.id,
+      username: user.name,
+      action: "unjoin_event",
+      content: `${user.name} huỷ tham gia sự kiện ${eventId}`,
     });
     return { status: 200 };
   } catch (error) {

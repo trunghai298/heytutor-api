@@ -551,7 +551,7 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
   const { user } = ctx;
   const today = new Date(Date.now());
   try {
-    const eventNotEnroll = await UserEvent.findAll({
+    const eventsNotEnroll = await UserEvent.findAll({
       where: {
         userId: {
           [Op.ne]: user.id,
@@ -561,7 +561,7 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
         [Sequelize.fn("DISTINCT", Sequelize.col("eventId")), "eventId"],
       ],
       raw: true,
-      limit: parseInt(limit) || 3,
+      limit: parseInt(limit) || 10,
       offset: parseInt(offset) || 0,
     });
 

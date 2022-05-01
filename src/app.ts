@@ -23,7 +23,7 @@ import Student from "./models/student.model";
 import Class from "./models/class.model";
 import Course from "./models/course.model";
 import Department from "./models/department.model";
-import Event from "./models/event.model";
+import User from "./models/user.model";
 const app = express();
 
 // Third party middlewares
@@ -33,6 +33,9 @@ app.use(bodyParser.json());
 app.use(initPassport());
 
 require("dotenv").config();
+console.log(
+  `Connected to ${process.env.DB_HOST} - dbName: ${process.env.DB_NAME} - port: ${process.env.DB_PORT}`
+);
 
 const compare = require("tsscmp");
 const auth = require("basic-auth");
@@ -66,7 +69,7 @@ app.post("/auth/admin", AuthController.adminLogin);
 
 const resetDb = async () => {
   try {
-    await Event.sync({ force: true });
+    // await User.sync({ force: true });
   } catch (error) {
     console.log(error);
   }
@@ -101,7 +104,7 @@ app.use(initSecurity());
 app.get("/", (req, res) => res.send("Hello World"));
 
 // JWT verification
-// app.use(authenticateJWT());
+app.use(authenticateJWT());
 Route(app);
 
 export default app;
