@@ -1,6 +1,7 @@
 import Student from "../models/student.model";
 import { NotFoundError, BadRequestError } from "../utils/errors";
 import { map } from "lodash";
+import { Sequelize } from "sequelize";
 
 const fetchById = async (id: number) => {
   try {
@@ -33,6 +34,22 @@ const list = async (limit, offset) => {
       offset: parseInt(offset, 10) || 0,
     });
     return listStudent;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Something went wrong!.",
+    });
+  }
+};
+
+const count = async () => {
+  try {
+    const listStudent = await Student.findAll({
+      attributes: [[Sequelize.fn("DISTINCT", Sequelize.col("stdId")), "stdId"]],
+      raw: true,
+      logging: true,
+    });
+    return listStudent.length;
   } catch (error) {
     throw new BadRequestError({
       field: "id",
@@ -93,5 +110,6 @@ export default {
   getListSubjects,
   fetchById,
   list,
+  count,
   subjectGroupByMajor,
 };

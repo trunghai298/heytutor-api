@@ -12,14 +12,21 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
+const count = (req, res, next) => {
+  StudentServices.count()
+    .then((students) => res.json(students))
+    .catch(next);
+};
+
 const subjectGroupByMajor = (req, res, next) => {
   StudentServices.subjectGroupByMajor()
-  .then((student) => res.json(student))
-  .catch(next);
-}
+    .then((student) => res.json(student))
+    .catch(next);
+};
 
 export default {
   fetch,
   list,
+  count,
   subjectGroupByMajor,
 };

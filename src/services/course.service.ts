@@ -1,5 +1,6 @@
 import { BadRequestError } from "../utils/errors";
 import Course from "../models/course.model";
+import { Sequelize } from "sequelize";
 
 /**
  * To create a new course
@@ -37,7 +38,26 @@ const list = async (limit, offset) => {
   }
 };
 
+const count = async () => {
+  try {
+    const res = await Course.findAll({
+      attributes: [
+        [Sequelize.fn("DISTINCT", Sequelize.col("courseId")), "courseId"],
+      ],
+      raw: true,
+      logging: true,
+    });
+    return res.length;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "id",
+      message: "Something went wrong!.",
+    });
+  }
+};
+
 export default {
   addCourse,
   list,
+  count,
 };

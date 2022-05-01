@@ -20,6 +20,7 @@ import Ban from "./ban.routes";
 import Notification from "./notification.routes";
 import UserPermission from "./user-permission.routes";
 import Suggest from "./suggest";
+import Search from "./search";
 
 export default (app: any) => {
   Auth(app);
@@ -44,4 +45,5 @@ export default (app: any) => {
   Notification(app);
   UserPermission(app);
   Suggest(app);
+  Search(app);
 };

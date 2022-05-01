@@ -12,7 +12,14 @@ const list = (req, res, next) => {
     .catch(next);
 };
 
+const count = (req, res, next) => {
+  CourseServices.count()
+    .then((students) => res.json(students))
+    .catch(next);
+};
+
 export default {
   create,
   list,
+  count,
 };
