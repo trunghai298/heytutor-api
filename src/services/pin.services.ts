@@ -23,7 +23,7 @@ const createPostPin = async (ctx, postId) => {
     });
 
     if (isValid.length >= 3) {
-      return "Over default number pin post!!!";
+      return "Số lượng vấn đề vượt quá số lượng ghim!";
     } else if (isValid.length < 3) {
       const userName = await User.findOne({
         where: {
@@ -71,7 +71,7 @@ const createPostPin = async (ctx, postId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
-      message: "Cannot find post!!!",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -128,7 +128,7 @@ const userUnPinPost = async (ctx, postId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
-      message: "Cannot find post!!!",
+      message: "Không tìm thấy vấn đề!",
     });
   }
 };
@@ -159,7 +159,7 @@ const checkPin = async () => {
           userId: pin.pinBy,
           userName: pin.userPin,
           action: NOTI_TYPE.SysUnPinPost,
-          content: `system unpin post ${pin.postId} of user ${pin.pinBy}`,
+          content: `Hệ thống gỡ ghim vấn đề ${pin.postId} của người dùng ${pin.pinBy}`,
         });
 
         const notification = {
@@ -177,7 +177,7 @@ const checkPin = async () => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Cannot find pin row!!!",
+      message: "Không tìm thấy vấn đề ghim!",
     });
   }
 };
@@ -209,12 +209,12 @@ const addEventPin = async (ctx, eventId) => {
 
       return { status: 200 };
     } else {
-      return "You do not have permission to perform this action!!!";
+      return "Bạn không có quyền chỉnh sửa thông tin này!";
     }
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Cannot find admin!!!",
+      message: "Không tìm thấy quản trị viên!",
     });
   }
 };
@@ -241,17 +241,17 @@ const deleteEventPin = async (ctx, eventId) => {
         userId: userId,
         userName: admin.name,
         action: NOTI_TYPE.UnPinEvent,
-        content: `adminId ${userId} unpin event ${eventId}`,
+        content: `Quản trị viên ${userId} bỏ ghim sự kiện ${eventId}`,
       });
 
       return { status: 200 };
     } else {
-      return "You do not have permission to perform this action!!!";
+      return "Bạn không có quyền chỉnh sửa thông tin này!";
     }
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Cannot find admin!!!",
+      message: "Không tìm thấy quản trị viên!",
     });
   }
 };
@@ -284,7 +284,7 @@ const getListPinPost = async () => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Cannot find post pined!!!",
+      message: "Không tìm thấy vấn đề ghim!",
     });
   }
 };
@@ -340,13 +340,13 @@ const getPinEvent = async (ctx) => {
     } else if (adminRole.role !== "superadmin" && adminRole.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Cannot find event pined!!!",
+      message: "Không tìm thấy vấn đề ghim!",
     });
   }
 };

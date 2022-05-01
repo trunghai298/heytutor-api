@@ -175,18 +175,19 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
           attributes: ["title"],
           raw: true,
         });
-        const reportedName = await User.findOne({
+        const reportedDetail = await User.findOne({
           where: {
             id: report.reportedBy,
           },
-          attributes: ["name"],
+          attributes: ["name", "email"],
           raw: true,
         });
 
         return {
           ...report,
           postTitle: postTitle.title,
-          reportedName: reportedName.name,
+          reportedName: reportedDetail.name,
+          reportedEmail: reportedDetail.email,
         };
       })
     );
@@ -240,9 +241,19 @@ const listReportResolvedByUser = async (userId, eventId) => {
           raw: true,
         });
 
+        const reportedDetail = await User.findOne({
+          where: {
+            id: report.reportedBy,
+          },
+          attributes: ["name", "email"],
+          raw: true,
+        });
+
         return {
           ...report,
           adminUpdate: adminUpdate.name,
+          reportedName: reportedDetail.name,
+          reportedEmail: reportedDetail.email,
         };
       })
     );
