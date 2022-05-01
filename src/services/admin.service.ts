@@ -57,7 +57,7 @@ const addCollaborator = async (ctx, payload) => {
           userId: user.id,
           username: user.name,
           action: NOTI_TYPE.NewCollab,
-          content: `admin ${user.name} thêm cộng tác viên mới ${name}`,
+          content: `Quản trị viên ${user.name} thêm cộng tác viên mới ${name}`,
         });
 
         const id = await Admin.count();
@@ -353,6 +353,8 @@ const listCollaborator = async (ctx) => {
       });
     }
   } catch (error) {
+    console.log(error);
+    
     throw new NotFoundError({
       field: "userId",
       message: "Không tìm thấy quản trị viên này.",
