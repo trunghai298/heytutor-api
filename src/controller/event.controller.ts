@@ -49,13 +49,7 @@ const getEventByUser = (req, res, next) => {
 };
 
 const getEventUserPostDetail = (req, res, next) => {
-  EventServices.getEventUserPostDetail(req.ctx, req.params.eventId)
-    .then((evt) => res.json(evt))
-    .catch(next);
-};
-
-const getUserRoleInEvent = (req, res, next) => {
-  EventServices.getEventUserPostDetail(req.ctx, req.params.eventId)
+  EventServices.getEventUserPostDetail(req.ctx.user.id, req.params.eventId)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -79,11 +73,7 @@ const getEventTitle = (req, res, next) => {
 // };
 
 const getListEventNotEnroll = (req, res, next) => {
-  EventServices.getListEventNotEnroll(
-    req.ctx,
-    req.body.limit,
-    req.body.offset
-  )
+  EventServices.getListEventNotEnroll(req.ctx, req.body.limit, req.body.offset)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -103,7 +93,6 @@ export default {
   getEventStats,
   getEventByUser,
   getEventUserPostDetail,
-  getUserRoleInEvent,
   getEventByDuration,
   // listActiveUser,
   getListEventNotEnroll,

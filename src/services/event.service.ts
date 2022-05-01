@@ -167,6 +167,25 @@ const getEventDetail = async (eventId) => {
   }
 };
 
+const getTotalPostInEvent = async (eventId) => {
+  try {
+    const posts = await UserPost.findAll({
+      where: {
+        eventId,
+      },
+      raw: true,
+    });
+    return posts.length;
+  } catch (error) {
+    console.log(error);
+
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Event is not found",
+    });
+  }
+};
+
 const getPostOfEvent = async (params) => {
   const { eventId, limit, offset } = params;
 
@@ -327,6 +346,9 @@ const getPostOfUserInEvent = async (userId, eventId) => {
       where: {
         userId,
         eventId,
+        isDone: {
+          [Op.ne]: 1,
+        },
       },
       raw: true,
     });
@@ -494,19 +516,6 @@ const isShortTermEvent = async (eventId) => {
 
 const getEventUserPostDetail = async (userId, eventId) => {
   try {
-    // const listSupporter = await UserEvent.findAll({
-    //   where: {
-    //     eventId,
-    //     isSupporter: 1,
-    //   },
-    //   include: [User],
-    //   raw: true,
-    // });
-    // const supportList = map(listSupporter, (user) => {
-    //   const pickFields = pick(user, ["userId", "User.name", "User.email"]);
-    //   return pickFields;
-    // });
-
     const listRequestor = await UserEvent.findAll({
       where: {
         eventId,
@@ -520,28 +529,24 @@ const getEventUserPostDetail = async (userId, eventId) => {
       return pickFields;
     });
 
-    // const eventPosts = await getPostOfEvent(eventId);
     const postNearDeadline = await getPostNearEndInEvent(eventId);
     const postNoRegister = await getPostNoRegisterInEvent(eventId);
     const eventUserPosts = await getPostOfUserInEvent(userId, eventId);
     const eventDetail = await getEventDetail(eventId);
-    // const eventRole = await getUserRoleInEvent(userId, eventId);
+    const totalPost = await getTotalPostInEvent(eventId);
     return {
       eventContent: eventDetail,
-      // listUserSupporter: supportList,
       listPostInEventOfUser: eventUserPosts.length,
       listPostNearDeadline: postNearDeadline.length,
       listNonRegisterPost: postNoRegister.length,
       listUserRequestor: requestorList.length,
-      // listPostOfEvent: eventPosts,
-      // userRoleInEvent: eventRole,
+      totalPost,
     };
   } catch (error) {
     console.log(error);
 
     throw new NotFoundError({
       field: "eventId",
-      // message: "Không tìm thấy sự kiện này.",
       message: error,
     });
   }

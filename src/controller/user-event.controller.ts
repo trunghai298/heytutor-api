@@ -7,13 +7,13 @@ const list = (req, res, next) => {
 };
 
 const joinEvent = (req, res, next) => {
-  UserEventServices.joinEvent(req.ctx, req.query.eventId)
+  UserEventServices.joinEvent(req.ctx, req.body.eventId)
     .then((result) => res.json(result))
     .catch(next);
 };
 
 const unJoinEvent = (req, res, next) => {
-  UserEventServices.unJoinEvent(req.ctx, req.query.eventId)
+  UserEventServices.unJoinEvent(req.ctx, req.body.eventId)
     .then((result) => res.json(result))
     .catch(next);
 };

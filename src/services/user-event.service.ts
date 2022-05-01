@@ -54,26 +54,27 @@ const joinEvent = async (ctx, eventId) => {
 const unJoinEvent = async (ctx, eventId) => {
   const { user } = ctx;
   try {
-    const res = await UserEvent.destroy({
-      where: {
+    await Promise.all([
+      UserEvent.destroy({
+        where: {
+          userId: user.id,
+          eventId,
+        },
+      }),
+      UserPermission.destroy({
+        where: {
+          userId: user.id,
+          eventId,
+        },
+      }),
+      ActivityServices.create({
         userId: user.id,
-        eventId,
-      },
-    });
+        username: user.name,
+        action: "unjoin_event",
+        content: `người dùng ${user.name} huỷ tham gia sự kiện ${eventId}`,
+      }),
+    ]);
 
-    const result = await UserPermission.destroy({
-      where: {
-        userId: user.id,
-        eventId,
-      },
-    });
-
-    const log = await ActivityServices.create({
-      userId: user.id,
-      username: user.name,
-      action: "unjoin_event",
-      content: `người dùng ${user.name} huỷ tham gia sự kiện ${eventId}`,
-    });
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
