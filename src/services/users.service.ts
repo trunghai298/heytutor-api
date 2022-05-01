@@ -237,7 +237,7 @@ const totalNumberConfirmedOfSupporter = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };

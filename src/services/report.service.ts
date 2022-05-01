@@ -84,17 +84,17 @@ const checkReportInDay = async () => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: ".",
     });
   }
 };
 
 const createReport = async (ctx, payload) => {
-  const reporterId = ctx?.user?.id;
+  const {reporter} = ctx;
   const { userId, postId, eventId, reason, content, commentId } = payload;
 
   try {
-    if (reporterId !== userId) {
+    if (reporter.id !== userId) {
       const res = await Report.create({
         userId: userId,
         postId: postId,
@@ -102,22 +102,17 @@ const createReport = async (ctx, payload) => {
         commentId: commentId,
         reason: reason,
         content: content,
-        reporterId: reporterId,
+        reporterId: reporter.id,
       });
     }
-    const user = await User.findOne({
-      where: { reporterId },
-      attributes: ["name"],
-      raw: true,
-    });
 
     const payload = {
       userId: userId,
       postId: postId,
       eventId: eventId,
       commentId: commentId,
-      fromUserId: reporterId,
-      fromUsername: user.name,
+      fromUserId: reporter.id,
+      fromUsername: reporter.name,
     };
 
     let results;
@@ -142,19 +137,20 @@ const createReport = async (ctx, payload) => {
       };
     }
 
+    await NotificationService.create(results);
+
     const log = await ActivityServices.create({
-      userId,
-      reporterId,
+      userId: reporter.id,
+      username: reporter.name,
       action: notiType,
-      content: `userId ${userId} un join event ${eventId}`,
+      content: `Người dùng ${reporter.id} tạo báo cáo xấu cho người dùng ${userId} về nội dung ${notiType}`,
     });
 
-    await NotificationService.create(results);
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: "Có lỗi khi tạo báo cáo xấu.",
     });
   }
 };
@@ -298,7 +294,7 @@ const listReportOfUser = async (userId, eventId) => {
     
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -366,7 +362,7 @@ const listReportResolved = async (ctx) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -384,7 +380,7 @@ const listAllReportOfUser = async (userId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -401,7 +397,7 @@ const listReportInEvent = async (eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện.",
     });
   }
 };
@@ -446,7 +442,7 @@ const listReportedPost = async () => {
   } catch (error) {
     throw new NotFoundError({
       field: "id",
-      message: "Post is not found",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -490,7 +486,7 @@ const resolvedSimilarReport = async (
   } catch (error) {
     throw new NotFoundError({
       field: "id",
-      message: "Report is not found",
+      message: "Không tìm thấy báo cáo xấu.",
     });
   }
 };

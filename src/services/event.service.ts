@@ -229,21 +229,20 @@ const getPostOfEvent = async (params) => {
 
     return finalRes;
   } catch (error) {
-    console.log(error);
     throw new NotFoundError({
       field: "eventId",
-      message: "Event has no post.",
+      message: "Sự kiện này không có vấn đề nào.",
     });
   }
 };
 
 const listEventByUser = async (ctx) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const today = new Date(Date.now());
   try {
     const listEvent = await UserEvent.findAll({
       where: {
-        userId,
+        userId: user.id,
       },
       attributes: ["eventId"],
       raw: true,
@@ -268,7 +267,10 @@ const listEventByUser = async (ctx) => {
     const listEventDetail = await Promise.all(
       map(EventStats, async (event) => {
         if (event !== null) {
-          const eventStats = await getEventUserPostDetail(userId, event.id);
+          const eventStats = await getEventUserPostDetail(
+            user.id,
+            event.eventId
+          );
           return eventStats;
         }
       })
@@ -276,61 +278,68 @@ const listEventByUser = async (ctx) => {
 
     return compact(listEventDetail);
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "ctx",
+      message: "Không tìm thấy cộng tác viên này.",
+    });
   }
 };
 
 const listEventByAdmin = async (ctx) => {
   const { user } = ctx;
   try {
-    const listEvent = await Event.findAll({
-      where: {
-        createId: user.id,
-      },
-      raw: true,
-      orderBy: [["createdAt", "DESC"]],
-    });
+    const listEvent = await MySQLClient.query(
+      `SELECT * FROM Events WHERE JSON_CONTAINS(JSON_EXTRACT(Events.adminId, '$[*]'), '${user.id}') AND endAt > now() AND isApproved = 1`,
+      { type: "SELECT" }
+    );
 
     return listEvent;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "ctx",
+      message: "Không tìm thấy cộng tác viên này.",
+    });
   }
 };
 
 const getUserRoleInEvent = async (ctx, eventId) => {
-  try {
-    const userId = ctx?.user?.id;
+  const { user } = ctx;
 
+  try {
     const userRole = await UserEvent.findAll({
       where: {
-        userId,
+        userId: user.id,
         eventId,
       },
       attributes: ["isSupporter", "isRequestor"],
       raw: true,
     });
+
     return userRole;
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện này.",
     });
   }
 };
 
 const getPostOfUserInEvent = async (ctx, eventId) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   try {
     const listPostsOfUser = await UserPost.findAll({
       where: {
-        userId,
+        userId: user.id,
         eventId,
       },
       raw: true,
     });
     return listPostsOfUser;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện này.",
+    });
   }
 };
 
@@ -479,7 +488,10 @@ const isShortTermEvent = async (eventId) => {
     }
     return boolean;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện này.",
+    });
   }
 };
 
@@ -530,19 +542,19 @@ const getEventUserPostDetail = async (ctx, eventId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện này.",
     });
   }
 };
 
 const getListEventNotEnroll = async (ctx, limit, offset) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const today = new Date(Date.now());
   try {
     const eventsNotEnroll = await UserEvent.findAll({
       where: {
         userId: {
-          [Op.ne]: userId,
+          [Op.ne]: user.id,
         },
       },
       attributes: [
@@ -553,8 +565,24 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
       offset: parseInt(offset) || 0,
     });
 
-    const listEventNotEnroll = await Promise.all(
+    const listEventActive = await Promise.all(
       map(eventsNotEnroll, async (event) => {
+        const eventData = await Event.findOne({
+          where: {
+            id: event.eventId,
+            endAt: {
+              [Op.gt]: today,
+            },
+          },
+          attributes: ["id"],
+          raw: true,
+        });
+        return eventData;
+      })
+    );
+
+    const listEventNotEnroll = await Promise.all(
+      map(listEventActive, async (event) => {
         if (event !== null) {
           const eventDetail = await getEventDetail(event.id);
           const eventUser = await getEventUser(event.id);
@@ -590,7 +618,10 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
 
     // return events;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "ctx",
+      message: "Không tìm thấy nguời dùng này.",
+    });
   }
 };
 
@@ -668,7 +699,7 @@ const getEventByDuration = async () => {
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện này.",
     });
   }
 };
@@ -684,8 +715,6 @@ const getPostNearEndInEvent = async (eventId) => {
       raw: true,
     });
 
-    let arrayPosts = [];
-
     const listPosts = await Promise.all(
       map(listEventPosts, async (post) => {
         const posts = await Post.findAll({
@@ -697,16 +726,15 @@ const getPostNearEndInEvent = async (eventId) => {
           },
           raw: true,
         });
-
-        if (posts.length !== 0) {
-          // arrayPosts.push(posts);
-          return posts;
-        }
+        return posts;
       })
     );
-    return listPosts;
+    return compact(listPosts);
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện này.",
+    });
   }
 };
 
@@ -723,7 +751,10 @@ const getPostNoRegisterInEvent = async (eventId) => {
 
     return listEventPosts;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện này.",
+    });
   }
 };
 
@@ -739,7 +770,10 @@ const getPostDoneInEvent = async (eventId) => {
 
     return listPost.length;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "eventId",
+      message: "Không tìm thấy sự kiện này.",
+    });
   }
 };
 
@@ -758,27 +792,23 @@ const getEventForCreatePost = async () => {
     });
     return res;
   } catch (error) {
-    return error;
+    throw new NotFoundError({
+      field: "",
+      message: "Không tìm thấy sự kiện nào.",
+    });
   }
 };
 
 const approveEvent = async (ctx, eventId) => {
-  const adminId = ctx?.user?.id;
+  const { admin } = ctx;
 
   try {
-    const adminInfo = Admin.findOne({
-      where: {
-        id: adminId,
-      },
-      attributes: ["role", "name"],
-      raw: true,
-    });
-
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+    if (admin.role === "superadmin" || admin.role === "Admin") {
       const res = Event.update(
         {
           isApproved: 1,
-          approveBy: adminId,
+          approveBy: admin.id,
+          adminId: [],
         },
         {
           where: {
@@ -788,16 +818,16 @@ const approveEvent = async (ctx, eventId) => {
       );
 
       return res;
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (admin.role !== "superadmin" && admin.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện",
     });
   }
 };
@@ -813,7 +843,7 @@ const countActiveEventOfCollaborator = async (userId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "Collaborator is not found",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
@@ -867,7 +897,7 @@ const countUserReportInEventOfCollaborator = async (userId) => {
 
     throw new NotFoundError({
       field: "userId",
-      message: "Collaborator is not found",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
@@ -886,15 +916,16 @@ const countPendingEventOfCollaborator = async (userId) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "Collaborator is not found",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
 
 const getListUserEventsManageByCollaborator = async (ctx) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   try {
-    const listEvent = await countActiveEventOfCollaborator(userId);
+    const listEvent = await countActiveEventOfCollaborator(user.id);
+
     let a = [];
 
     const manageUserEventId = await Promise.all(
@@ -951,16 +982,15 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
     return userEventData.filter(Boolean);
   } catch (error) {
     throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
+      field: "ctx",
+      message: "Không tìm thấy tài khoản này.",
     });
   }
 };
 
-const listEventManageByCollaborator = async (ctx) => {
-  const userId = ctx?.user?.id;
+const listEventManageByCollaborator = async (collabId) => {
   try {
-    const listEvent = await countActiveEventOfCollaborator(userId);
+    const listEvent = await countActiveEventOfCollaborator(collabId);
     const res = await Promise.all(
       map(listEvent, async (event) => {
         const listUsers = await UserEventService.listUserOfEvent(event.id);
@@ -978,24 +1008,17 @@ const listEventManageByCollaborator = async (ctx) => {
     return res;
   } catch (error) {
     throw new NotFoundError({
-      field: "userId",
-      message: "User is not found",
+      field: "collabId",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
 
 const listCollaboratorInfo = async (ctx) => {
-  const adminId = ctx?.user?.id;
-  try {
-    const adminInfo = Admin.findOne({
-      where: {
-        id: adminId,
-      },
-      attributes: ["role", "name"],
-      raw: true,
-    });
+  const { admin } = ctx;
 
-    if (adminInfo.role === "superadmin" || adminInfo.role === "Admin") {
+  try {
+    if (admin.role === "superadmin" || admin.role === "Admin") {
       const listCollaborator = await Admin.findAll({
         where: {
           role: "ctv1",
@@ -1014,24 +1037,22 @@ const listCollaboratorInfo = async (ctx) => {
       );
 
       return res;
-    } else if (adminInfo.role !== "superadmin" && adminInfo.role !== "Admin") {
+    } else if (admin.role !== "superadmin" && admin.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to access this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
-    console.log(error);
-
     throw new NotFoundError({
       field: "listCollaborator",
-      message: "Collaborator is not found",
+      message: "Không tìm thấy cộng tác viên này.",
     });
   }
 };
 
 const assignEventAdmin = async (ctx, payload) => {
-  const userId = ctx?.user?.id;
+  const { user } = ctx;
   const { eventId, collaboratorId } = payload;
   let list = [];
   try {
@@ -1043,7 +1064,7 @@ const assignEventAdmin = async (ctx, payload) => {
       raw: true,
     });
 
-    const isAdmin = await listAdmins.adminId.includes(userId);
+    const isAdmin = await listAdmins.adminId.includes(user.id);
 
     const admins = listAdmins.adminId;
 
@@ -1065,13 +1086,13 @@ const assignEventAdmin = async (ctx, payload) => {
     } else if (isAdmin === false) {
       throw new BadRequestError({
         field: "ctx",
-        message: "You dont have permission to update this information",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
     throw new NotFoundError({
       field: "eventId",
-      message: "Event is not found",
+      message: "Không tìm thấy sự kiện này.",
     });
   }
 };

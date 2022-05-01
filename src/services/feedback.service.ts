@@ -7,7 +7,7 @@ import { NOTI_TYPE } from "../constants/notification";
 import { BadRequestError } from "../utils/errors";
 
 const newFeedback = async (ctx, payload) => {
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   const { postId, type, score, reason, content, receiverId } = payload;
 
   try {
@@ -18,30 +18,24 @@ const newFeedback = async (ctx, payload) => {
       score,
       reason,
       content,
-      fromUserId: userId,
+      fromUserId: user.id,
     });
 
     const newPayload = { receiverId, score, type };
     await RankingService.reCalculatePoint(newPayload);
 
-    const user = await User.findOne({
-      where: { userId },
-      attributes: ["name"],
-      raw: true,
-    });
-
     const log = await ActivityServices.create({
-      userId: userId,
+      userId: user.id,
       username: user.name,
       action: NOTI_TYPE.NewFeedback,
-      content: `userId: ${userId} create new feedback for userId: ${receiverId} of postId: ${postId}`,
+      content: `userId: ${user.id} create new feedback for userId: ${receiverId} of postId: ${postId}`,
     });
 
     const result = {
       userId: receiverId,
       postId: postId,
       notificationType: NOTI_TYPE.NewFeedback,
-      fromUserId: userId,
+      fromUserId: user.id,
       fromUsername: user.name,
     };
     await NotificationService.create(result);
@@ -50,7 +44,7 @@ const newFeedback = async (ctx, payload) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Cannot find user.",
+      message: "Không tìm thấy tài khoản.",
     });
   }
 };
@@ -91,7 +85,7 @@ const listMyFeedback = async (ctx, filter) => {
   } catch (error) {
     throw new BadRequestError({
       field: "userId",
-      message: "Cannot find user.",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };

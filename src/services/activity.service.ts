@@ -34,11 +34,11 @@ const create = async (payload) => {
 };
 
 const getActivitiesOfUser = async (ctx, filter) => {
-  const userId = ctx?.user?.id;
+  const {user} = ctx;
   try {
     const res = await Activity.findAll({
       where: { 
-        userId,
+        userId: user.id,
         filter,
       },
       raw: true,
