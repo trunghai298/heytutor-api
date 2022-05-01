@@ -13,6 +13,7 @@ import ReportService from "./report.service";
 import UserEventService from "./user-event.service";
 import usersService from "./users.service";
 import Admin from "../models/admin.model";
+import console from "console";
 
 /**
  * To create a new event
@@ -800,15 +801,20 @@ const getEventForCreatePost = async () => {
 };
 
 const approveEvent = async (ctx, eventId) => {
-  const { admin } = ctx;
+  const { user } = ctx;
 
   try {
-    if (admin.role === "superadmin" || admin.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
+      const eventDetail = await Event.FindOne({
+        where: { id: eventId },
+        raw: true,
+      });
+
       const res = Event.update(
         {
           isApproved: 1,
-          approveBy: admin.id,
-          adminId: [],
+          approveBy: user.id,
+          adminId: [eventDetail.createdId],
         },
         {
           where: {
@@ -818,7 +824,7 @@ const approveEvent = async (ctx, eventId) => {
       );
 
       return res;
-    } else if (admin.role !== "superadmin" && admin.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
         message: "Bạn không có quyền chỉnh sửa thông tin này.",
@@ -942,6 +948,8 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
       })
     );
 
+    console.log(a);
+
     const userEventData = await Promise.all(
       map(a, async (userEvent) => {
         const getUserRank = await RankingService.getUserRank(userEvent.userId);
@@ -965,17 +973,14 @@ const getListUserEventsManageByCollaborator = async (ctx) => {
         const listReported = await ReportService.listAllReportOfUser(
           userEvent.userId
         );
-
-        if (getBanDetail.length > 0) {
-          return {
-            rankInfo: getUserRank,
-            eventInfo: getEvent,
-            userInfo: getUserDetail,
-            userBanInfo: getBanDetail,
-            nbOfNotResolvedReport: listReportNotResolved,
-            nbOfReport: listReported,
-          };
-        }
+        return {
+          rankInfo: getUserRank,
+          eventInfo: getEvent,
+          userInfo: getUserDetail,
+          userBanInfo: getBanDetail,
+          nbOfNotResolvedReport: listReportNotResolved,
+          nbOfReport: listReported,
+        };
       })
     );
 
@@ -1015,10 +1020,10 @@ const listEventManageByCollaborator = async (collabId) => {
 };
 
 const listCollaboratorInfo = async (ctx) => {
-  const { admin } = ctx;
+  const { user } = ctx;
 
   try {
-    if (admin.role === "superadmin" || admin.role === "Admin") {
+    if (user.role === "superadmin" || user.role === "Admin") {
       const listCollaborator = await Admin.findAll({
         where: {
           role: "ctv1",
@@ -1026,8 +1031,6 @@ const listCollaboratorInfo = async (ctx) => {
         attributes: ["id", "name", "isActive", "updatedBy"],
         raw: true,
       });
-
-      console.log(listCollaborator);
 
       const res = await Promise.all(
         map(listCollaborator, async (collaborator) => {
@@ -1037,13 +1040,15 @@ const listCollaboratorInfo = async (ctx) => {
       );
 
       return res;
-    } else if (admin.role !== "superadmin" && admin.role !== "Admin") {
+    } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
         message: "Bạn không có quyền chỉnh sửa thông tin này.",
       });
     }
   } catch (error) {
+    console.log(error);
+
     throw new NotFoundError({
       field: "listCollaborator",
       message: "Không tìm thấy cộng tác viên này.",
