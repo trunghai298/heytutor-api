@@ -33,8 +33,7 @@ const createAdmin = async () => {
 };
 
 const addCollaborator = async (ctx, payload) => {
-  const { email, name, role, address, phone, facebook } =
-    payload;
+  const { email, name, role, address, phone, facebook } = payload;
   const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
@@ -45,12 +44,14 @@ const addCollaborator = async (ctx, payload) => {
       if (admin === null) {
         const password = generator.generate({
           length: 10,
-          numbers: true
+          numbers: true,
         });
 
         await MailService.sendMailToCollaborator(email, password);
 
-        const myEncryptPassword = await Password.Encrypt.cryptPassword(password);
+        const myEncryptPassword = await Password.Encrypt.cryptPassword(
+          password
+        );
 
         const res = await Admin.create({
           email,
@@ -365,7 +366,7 @@ const listCollaborator = async (ctx) => {
     }
   } catch (error) {
     console.log(error);
-    
+
     throw new NotFoundError({
       field: "userId",
       message: "Không tìm thấy quản trị viên này.",
@@ -435,11 +436,7 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
-const listAllActivityRelatedToReport = async (ctx) => {
-
-};
-
-
+const listAllActivityRelatedToReport = async (ctx) => {};
 
 export default {
   createAdmin,

@@ -4,7 +4,7 @@ import UserPostController from "../controller/user-post.controller"
 
 export default (app: Application) => {
   app
-    .put("/add-new-collaborator", AdminController.addCollaborator)
+    .post("/add-new-collaborator", AdminController.addCollaborator)
     .put("/update-collaborator", AdminController.updateCollaborator)
     .get("/get-system-detail", AdminController.systemDetailsInXDays)
     .put("/approve-event", AdminController.approveEvent)

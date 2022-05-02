@@ -5,15 +5,17 @@ const transporter = nodemailer.createTransport({
   port: 587,
   secure: false,
   auth: {
-    user: "heytutor.noreply@gmail.com",
-    pass: "heytutor1234",
+    // user: "heytutor.noreply@gmail.com",
+    // pass: "heytutor1234",
+    user: "nguoi.choi.he.ax@gmail.com",
+    pass: "Anhpr098",
   },
 });
 
 const sendMailToCollaborator = async (email, password) => {
   try {
     const mailOptions = {
-      from: "youremail@gmail.com",
+      from: "heytutor.noreply@gmail.com",
       to: email,
       subject: "You are invited to HeyTutor system as a collaborator!",
       text: `Your account: email ${email}, password: ${password}`,
