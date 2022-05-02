@@ -1040,6 +1040,188 @@ const userRequestDone = async (ctx, postId) => {
   }
 };
 
+const userRequestDone1vs1 = async (ctx, postId) => {
+  const { user } = ctx;
+  try {
+    const postDetail = await UserPost.findOne({
+      where: {
+        postId,
+      },
+      raw: true,
+    });
+
+    if (postDetail.requestDone === null) {
+      if (user.id === postDetail.userId) {
+        const mapRequester = !isEmpty(postDetail.requestDone)
+          ? [...postDetail.requestDone, user.id]
+          : [user.id];
+
+        const update = await UserPost.update(
+          {
+            requestDone: mapRequester,
+          },
+          {
+            where: {
+              userId: user.id,
+              postId,
+            },
+          }
+        );
+
+        const payloadActivity = {
+          userId: user.id,
+          username: user.name,
+          action: NOTI_TYPE.RequestDone,
+          content: `Yêu cầu đóng vấn đề ${postId}`,
+        };
+
+        await ActivityService.create(payloadActivity);
+
+        for (const supporter of postDetail.supporterId) {
+          const payloadNoti = {
+            userId: supporter,
+            postId,
+            notificationType: NOTI_TYPE.RequestDone,
+            fromUserId: user.id,
+            fromUsername: user.name,
+          };
+
+          await NotificationService.create(payloadNoti);
+        }
+
+        return payloadActivity;
+      } else if (postDetail.supporterId.includes(user.id)) {
+        const mapRequester = !isEmpty(postDetail.requestDone)
+          ? [...postDetail.requestDone, user.id]
+          : [user.id];
+
+        const update = await UserPost.update(
+          {
+            requestDone: mapRequester,
+          },
+          {
+            where: {
+              postId,
+            },
+          }
+        );
+
+        const payloadActivity = {
+          userId: user.id,
+          username: user.name,
+          action: NOTI_TYPE.RequestDone,
+          content: `Yêu cầu đóng vấn đề ${postId}`,
+        };
+
+        await ActivityService.create(payloadActivity);
+
+        const payloadNoti = {
+          userId: postDetail.userId,
+          postId,
+          notificationType: NOTI_TYPE.RequestDone,
+          fromUserId: user.id,
+          fromUsername: user.name,
+        };
+
+        await NotificationService.create(payloadNoti);
+
+        return payloadActivity;
+      }
+    } else {
+      if (
+        !postDetail.requestDone.includes(user.id) &&
+        postDetail.userId === user.id
+      ) {
+        const mapRequester = !isEmpty(postDetail.requestDone)
+          ? [...postDetail.requestDone, user.id]
+          : [user.id];
+
+        const update = await UserPost.update(
+          {
+            isDone: 1,
+            isConfirmed: 0,
+            requestDone: mapRequester,
+          },
+          {
+            where: {
+              postId,
+            },
+          }
+        );
+
+        const payloadActivity = {
+          userId: user.id,
+          username: user.name,
+          action: NOTI_TYPE.ConfirmDone,
+          content: `Xác nhận đóng vấn đề ${postId}`,
+        };
+
+        await ActivityService.create(payloadActivity);
+
+        for (const supporter of postDetail.requestDone) {
+          const payloadNoti = {
+            userId: supporter,
+            postId,
+            notificationType: NOTI_TYPE.ConfirmDone,
+            fromUserId: user.id,
+            fromUsername: user.name,
+          };
+
+          await NotificationService.create(payloadNoti);
+        }
+
+        return payloadActivity;
+      } else if (
+        postDetail.supporterId.includes(user.id) &&
+        !postDetail.requestDone.includes(user.id)
+      ) {
+        const mapRequester = !isEmpty(postDetail.requestDone)
+          ? [...postDetail.requestDone, user.id]
+          : [user.id];
+
+        const update = await UserPost.update(
+          {
+            isDone: 1,
+            isConfirmed: 0,
+            requestDone: mapRequester,
+          },
+          {
+            where: {
+              postId,
+            },
+          }
+        );
+
+        const payloadActivity = {
+          userId: user.id,
+          username: user.name,
+          action: NOTI_TYPE.ConfirmDone,
+          content: `Xác nhận đóng vấn đề ${postId}`,
+        };
+
+        await ActivityService.create(payloadActivity);
+
+        const payloadNoti = {
+          userId: postDetail.userId,
+          postId,
+          notificationType: NOTI_TYPE.ConfirmDone,
+          fromUserId: user.id,
+          fromUsername: user.name,
+        };
+
+        await NotificationService.create(payloadNoti);
+
+        return payloadActivity;
+      }
+    }
+  } catch (error) {
+    throw new NotFoundError({
+      field: "postId",
+      message: "Có lỗi khi tìm vấn đề.",
+    });
+  }
+};
+
 /**
  * Job run every 30 minutes.
  * @returns status : 200.
@@ -1121,4 +1303,5 @@ export default {
   postDoneOfUser,
   getListPostNoRegister,
   closeDonePost,
+  userRequestDone1vs1,
 };

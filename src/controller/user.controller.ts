@@ -52,7 +52,7 @@ const createReport = async (req, res, next) => {
 };
 
 const requestPostDone = async (req, res, next) => {
-  UserPostService.userRequestDone(req.ctx, req.query.postId)
+  UserPostService.userRequestDone1vs1(req.ctx, req.query.postId)
     .then((data) => res.json(data))
     .catch(next);
 };
