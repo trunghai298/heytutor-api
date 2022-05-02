@@ -12,4 +12,5 @@ export default (app: any) => {
     .post("/user-unpin-post", UserController.userUnPinPost)
     .post("/create-report", UserController.createReport)
     .post("/add-new-feedback", FeedbackController.addNewFeedback)
+    .put("/request-done", UserController.requestPostDone)
 };

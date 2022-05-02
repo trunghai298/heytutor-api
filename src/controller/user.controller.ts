@@ -1,6 +1,7 @@
 import ReportService from "../services/report.service";
 import PinServices from "../services/pin.services";
 import UserServices from "../services/users.service";
+import UserPostService from "../services/user-post.service";
 
 const fetchByEmail = (req, res, next) => {
   UserServices.fetchByEmail(req.params.email)
@@ -50,6 +51,12 @@ const createReport = async (req, res, next) => {
     .catch(next);
 };
 
+const requestPostDone = async (req, res, next) => {
+  UserPostService.userRequestDone1vs1(req.ctx, req.query.postId)
+    .then((data) => res.json(data))
+    .catch(next);
+};
+
 export default {
   fetchByEmail,
   getUser,
@@ -59,4 +66,5 @@ export default {
   userCreatePostPin,
   userUnPinPost,
   createReport,
+  requestPostDone,
 };

@@ -1,9 +1,10 @@
 import { Application } from "express";
 import AdminController from "../controller/admin.controller";
+import UserPostController from "../controller/user-post.controller"
 
 export default (app: Application) => {
   app
-    .put("/add-new-collaborator", AdminController.addCollaborator)
+    .post("/add-new-collaborator", AdminController.addCollaborator)
     .put("/update-collaborator", AdminController.updateCollaborator)
     .get("/get-system-detail", AdminController.systemDetailsInXDays)
     .put("/approve-event", AdminController.approveEvent)
@@ -22,4 +23,5 @@ export default (app: Application) => {
     .get("/collaborator-detail-information", AdminController.collaboratorInfo)
     .post("/assign-event-admin", AdminController.assignEventAdmin)
     .get("/list-reports-of-user-in-event", AdminController.getListReportOfUser)
+    // .put("/check-post-done", UserPostController.checkDonePost)
 };

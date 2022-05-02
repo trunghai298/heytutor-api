@@ -65,6 +65,11 @@ const UserPost = MySQLClient.define<UserPostInstance>("UserPost", {
     type: DataTypes.INTEGER.UNSIGNED,
     defaultValue: 0,
   },
+  requestDone: {
+    allowNull: true,
+    type: DataTypes.JSON,
+    defaultValue: null,
+  },
   createdAt: {
     type: DataTypes.DATE,
     allowNull: false,
