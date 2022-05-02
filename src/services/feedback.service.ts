@@ -28,7 +28,7 @@ const newFeedback = async (ctx, payload) => {
       userId: user.id,
       username: user.name,
       action: NOTI_TYPE.NewFeedback,
-      content: `userId: ${user.id} create new feedback for userId: ${receiverId} of postId: ${postId}`,
+      content: `người dùng ${user.id} tạo đánh giá mới cho người dùng ${receiverId} trong vấn đề ${postId}`,
     });
 
     const result = {

@@ -27,9 +27,8 @@ const getUserRank = async (userId) => {
 };
 
 const getTop10User = async (ctx) => {
-  const {user} = ctx;
+  const { user } = ctx;
   try {
-
     if (user.role === "superadmin" || user.role === "Admin") {
       const res = await Ranking.findAll({
         limit: 10,
@@ -53,12 +52,15 @@ const getTop10User = async (ctx) => {
 };
 
 const reCalculatePoint = async (payload) => {
-  const { userId, score, type } = payload;
+  const { receiverId, score, type } = payload;
+
   try {
     const rankPointInfo = await Ranking.findOne({
-      where: { userId: userId },
+      where: { userId: receiverId },
       raw: true,
     });
+
+
     if (type === 1) {
       const newVoteCount = rankPointInfo.voteCount + 1;
 
@@ -87,11 +89,10 @@ const reCalculatePoint = async (payload) => {
         },
         {
           where: {
-            userId: userId,
+            userId: receiverId,
           },
         }
       );
-
       return { status: 200 };
     } else if (type === 2) {
       const newVoteCount = rankPointInfo.requestVoteCount + 1;
@@ -107,11 +108,10 @@ const reCalculatePoint = async (payload) => {
         },
         {
           where: {
-            userId: userId,
+            userId: receiverId,
           },
         }
       );
-
       return { status: 200 };
     }
   } catch (error) {
