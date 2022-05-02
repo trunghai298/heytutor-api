@@ -12,6 +12,9 @@ import NotificationService from "./notification.service";
 import PinServices from "./pin.services";
 import ReportService from "./report.service";
 import UserPostService from "./user-post.service";
+import generator from "generate-password";
+import MailService from "./mail.service";
+import Password from "./password.service";
 
 const createAdmin = async () => {
   const admin = await Admin.findOne({ where: { name: "root" }, raw: true });
@@ -30,20 +33,29 @@ const createAdmin = async () => {
 };
 
 const addCollaborator = async (ctx, payload) => {
-  const { email, password, name, role, permission, address, phone, facebook } =
+  const { email, name, role, permission, address, phone, facebook } =
     payload;
   const { user } = ctx;
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
-      const user = await Admin.findOne({
+      const admin = await Admin.findOne({
         where: { email },
         raw: true,
       });
-      if (user === null) {
+      if (admin === null) {
+        const password = generator.generate({
+          length: 10,
+          numbers: true
+        });
+
+        await MailService.sendMailToCollaborator(email, password);
+
+        const myEncryptPassword = await Password.Encrypt.cryptPassword(password);
+
         const res = await Admin.create({
           email,
-          password,
           name,
+          password: myEncryptPassword,
           role,
           permission,
           address,
@@ -424,7 +436,11 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
-const listAllActivityRelatedToReport = async (ctx) => {};
+const listAllActivityRelatedToReport = async (ctx) => {
+
+};
+
+
 
 export default {
   createAdmin,

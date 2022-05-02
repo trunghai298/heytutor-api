@@ -13,7 +13,7 @@ import UserEvent from "../models/user-event.model";
 /**
  * To information of a user
  */
-const getUserInfoById = async (userId: number) => {
+const getUserInfoById = async (userId) => {
   try {
     const user = await User.findOne({
       where: {
@@ -44,7 +44,7 @@ const getUserInfoById = async (userId: number) => {
     if (!user) {
       throw new NotFoundError({
         field: "id",
-        message: "User is not found",
+        message: "Không tìm thấy người dùng.",
       });
     }
 
@@ -61,7 +61,7 @@ const getUserInfoById = async (userId: number) => {
 /**
  * To information of a user by email
  */
-const fetchByEmail = async (email: string) => {
+const fetchByEmail = async (email) => {
   try {
     const user = await User.findOne({
       where: { email },
@@ -73,7 +73,7 @@ const fetchByEmail = async (email: string) => {
   } catch (error) {
     throw new NotFoundError({
       field: "email",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -91,7 +91,7 @@ const totalRequestNumber = async (userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -112,7 +112,7 @@ const getTotalSubject = async (userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -132,7 +132,7 @@ const getNumberOfRequestResolved = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -152,7 +152,7 @@ const getNumberOfRequestPending = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -171,7 +171,7 @@ const getNumberOfRequestActive = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -205,7 +205,7 @@ const getUserPostStats = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };
@@ -335,7 +335,7 @@ const getSupporterStats = async (_userId: number) => {
   } catch (error) {
     throw new NotFoundError({
       field: "userId",
-      message: "User is not found",
+      message: "Không tìm thấy người dùng.",
     });
   }
 };

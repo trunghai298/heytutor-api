@@ -55,7 +55,7 @@ const initPermission = async () => {
       userId: 5,
       username: "superadmin",
       action: NOTI_TYPE.InitPermission,
-      content: "SuperAdmin assign default permission for all users",
+      content: "Quản trị viên cấp cao cấp quyền hạn mặc định cho tất cả người dùng.",
     });
   } catch (error) {
     return error;
@@ -161,14 +161,14 @@ const checkEventPermission = async () => {
       userId: 5,
       username: "superadmin",
       action: NOTI_TYPE.CheckEventPermission,
-      content: `SuperAdmin change permission for all users in list events ${listEvent} at ${today}`,
+      content: `Quản trị viên cấp cao thay đổi quyền cho tất cả người dùng trong các sự kiện hết hạn vào lúc ${today}`,
     });
 
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "eventId",
-      message: "Cannot find this event",
+      field: "",
+      message: error,
     });
   }
 };
@@ -195,7 +195,7 @@ const createPermission = async (payload) => {
   } catch (error) {
     throw new BadRequestError({
       field: "eventId-userId",
-      message: "Failed to create this item.",
+      message: "Có lỗi khi thực hiện tạo quyền.",
     });
   }
 };
@@ -339,7 +339,7 @@ const checkUnBan = async () => {
             userId: 5,
             userName: "superadmin",
             action: NOTI_TYPE.UpdateBanPost,
-            content: `Update post permission for user ${ban.userId} in event ${ban.eventId}`,
+            content: `Thay đổi quyền tạo vấn đề cho người dùng ${ban.userId} trong sự kiện ${ban.eventId}`,
           });
 
           const payload = {
@@ -367,7 +367,7 @@ const checkUnBan = async () => {
             userId: 5,
             userName: "superadmin",
             action: NOTI_TYPE.UpdateBanRegister,
-            content: `Update register permission for user ${ban.userId} in event ${ban.eventId}`,
+            content: `Thay đổi quyền đăng kí cho người dùng ${ban.userId} trong sự kiện ${ban.eventId}`,
           });
 
           const payload = {
@@ -395,7 +395,7 @@ const checkUnBan = async () => {
             userId: 5,
             userName: "superadmin",
             action: NOTI_TYPE.UpdateBanComment,
-            content: `Update comment permission for user ${ban.userId} in event ${ban.eventId}`,
+            content: `Thay đổi quyền bình luận cho người dùng ${ban.userId} trong sự kiện ${ban.eventId}`,
           });
 
           const payload = {
@@ -413,8 +413,8 @@ const checkUnBan = async () => {
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "id",
-      message: "Failed to create this item.",
+      field: "",
+      message: error,
     });
   }
 };
