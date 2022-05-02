@@ -8,6 +8,8 @@ import { map } from "lodash";
 import User from "../models/user.model";
 import { Op } from "sequelize";
 import ConversationService from "./conversation.service";
+import { NOTI_TYPE } from "../constants/notification";
+import notificationService from "./notification.service";
 
 /**
  * To create a new message
@@ -54,8 +56,15 @@ const create = async (body, ctx) => {
       conversationId: conversation.id,
     });
 
-    // send message to socket
-    // sendNewMessage(receiver.email, conversation.id, session.id, settings);
+    const payload = {
+      userId: receiverId,
+      postId,
+      notificationType: NOTI_TYPE.NewMessage,
+      fromUserId: user.id,
+      fromUsername: user.name,
+    };
+
+    await notificationService.create(payload);
 
     return messageResult;
   } catch (error) {
@@ -95,7 +104,10 @@ const listMessages = async (params) => {
 const checkUnreadMessage = async (ctx, params) => {
   const myUserId = ctx?.user.id;
   try {
-    const conversationId = ConversationService.getConversationOfPost(params, ctx);
+    const conversationId = ConversationService.getConversationOfPost(
+      params,
+      ctx
+    );
 
     const res = Message.findAll({
       where: {
