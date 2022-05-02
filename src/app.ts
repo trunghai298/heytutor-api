@@ -91,12 +91,12 @@ app.get("/mysql", async (req, res) => {
 });
 
 app.get("/fap-data", async (req, res, next) => {
-  await Promise.all([
-    Student.sync({ force: true }),
-    Class.sync({ force: true }),
-    Course.sync({ force: true }),
-    Department.sync({ force: true }),
-  ]);
+  // await Promise.all([
+  //   Student.sync({ force: true }),
+  //   Class.sync({ force: true }),
+  //   Course.sync({ force: true }),
+  //   Department.sync({ force: true }),
+  // ]);
   await fetchFapData(req.query.fapCookie as string, req.query.termId as string);
   res.send({ message: "Insert data successfully" });
 });

@@ -158,13 +158,14 @@ const getPostStats = async (ctx, filters) => {
 const addRegister = async (ctx, postId) => {
   const { user } = ctx;
   try {
-    const userPost = UserPost.findOne({
+    const userPost = await UserPost.findOne({
       where: {
         postId,
       },
       attributes: ["userId", "eventId", "registerId", "isConfirmed"],
       raw: true,
     });
+
     if (
       userPermissionService.checkUserRegisterPermission(
         user.id,
@@ -287,24 +288,21 @@ const removeRegister = async (ctx, payload) => {
 
 const cancelRegister = async (ctx, payload) => {
   const { user } = ctx;
-  const { postId, ownerId } = payload;
+  const { postId } = payload;
   try {
     const post = await UserPost.findOne({
-      where: { postId, ownerId },
+      where: { postId },
       raw: true,
     });
-
-    const removeRegisterFromRegisterList = post.registerId.filter(
-      (o) => o !== user.id
-    );
+    const newRegisters = post.registerId.filter((o) => o !== user.id);
 
     await UserPost.update(
-      { registerId: removeRegisterFromRegisterList },
-      { where: { postId, ownerId } }
+      { registerId: newRegisters?.length === 0 ? null : newRegisters },
+      { where: { postId } }
     );
 
     const payload = {
-      userId: ownerId,
+      userId: post.userId,
       postId: postId,
       eventId: post.eventId,
       notificationType: NOTI_TYPE.CancelRegister,
@@ -329,6 +327,39 @@ const cancelRegister = async (ctx, payload) => {
     throw new BadRequestError({
       field: "ctx",
       message: "Không tìm thấy người dùng.",
+    });
+  }
+};
+
+const unsupport = async (ctx, payload) => {
+  const { user } = ctx;
+  const { postId } = payload;
+  try {
+    const post = await UserPost.findOne({
+      where: { postId },
+      raw: true,
+    });
+    const newSupportList = post.supporterId.filter((o) => o !== user.id);
+
+    await UserPost.update(
+      { supporterId: newSupportList?.length === 0 ? null : newSupportList },
+      { where: { postId } }
+    );
+
+    const payload = {
+      userId: post.userId,
+      postId: postId,
+      eventId: post.eventId,
+      notificationType: NOTI_TYPE.CancelSupport,
+      fromUserId: user.id,
+      fromUsername: user.name,
+    };
+    await NotificationService.create(payload);
+    return { status: 200 };
+  } catch (error) {
+    throw new BadRequestError({
+      field: "postId",
+      message: error,
     });
   }
 };
@@ -437,11 +468,15 @@ const listRegistedRequests = async (ctx, params) => {
   let timeFilter;
 
   if (time === "week") {
-    timeFilter = "AND createdAt > date_sub(now(), interval 1 week)";
+    timeFilter = "AND createdAt >= date_sub(now(), interval 1 week)";
+  }
+
+  if (time === "semester") {
+    timeFilter = "AND createdAt BETWEEN '2022-03-01' AND '2022-05-06'";
   }
 
   if (time === "month") {
-    timeFilter = "AND createdAt > date_sub(now(), interval 1 month)";
+    timeFilter = "AND createdAt >= date_sub(now(), interval 1 month)";
   }
 
   if (time.includes("BETWEEN")) {
@@ -1115,6 +1150,7 @@ export default {
   removeRegister,
   addSupporter,
   cancelRegister,
+  unsupport,
   addRegister,
   userRequestDone,
   getRegisteredNearDeadline,

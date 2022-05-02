@@ -31,7 +31,7 @@ const addSupporter = (req, res, next) => {
 };
 
 const addRegister = (req, res, next) => {
-  UserPostServices.addRegister(req.ctx, req.body)
+  UserPostServices.addRegister(req.ctx, req.body.postId)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -42,6 +42,11 @@ const unregister = (req, res, next) => {
     .catch(next);
 };
 
+const unsupport = (req, res, next) => {
+  UserPostServices.unsupport(req.ctx, req.body)
+    .then((result) => res.json(result))
+    .catch(next);
+};
 const getRegisteredNearDeadline = async (req, res, next) => {
   UserPostServices.getRegisteredNearDeadline(req.ctx)
     .then((result) => res.json(result))
@@ -67,6 +72,7 @@ export default {
   removeRegister,
   addSupporter,
   unregister,
+  unsupport,
   addRegister,
   getRegisteredNearDeadline,
   postDoneOfUser,

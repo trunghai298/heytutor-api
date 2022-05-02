@@ -5,6 +5,7 @@ export enum NOTI_TYPE {
   CancelRegister = "cancel_register",
   ConfirmDone = "confirm_support_done",
   SysClosePost = "system_close_post",
+  CancelSupport = "cancel_support",
 
   ReportUser = "report_user",
   ReportPost = "report_post",
