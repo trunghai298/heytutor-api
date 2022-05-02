@@ -35,9 +35,8 @@ const Feedback = MySQLClient.define<IFeedbackInstance>("Feedback", {
     allowNull: false,
     type: DataTypes.DOUBLE,
   },
-    allowNull: false,
   reason: {
-    allowNull: false,
+    allowNull: true,
     type: DataTypes.STRING,
   },
   content: {

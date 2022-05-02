@@ -437,18 +437,31 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
-const listAllActivityRelatedToReport = async (ctx, reportId) => {
-  try {
-    const reportDetail = await Report.findOne({
-      where: {}
-    })
-  } catch (error) {
-    throw new NotFoundError({
-      field: "reportId",
-      message: "Không tìm thấy báo cáo xấu.",
-    });
-  }
-};
+// const listAllActivityRelatedToReport = async (ctx, reportId) => {
+//   const { user } = ctx;
+//   try {
+//     if (user.role === "Admin" || user.role === "superadmin") {
+//       const reportDetail = await Report.findOne({
+//         where: {
+//           reportId,
+//         },
+//         raw: true,
+//       });
+
+
+//     } else if (user.role !== "Admin" && user.role !== "superadmin") {
+//       throw new BadRequestError({
+//         field: "adminId",
+//         message: "Bạn không có quyền truy cập thông tin này.",
+//       });
+//     }
+//   } catch (error) {
+//     throw new NotFoundError({
+//       field: "reportId",
+//       message: "Không tìm thấy báo cáo xấu.",
+//     });
+//   }
+// };
 
 export default {
   createAdmin,

@@ -3,7 +3,7 @@ import UserController from "../controller/user.controller";
 
 export default (app: any) => {
   app
-    .get("/user/:userId", UserController.getUser)
+    .get("/user-info", UserController.getUser)
     .get("/user/:email", UserController.fetchByEmail)
     .get("/user-request-stats/:userId", UserController.getUserPostStats)
     .get("/supporter-request-stats/:userId", UserController.getSupporterStats)
@@ -13,4 +13,5 @@ export default (app: any) => {
     .post("/create-report", UserController.createReport)
     .post("/add-new-feedback", FeedbackController.addNewFeedback)
     .put("/request-done", UserController.requestPostDone)
+    // .get("/feedbackByUser", UserController.feedbackByUser)
 };
