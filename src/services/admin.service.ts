@@ -33,7 +33,7 @@ const createAdmin = async () => {
 };
 
 const addCollaborator = async (ctx, payload) => {
-  const { email, name, role, permission, address, phone, facebook } =
+  const { email, name, role, address, phone, facebook } =
     payload;
   const { user } = ctx;
   try {
@@ -57,7 +57,6 @@ const addCollaborator = async (ctx, payload) => {
           name,
           password: myEncryptPassword,
           role,
-          permission,
           address,
           phone,
           facebook,

@@ -4,6 +4,7 @@ export enum NOTI_TYPE {
   RemoveRegister = "remove_register",
   CancelRegister = "cancel_register",
   ConfirmDone = "confirm_support_done",
+  SysClosePost = "system_close_post",
 
   ReportUser = "report_user",
   ReportPost = "report_post",
@@ -52,4 +53,6 @@ export enum NOTI_TYPE {
 
   InitPermission = "init_default_permission",
   CheckEventPermission = "daily_event_permission",
+
+  RequestDone = "user_request_close_post",
 }
