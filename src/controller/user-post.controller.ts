@@ -59,6 +59,12 @@ const postDoneOfUser = async (req, res, next) => {
     .catch(next);
 };
 
+// const checkDonePost = async (req, res, next) => {
+//   UserPostServices.closeDonePost()
+//     .then((result) => res.json(result))
+//     .catch(next);
+// };
+
 export default {
   getPostStats,
   getListMyRequests,
@@ -70,4 +76,5 @@ export default {
   addRegister,
   getRegisteredNearDeadline,
   postDoneOfUser,
+  // checkDonePost,
 };
