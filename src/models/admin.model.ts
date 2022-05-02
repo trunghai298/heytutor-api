@@ -29,6 +29,7 @@ const Admin = MySQLClient.define<IAdminInstance>("Admin", {
   },
   password: {
     allowNull: false,
+    defaultValue: 1,
     type: DataTypes.STRING,
   },
   name: {

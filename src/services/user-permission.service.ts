@@ -161,7 +161,7 @@ const checkEventPermission = async () => {
       userId: 5,
       username: "superadmin",
       action: NOTI_TYPE.CheckEventPermission,
-      content: `Quản trị viên cấp cao thay đổi quyền cho tất cả người dùng trong các sự kiện ${listEvent} vào lúc ${today}`,
+      content: `Quản trị viên cấp cao thay đổi quyền cho tất cả người dùng trong các sự kiện hết hạn vào lúc ${today}`,
     });
 
     return { status: 200 };
