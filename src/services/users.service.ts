@@ -9,11 +9,13 @@ import Event from "../models/event.model";
 import { Op } from "sequelize";
 import { map } from "lodash";
 import UserEvent from "../models/user-event.model";
+import FeedbackService from "./feedback.service";
+import { BadRequestError } from "../utils/errors";
 
 /**
  * To information of a user
  */
-const getUserInfoById = async (userId) => {
+const getUserInfoById = async (userId, limit, offset) => {
   try {
     const user = await User.findOne({
       where: {
@@ -25,21 +27,22 @@ const getUserInfoById = async (userId) => {
       raw: true,
     });
 
-    const userRanking = await Ranking.findOne({
-      where: { userId },
-      raw: true,
-    });
+    const feedbackHistory = await FeedbackService.feedbackByUser(userId, limit, offset);
+    // const userRanking = await Ranking.findOne({
+    //   where: { userId },
+    //   raw: true,
+    // });
 
-    const userPostStats = await UserPost.findAll({
-      where: {
-        userId,
-      },
-      raw: true,
-    });
+    // const userPostStats = await UserPost.findAll({
+    //   where: {
+    //     userId,
+    //   },
+    //   raw: true,
+    // });
 
-    const nbTotalPost = userPostStats.length || 0;
-    const nbDonePost =
-      filter(userPostStats, (post) => post.isDone === 1).length || 0;
+    // const nbTotalPost = userPostStats.length || 0;
+    // const nbDonePost =
+    //   filter(userPostStats, (post) => post.isDone === 1).length || 0;
 
     if (!user) {
       throw new NotFoundError({
@@ -50,12 +53,18 @@ const getUserInfoById = async (userId) => {
 
     return {
       ...user,
-      voteCount: userRanking.voteCount,
-      rankPoint: userRanking.rankPoint,
-      nbTotalPost,
-      nbDonePost,
+      feedbackHistory,
+      // voteCount: userRanking.voteCount,
+      // rankPoint: userRanking.rankPoint,
+      // nbTotalPost,
+      // nbDonePost,
     };
-  } catch (error) {}
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "Không tìm thấy người dùng.",
+    });
+  }
 };
 
 /**

@@ -2,6 +2,7 @@ import ReportService from "../services/report.service";
 import PinServices from "../services/pin.services";
 import UserServices from "../services/users.service";
 import UserPostService from "../services/user-post.service";
+// import FeedbackService from "../services/feedback.service";
 
 const fetchByEmail = (req, res, next) => {
   UserServices.fetchByEmail(req.params.email)
@@ -10,7 +11,11 @@ const fetchByEmail = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  UserServices.getUserInfoById(req.params.userId)
+  UserServices.getUserInfoById(
+    req.query.userId,
+    req.query.limit,
+    req.query.offset
+  )
     .then((user) => res.json(user))
     .catch(next);
 };
@@ -57,6 +62,16 @@ const requestPostDone = async (req, res, next) => {
     .catch(next);
 };
 
+// const feedbackByUser = async (req, res, next) => {
+//   FeedbackService.feedbackByUser(
+//     req.query.userId,
+//     req.query.limit,
+//     req.query.offset
+//   )
+//     .then((data) => res.json(data))
+//     .catch(next);
+// };
+
 export default {
   fetchByEmail,
   getUser,
@@ -67,4 +82,5 @@ export default {
   userUnPinPost,
   createReport,
   requestPostDone,
+  // feedbackByUser,
 };
