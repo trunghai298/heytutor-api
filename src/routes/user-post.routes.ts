@@ -9,6 +9,10 @@ export default (app) => {
     .put("/remove-register", UserPostController.removeRegister)
     .put("/add-supporter", UserPostController.addSupporter)
     .put("/unregister", UserPostController.unregister)
-    .get("/get-registered-near-deadline", UserPostController.getRegisteredNearDeadline)
-    .get("/post-done-of-user", UserPostController.postDoneOfUser)
+    .put("/unsupport", UserPostController.unsupport)
+    .get(
+      "/get-registered-near-deadline",
+      UserPostController.getRegisteredNearDeadline
+    )
+    .get("/post-done-of-user", UserPostController.postDoneOfUser);
 };

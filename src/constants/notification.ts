@@ -4,6 +4,7 @@ export enum NOTI_TYPE {
   RemoveRegister = "remove_register",
   CancelRegister = "cancel_register",
   ConfirmDone = "confirm_support_done",
+  CancelSupport = "cancel_support",
 
   ReportUser = "report_user",
   ReportPost = "report_post",
