@@ -15,6 +15,7 @@ import UserPostService from "./user-post.service";
 import generator from "generate-password";
 import MailService from "./mail.service";
 import Password from "./password.service";
+import Report from "../models/report.model";
 
 const createAdmin = async () => {
   const admin = await Admin.findOne({ where: { name: "root" }, raw: true });
@@ -436,7 +437,18 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
-const listAllActivityRelatedToReport = async (ctx) => {};
+const listAllActivityRelatedToReport = async (ctx, reportId) => {
+  try {
+    const reportDetail = await Report.findOne({
+      where: {}
+    })
+  } catch (error) {
+    throw new NotFoundError({
+      field: "reportId",
+      message: "Không tìm thấy báo cáo xấu.",
+    });
+  }
+};
 
 export default {
   createAdmin,
