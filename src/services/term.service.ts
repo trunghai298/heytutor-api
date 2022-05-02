@@ -17,7 +17,7 @@ const addTerm = async (payload) => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to create this item.",
+      message: "Có lỗi khi thực hiện tạo.",
     });
   }
 };
@@ -38,7 +38,7 @@ const updateTerm = async (id, payload) => {
   } catch (error) {
     throw new BadRequestError({
       field: "id",
-      message: "Failed to update this item.",
+      message: "Có lỗi khi thực hiện chỉnh sửa.",
     });
   }
 };

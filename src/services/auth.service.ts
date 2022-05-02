@@ -6,6 +6,8 @@ import { compare, encrypt } from "../utils/bcrypt";
 import Student from "../models/student.model";
 import StudentServices from "../services/student.service";
 import Admin from "../models/admin.model";
+import Password from "./password.service";
+
 
 export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
@@ -78,7 +80,9 @@ export const adminLogin = async (params: any, ctx: any) => {
     });
   }
 
-  const isSamePassword = password === admin.password;
+  const isSamePassword = await Password.Encrypt.comparePassword(password, admin.password);
+
+  // const isSamePassword = password === admin.password;
 
   if (!isSamePassword) {
     throw new BadRequestError({

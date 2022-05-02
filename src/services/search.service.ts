@@ -44,7 +44,7 @@ const search = async (query: string) => {
   } catch (error) {
     throw new BadRequestError({
       field: "query",
-      message: "Fail to query",
+      message: "Không tìm thấy.",
     });
   }
 };

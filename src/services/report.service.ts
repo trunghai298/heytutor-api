@@ -83,8 +83,8 @@ const checkReportInDay = async () => {
     return { status: 200 };
   } catch (error) {
     throw new BadRequestError({
-      field: "id",
-      message: ".",
+      field: "",
+      message: error,
     });
   }
 };
@@ -221,6 +221,8 @@ const listReportNotResolvedByUser = async (userId, eventId) => {
 };
 
 const listReportResolvedByUser = async (userId, eventId) => {
+  const currentTime = new Date(Date.now());
+
   try {
     const listReport = await Report.findAll({
       where: {
@@ -249,11 +251,24 @@ const listReportResolvedByUser = async (userId, eventId) => {
           raw: true,
         });
 
+        const activeBan = await Ban.findAll({
+          where: {
+            userId,
+            eventId,
+            unbanDate: {
+              [Op.gt]: currentTime,
+            },
+          },
+          attributes: ["type", "banBy", "unbanDate"],
+          raw: true,
+        });
+
         return {
           ...report,
           adminUpdate: adminUpdate.name,
           reportedName: reportedDetail.name,
           reportedEmail: reportedDetail.email,
+          banDetail: activeBan,
         };
       })
     );

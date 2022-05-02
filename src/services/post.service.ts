@@ -24,7 +24,7 @@ const create = async (ctx, payload) => {
     if (isEmpty(payload.content)) {
       throw new BadRequestError({
         field: "content",
-        message: "Failed to create this post.",
+        message: "Không tạo được vấn đề.",
       });
     } else if (
       userPermissionService.checkUserCreatePostPermission(user.id, eventId)
@@ -149,7 +149,7 @@ const deletePost = async (postId: string) => {
     if (transaction) transaction.rollback();
     throw new BadRequestError({
       field: "postId",
-      message: "Failed to delete this post.",
+      message: "Không tạo xóa được vấn đề.",
     });
   }
 };
@@ -204,8 +204,8 @@ const listPostByUserId = async (ctx, limit, offset) => {
     return listPost;
   } catch (error) {
     throw new BadRequestError({
-      field: "postId",
-      message: "Failed to list post.",
+      field: "ctx",
+      message: "Không tìm thấy thông tin người dùng.",
     });
   }
 };
@@ -234,10 +234,9 @@ const countPeopleCmtOfPost = async (postId) => {
     });
     return res;
   } catch (error) {
-    console.log(error);
     throw new NotFoundError({
       field: "postId",
-      message: "Post has no comment.",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -293,7 +292,7 @@ const countPeopleSupporterOfPost = async (postId) => {
           where: { id: user.supporterId },
           raw: true,
         });
-        return matchUserSupporter;
+        return userData;
       })
     );
 
@@ -303,7 +302,7 @@ const countPeopleSupporterOfPost = async (postId) => {
           where: { userId: user.supporterId },
           raw: true,
         });
-        return matchUserRank;
+        return userData;
       })
     );
 
@@ -322,7 +321,7 @@ const countPeopleSupporterOfPost = async (postId) => {
     console.log(error);
     throw new NotFoundError({
       field: "postId",
-      message: "Post has no supporter.",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -354,7 +353,7 @@ const postDetailByPostId = async (postId) => {
     console.log(error);
     throw new BadRequestError({
       field: "postId",
-      message: "Failed to list post.",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -458,7 +457,7 @@ const getListPostByFilter = async (filters, ctx) => {
     console.log(error);
     throw new NotFoundError({
       field: "filter",
-      message: "Filter input wrong.",
+      message: "Bộ lọc sai.",
     });
   }
 };
@@ -490,7 +489,7 @@ const registerDetailOfPost = async (postId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
-      message: "Post not found.",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -524,7 +523,7 @@ const supporterDetailOfPost = async (postId) => {
   } catch (error) {
     throw new BadRequestError({
       field: "postId",
-      message: "Post not found.",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
@@ -548,7 +547,7 @@ const getAllDetailsByPostId = async (postId) => {
     console.log(error);
     throw new NotFoundError({
       field: "postId",
-      message: "Post is not found",
+      message: "Không tìm thấy vấn đề.",
     });
   }
 };
