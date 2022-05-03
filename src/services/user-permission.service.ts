@@ -55,7 +55,8 @@ const initPermission = async () => {
       userId: 5,
       username: "superadmin",
       action: NOTI_TYPE.InitPermission,
-      content: "Quản trị viên cấp cao cấp quyền hạn mặc định cho tất cả người dùng.",
+      content:
+        "Quản trị viên cấp cao cấp quyền hạn mặc định cho tất cả người dùng.",
     });
   } catch (error) {
     return error;
@@ -132,6 +133,7 @@ const checkEventPermission = async () => {
   try {
     const listEvent = await Event.findAll({
       where: {
+        isApproved: 1,
         endAt: {
           [Op.lt]: today,
         },

@@ -3,7 +3,7 @@ import MySQLClient from "../clients/mysql";
 import Event from "../models/event.model";
 import { BadRequestError, NotFoundError } from "../utils/errors";
 import UserEvent from "../models/user-event.model";
-import { pick, compact, map, filter, flattenDeep } from "lodash";
+import { pick, compact, map, filter, flattenDeep, difference } from "lodash";
 import Post from "../models/post.model";
 import User from "../models/user.model";
 import { Op, Sequelize } from "sequelize";
@@ -273,6 +273,7 @@ const listEventByUser = async (ctx) => {
         const lists = await Event.findOne({
           where: {
             id: event.eventId,
+            isApproved: 1,
             endAt: {
               [Op.gt]: today,
             },
@@ -556,43 +557,54 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
   const { user } = ctx;
   const today = new Date(Date.now());
   try {
-    const eventsNotEnroll = await UserEvent.findAll({
+    const eventsEnrolled = await UserEvent.findAll({
       where: {
-        userId: {
-          [Op.ne]: user.id,
-        },
+        userId: user.id,
       },
       attributes: [
         [Sequelize.fn("DISTINCT", Sequelize.col("eventId")), "eventId"],
       ],
       raw: true,
-      limit: parseInt(limit) || 10,
-      offset: parseInt(offset) || 0,
     });
 
-    const listEventActive = await Promise.all(
-      map(eventsNotEnroll, async (event) => {
-        const eventData = await Event.findOne({
-          where: {
-            id: event.eventId,
-            endAt: {
-              [Op.gt]: today,
-            },
-          },
-          attributes: ["id"],
-          raw: true,
-        });
-        return eventData;
-      })
-    );
+    let eventIds = [];
+
+    for (const userEvent of eventsEnrolled) {
+      eventIds.push(userEvent.eventId);
+    }
+
+    console.log(eventIds);
+
+    const eventsActive = await Event.findAll({
+      where: {
+        isApproved: 1,
+        endAt: {
+          [Op.gt]: today,
+        },
+      },
+      attributes: ["id"],
+      raw: true,
+    });
+
+    let activeEvents = [];
+
+    for (const userEvent of eventsActive) {
+      activeEvents.push(userEvent.id);
+    }
+
+    console.log(activeEvents);
+
+    const listEventActive = await difference(activeEvents, eventIds);
+
+    console.log(listEventActive);
 
     const listEventNotEnroll = await Promise.all(
       map(listEventActive, async (event) => {
         if (event !== null) {
-          const eventDetail = await getEventDetail(event.id);
-          const eventUser = await getEventUser(event.id);
-          const listPost = await getNumberPostOfEvent(event.id);
-          const listPostDone = await getPostDoneInEvent(event.id);
+          const eventDetail = await getEventDetail(event);
+          const eventUser = await getEventUser(event);
+          const listPost = await getNumberPostOfEvent(event);
+          const listPostDone = await getPostDoneInEvent(event);
           // const listActiveUsers = await listActiveUser(event.eventId);
           return { eventDetail, eventUser, listPost, listPostDone };
         }
@@ -659,7 +671,12 @@ const getListEventNotEnroll = async (ctx, limit, offset) => {
 
 const getEventByDuration = async () => {
   try {
-    const listEvent = Event.findAll({});
+    const listEvent = Event.findAll({
+      where: {
+        isApproved: 1,
+      },
+      raw: true,
+    });
 
     let mapShortTerm = [];
     let mapShortTerm1 = [];
@@ -788,6 +805,7 @@ const getEventForCreatePost = async () => {
   try {
     const res = await Event.findAll({
       where: {
+        isApproved: 1,
         endAt: {
           [Op.gt]: today,
         },
@@ -810,7 +828,10 @@ const approveEvent = async (ctx, eventId) => {
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
       const eventDetail = await Event.FindOne({
-        where: { id: eventId },
+        where: {
+          id: eventId,
+          isApproved: 0,
+        },
         raw: true,
       });
 
@@ -1005,11 +1026,17 @@ const listEventManageByCollaborator = async (collabId) => {
     const listEvent = await countActiveEventOfCollaborator(collabId);
     const res = await Promise.all(
       map(listEvent, async (event) => {
+        const adminApproved = await Admin.findOne({
+          where: { id: event.approveBy },
+          attributes: ["name"],
+          raw: true,
+        });
         const listUsers = await UserEventService.listUserOfEvent(event.id);
         const listReport = await ReportService.listReportInEvent(event.id);
 
         const result = {
           eventDetail: event,
+          adminApproved: adminApproved.name,
           listUserInEvent: flattenDeep(listUsers),
           listReportInEvent: flattenDeep(listReport),
         };
@@ -1018,6 +1045,29 @@ const listEventManageByCollaborator = async (collabId) => {
     );
 
     return res;
+  } catch (error) {
+    throw new NotFoundError({
+      field: "collabId",
+      message: "Không tìm thấy cộng tác viên này.",
+    });
+  }
+};
+
+const listEventNotApproveByCollaborator = async (collabId) => {
+  const currentTime = new Date(Date.now());
+  try {
+    const listEvent = await Event.findAll({
+      where: {
+        createId: collabId,
+        isApproved: 0,
+        endAt: {
+          [Op.gt]: currentTime,
+        },
+      },
+      raw: true,
+    });
+
+    return listEvent;
   } catch (error) {
     throw new NotFoundError({
       field: "collabId",
@@ -1071,10 +1121,18 @@ const assignEventAdmin = async (ctx, payload) => {
     const listAdmins = await Event.findOne({
       where: {
         id: eventId,
+        isApproved: 1,
       },
       attributes: ["adminId"],
       raw: true,
     });
+
+    if (!listAdmins) {
+      throw new BadRequestError({
+        field: "eventId",
+        message: "Không tìm thấy sự kiện.",
+      });
+    }
 
     const isAdmin = await listAdmins.adminId.includes(user.id);
 
@@ -1132,4 +1190,5 @@ export default {
   listEventByAdmin,
   assignEventAdmin,
   countUserReportInEventOfCollaborator,
+  listEventNotApproveByCollaborator,
 };

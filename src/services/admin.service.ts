@@ -169,6 +169,7 @@ const listEventInXDays = async (nbFromDays, nbToDays) => {
   try {
     const list = await Event.findAll({
       where: {
+        isApproved: 1,
         createdAt: {
           [Op.lt]: currentDate,
           [Op.gt]: XDaysBefore,

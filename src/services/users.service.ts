@@ -27,7 +27,11 @@ const getUserInfoById = async (userId, limit, offset) => {
       raw: true,
     });
 
-    const feedbackHistory = await FeedbackService.feedbackByUser(userId, limit, offset);
+    const feedbackHistory = await FeedbackService.feedbackByUser(
+      userId,
+      limit,
+      offset
+    );
     // const userRanking = await Ranking.findOne({
     //   where: { userId },
     //   raw: true,
@@ -424,6 +428,7 @@ const searchSuggest = async (key) => {
   try {
     const eventSimilar = await Event.findAll({
       where: {
+        isApproved: 1,
         [Op.or]: [
           {
             title: {

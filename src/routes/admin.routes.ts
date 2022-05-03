@@ -14,6 +14,10 @@ export default (app: Application) => {
       "/get-active-event-of-collaborator",
       AdminController.getActiveEventOfCollaborator
     )
+    .get(
+      "/get-event-not-approve-of-collaborator",
+      AdminController.getEventNotApproveOfCollaborator
+    )
     .get("/collaborator-information", AdminController.listCollaboratorInfo)
     .get("/get-list-post-manage", AdminController.listPostManage)
     .post("/add-event-pin", AdminController.addEventPin)
