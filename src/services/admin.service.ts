@@ -50,6 +50,8 @@ const addCollaborator = async (ctx, payload) => {
 
         await MailService.sendMailToCollaborator(email, password);
 
+        console.log(password);
+
         const myEncryptPassword = await Password.Encrypt.cryptPassword(
           password
         );
@@ -437,6 +439,41 @@ const collaboratorInfo = async (ctx, userId) => {
   }
 };
 
+const banCollaborator = async (ctx, collaboratorId) => {
+  const { user } = ctx;
+  try {
+    if (user.role === "Admin" || user.role === "superadmin") {
+      const res = await Admin.update(
+        {
+          isActive: 0,
+        },
+        {
+          where: { id: collaboratorId },
+        }
+      );
+
+      const log = await ActivityServices.create({
+        userId: user.id,
+        username: user.name,
+        action: NOTI_TYPE.UpdateCollab,
+        content: `Quản trị viên ${user.name} hạn chế quyền truy cập của cộng tác viên ${collaboratorId}`,
+      });
+
+      return { status: 200 };
+    } else if (user.role !== "Admin" && user.role !== "superadmin") {
+      throw new BadRequestError({
+        field: "adminId",
+        message: "Bạn không có quyền chỉnh sửa thông tin này.",
+      });
+    }
+  } catch (error) {
+    throw new NotFoundError({
+      field: "ctx",
+      message: "Không tìm thấy quản trị viên này.",
+    });
+  }
+};
+
 // const listAllActivityRelatedToReport = async (ctx, reportId) => {
 //   const { user } = ctx;
 //   try {
@@ -447,7 +484,6 @@ const collaboratorInfo = async (ctx, userId) => {
 //         },
 //         raw: true,
 //       });
-
 
 //     } else if (user.role !== "Admin" && user.role !== "superadmin") {
 //       throw new BadRequestError({
@@ -472,4 +508,5 @@ export default {
   listCollaborator,
   listPostManage,
   collaboratorInfo,
+  banCollaborator,
 };
