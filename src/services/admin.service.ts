@@ -52,41 +52,41 @@ const addCollaborator = async (ctx, payload) => {
 
         console.log(password);
 
-        const myEncryptPassword = await Password.Encrypt.cryptPassword(
-          password
-        );
+        // const myEncryptPassword = await Password.Encrypt.cryptPassword(
+        //   password
+        // );
 
-        const res = await Admin.create({
-          email,
-          name,
-          password: myEncryptPassword,
-          role,
-          address,
-          phone,
-          facebook,
-          updatedBy: user.id,
-          addBy: user.id,
-        });
+        // const res = await Admin.create({
+        //   email,
+        //   name,
+        //   password: myEncryptPassword,
+        //   role,
+        //   address,
+        //   phone,
+        //   facebook,
+        //   updatedBy: user.id,
+        //   addBy: user.id,
+        // });
 
-        const log = await ActivityServices.create({
-          userId: user.id,
-          username: user.name,
-          action: NOTI_TYPE.NewCollab,
-          content: `Quản trị viên ${user.name} thêm cộng tác viên mới ${name}`,
-        });
+        // const log = await ActivityServices.create({
+        //   userId: user.id,
+        //   username: user.name,
+        //   action: NOTI_TYPE.NewCollab,
+        //   content: `Quản trị viên ${user.name} thêm cộng tác viên mới ${name}`,
+        // });
 
-        const id = await Admin.count();
-        const payload = {
-          userId: id,
-          notificationType: NOTI_TYPE.NewCollab,
-          fromUserId: user.id,
-          fromUsername: user.name,
-        };
-        await NotificationService.create(payload);
+        // const id = await Admin.count();
+        // const payload = {
+        //   userId: id,
+        //   notificationType: NOTI_TYPE.NewCollab,
+        //   fromUserId: user.id,
+        //   fromUsername: user.name,
+        // };
+        // await NotificationService.create(payload);
 
-        return {
-          log,
-        };
+        // return {
+        //   log,
+        // };
       } else {
         return {
           message: "Người dùng đã tồn tại.",
