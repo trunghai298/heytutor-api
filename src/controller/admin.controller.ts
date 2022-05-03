@@ -45,7 +45,7 @@ const systemDetailsInXDays = (req, res, next) => {
 };
 
 const approveEvent = async (req, res, next) => {
-  EventService.approveEvent(req.ctx, req.body.eventId)
+  EventService.approveEvent(req.ctx, req.query.eventId)
     .then((result) => res.json(result))
     .catch(next);
 };
@@ -64,6 +64,12 @@ const getListUserEventInfo = (req, res, next) => {
 
 const getActiveEventOfCollaborator = (req, res, next) => {
   EventService.listEventManageByCollaborator(req.ctx?.user?.id)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
+const getEventNotApproveOfCollaborator = (req, res, next) => {
+  EventService.listEventNotApproveByCollaborator(req.ctx?.user?.id)
     .then((evt) => res.json(evt))
     .catch(next);
 };
@@ -142,4 +148,5 @@ export default {
   assignEventAdmin,
   getListReportOfUser,
   banCollaborator,
+  getEventNotApproveOfCollaborator,
 };

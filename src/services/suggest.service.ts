@@ -9,6 +9,7 @@ import MySQLClient from "../clients/mysql";
 const getTop3EventByMajor = async (major) => {
   return Event.findAll({
     where: {
+      isApproved: 1,
       hashtag: {
         [Op.like]: `%${major}%`,
       },
@@ -26,6 +27,7 @@ const getTop3EventBySubjects = async (userId, subjects) => {
     map(subjectData, async (subject) => {
       const events = await Event.findAll({
         where: {
+          isApproved: 1,
           hashtag: {
             [Op.like]: `%${subject}%`,
           },
