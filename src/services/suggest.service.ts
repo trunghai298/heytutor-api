@@ -1,11 +1,10 @@
 import Event from "../models/event.model";
-import { NotFoundError, BadRequestError } from "../utils/errors";
 import { Op, Sequelize } from "sequelize";
 import { map, compact, flattenDeep } from "lodash";
 import Post from "../models/post.model";
 import UserEvent from "../models/user-event.model";
 import UserPost from "../models/user-post.model";
-import Course from "../models/course.model";
+import MySQLClient from "../clients/mysql";
 
 const getTop3EventByMajor = async (major) => {
   return Event.findAll({
@@ -108,10 +107,12 @@ const suggestHome = async (ctx) => {
 };
 
 const getListCourse = async () => {
-  const listCourse = await Course.findAll({
-    raw: true,
-    attributes: ["courseId", "courseName", "courseCode"],
-  });
+  const listCourse = await MySQLClient.query(
+    `SELECT DISTINCT Courses.courseCode, Courses.courseName from Courses`,
+    {
+      type: "SELECT",
+    }
+  );
 
   return listCourse;
 };

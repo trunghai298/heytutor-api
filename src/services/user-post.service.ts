@@ -78,6 +78,10 @@ const getPostStats = async (ctx, filters) => {
     timeFilter = "AND createdAt > date_sub(now(), interval 1 month)";
   }
 
+  if (time === "semester") {
+    timeFilter = "AND createdAt BETWEEN '2022-03-01' AND '2022-05-06'";
+  }
+
   if (time.includes("BETWEEN")) {
     timeFilter = `AND createdAt ${filterParams.time}`;
   }
@@ -85,7 +89,6 @@ const getPostStats = async (ctx, filters) => {
   try {
     // my request
     const myRequests = await getNbOfAllPost(user.id, timeFilter);
-
     const nbOfConfirmedPost = filter(
       myRequests,
       (item) => item.isConfirmed === 1 && item.isDone !== 1
@@ -593,7 +596,7 @@ const listPostHasRegister = async (userId, limit, offset) => {
 
 const listPostHasNoRegister = async (userId, limit, offset) => {
   try {
-    const postHasRegister = await UserPost.findAll({
+    const postHasNoRegister = await UserPost.findAll({
       where: {
         userId,
         registerId: {
@@ -608,7 +611,7 @@ const listPostHasNoRegister = async (userId, limit, offset) => {
       offset,
     });
     const res = await Promise.all(
-      map(postHasRegister, async (post) => {
+      map(postHasNoRegister, async (post) => {
         const postData = await getPost(post.postId);
         if (postData) {
           return { ...post, postData };

@@ -55,5 +55,5 @@ export enum NOTI_TYPE {
   InitPermission = "init_default_permission",
   CheckEventPermission = "daily_event_permission",
 
-  RequestDone = "user_request_close_post",
+  RequestDone = "request_done",
 }

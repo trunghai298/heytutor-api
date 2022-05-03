@@ -75,14 +75,23 @@ const resetDb = async () => {
   }
 };
 
-app.get("/auth/google/callback", authenticateGoogle(), async (req, res) => {
-  const token = await sign({ user: req.user });
-  if (!req.user.email.includes("fpt.edu.vn")) {
-    res.redirect(`http://localhost:3000?error=access_denied`);
-  } else {
-    res.redirect(`http://localhost:3000?token=${token}`);
+app.get(
+  "/auth/google/callback",
+  authenticateGoogle(),
+  async (req: any, res: any) => {
+    const mapStudentData = {
+      ...req.user,
+      subjects: JSON.stringify(["PRJ301", "SWD391", "CSD201"]),
+      major: "se",
+    };
+    const token = await sign({ user: mapStudentData });
+    if (!req.user.email.includes("fpt.edu.vn")) {
+      res.redirect(`http://localhost:3000?error=access_denied`);
+    } else {
+      res.redirect(`http://localhost:3000?token=${token}`);
+    }
   }
-});
+);
 
 app.get("/mysql", async (req, res) => {
   await resetDb();
