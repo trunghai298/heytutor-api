@@ -45,7 +45,7 @@ const systemDetailsInXDays = (req, res, next) => {
 };
 
 const approveEvent = async (req, res, next) => {
-  EventService.approveEvent(req.ctx, req.body.eventId)
+  EventService.approveEvent(req.ctx, req.query.eventId)
     .then((result) => res.json(result))
     .catch(next);
 };
