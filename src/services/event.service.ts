@@ -535,7 +535,7 @@ const getEventUserPostDetail = async (userId, eventId) => {
     const eventDetail = await getEventDetail(eventId);
     const totalPost = await getTotalPostInEvent(eventId);
     return {
-      eventContent: eventDetail,
+      eventDetail,
       listPostInEventOfUser: eventUserPosts.length,
       listPostNearDeadline: postNearDeadline.length,
       listNonRegisterPost: postNoRegister.length,

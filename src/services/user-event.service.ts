@@ -108,7 +108,7 @@ const checkUserInEvent = async (ctx, eventId) => {
     const isInEvent = await UserEvent.findOne({
       where: {
         userId: user.id,
-        eventId: eventId,
+        eventId,
       },
       raw: true,
     });
