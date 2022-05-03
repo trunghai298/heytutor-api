@@ -5,9 +5,11 @@ import ActivityServices from "./activity.service";
 import NotificationService from "./notification.service";
 import { NOTI_TYPE } from "../constants/notification";
 import { BadRequestError } from "../utils/errors";
+import { map } from "lodash";
+import Post from "../models/post.model";
 
 const newFeedback = async (ctx, payload) => {
-  const {user} = ctx;
+  const { user } = ctx;
   const { postId, type, score, reason, content, receiverId } = payload;
 
   try {
@@ -28,7 +30,7 @@ const newFeedback = async (ctx, payload) => {
       userId: user.id,
       username: user.name,
       action: NOTI_TYPE.NewFeedback,
-      content: `userId: ${user.id} create new feedback for userId: ${receiverId} of postId: ${postId}`,
+      content: `người dùng ${user.id} tạo đánh giá mới cho người dùng ${receiverId} trong vấn đề ${postId}`,
     });
 
     const result = {
@@ -90,7 +92,55 @@ const listMyFeedback = async (ctx, filter) => {
   }
 };
 
+const feedbackByUser = async (userId, limit, offset) => {
+  try {
+    const listFeedback = await Feedback.findAll({
+      where: {
+        userId,
+      },
+      order: [
+        ["score", "DESC"],
+        ["createdAt", "DESC"],
+      ],
+      limit: limit || 10,
+      offset: offset || 0,
+      raw: true,
+    });
+
+    const res = await Promise.all(
+      map(listFeedback, async (feedback) => {
+        const userDetail = await User.findOne({
+          where: { id: feedback.fromUserId },
+          attributes: ["name"],
+          raw: true,
+        });
+        const postDetail = await Post.findOne({
+          where: {
+            id: feedback.postId,
+          },
+          attributes: ["title"],
+          raw: true,
+        });
+
+        return {
+          ...feedback,
+          fromUserName: userDetail.name,
+          postTitle: postDetail.title,
+        };
+      })
+    );
+
+    return res;
+  } catch (error) {
+    throw new BadRequestError({
+      field: "userId",
+      message: "Không tìm thấy người dùng.",
+    });
+  }
+};
+
 export default {
   newFeedback,
   listMyFeedback,
+  feedbackByUser,
 };

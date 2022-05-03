@@ -26,6 +26,12 @@ const updateCollaborator = (req, res, next) => {
     .catch(next);
 };
 
+const banCollaborator = (req, res, next) => {
+  AdminServices.banCollaborator(req.ctx, req.query.collaboratorId)
+    .then((result) => res.json(result))
+    .catch(next);
+};
+
 // const listAllCollaborator = (req, res, next) => {
 //   AdminServices.listAllCollaborator()
 //     .then((result) => res.json(result))
@@ -135,4 +141,5 @@ export default {
   collaboratorInfo,
   assignEventAdmin,
   getListReportOfUser,
+  banCollaborator,
 };
