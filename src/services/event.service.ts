@@ -824,10 +824,9 @@ const getEventForCreatePost = async () => {
 
 const approveEvent = async (ctx, eventId) => {
   const { user } = ctx;
-
   try {
     if (user.role === "superadmin" || user.role === "Admin") {
-      const eventDetail = await Event.FindOne({
+      const eventDetail = await Event.findOne({
         where: {
           id: eventId,
           isApproved: 0,
@@ -839,16 +838,16 @@ const approveEvent = async (ctx, eventId) => {
         {
           isApproved: 1,
           approveBy: user.id,
-          adminId: [eventDetail.createdId],
+          adminId: [eventDetail.createId],
         },
         {
           where: {
-            eventId,
+            id: eventId,
           },
         }
       );
 
-      return res;
+      return { status: 200 };
     } else if (user.role !== "superadmin" && user.role !== "Admin") {
       throw new BadRequestError({
         field: "ctx",
@@ -856,6 +855,8 @@ const approveEvent = async (ctx, eventId) => {
       });
     }
   } catch (error) {
+    console.log(error);
+
     throw new NotFoundError({
       field: "eventId",
       message: "Không tìm thấy sự kiện",
