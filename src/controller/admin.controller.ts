@@ -68,6 +68,12 @@ const getActiveEventOfCollaborator = (req, res, next) => {
     .catch(next);
 };
 
+const getEventNotApproveOfCollaborator = (req, res, next) => {
+  EventService.listEventNotApproveByCollaborator(req.ctx?.user?.id)
+    .then((evt) => res.json(evt))
+    .catch(next);
+};
+
 const listCollaboratorInfo = (req, res, next) => {
   EventService.listCollaboratorInfo(req.ctx)
     .then((result) => res.json(result))
@@ -142,4 +148,5 @@ export default {
   assignEventAdmin,
   getListReportOfUser,
   banCollaborator,
+  getEventNotApproveOfCollaborator,
 };
