@@ -8,7 +8,6 @@ import StudentServices from "../services/student.service";
 import Admin from "../models/admin.model";
 import Password from "./password.service";
 
-
 export const anonymous = async (ctx: any) => JWTUtils.sign({ ctx });
 
 export const login = async (params: any, ctx: any) => {
@@ -80,7 +79,10 @@ export const adminLogin = async (params: any, ctx: any) => {
     });
   }
 
-  const isSamePassword = await Password.Encrypt.comparePassword(password, admin.password);
+  const isSamePassword = await Password.Encrypt.comparePassword(
+    password,
+    admin.password
+  );
 
   // const isSamePassword = password === admin.password;
 
@@ -89,6 +91,10 @@ export const adminLogin = async (params: any, ctx: any) => {
       field: "password",
       message: "Mật khẩu không đúng.",
     });
+  } else {
+    if (admin.isActive !== 1) {
+      return { status: 403 };
+    }
   }
 
   const token = await JWTUtils.sign({
